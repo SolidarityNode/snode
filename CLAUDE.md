@@ -41,13 +41,20 @@ Source of truth for the science: `docs/specs/` (research description and per-mod
 
 ## Commands
 
-Fill in exact commands once the bootstrap PR is merged. Expected targets:
+Requires `uv`, Node.js 26 with `pnpm` 12, and Podman (or Docker). `make help` lists all targets.
 
-- `make setup` — install all dependencies
-- `make test` — run all tests (core, backend, frontend)
-- `make lint` — ruff, mypy, eslint, prettier check
-- `make fmt` — auto-format
-- `make up` — start the full stack with the configured container engine (Podman by default)
+- `make setup` — install locked dependencies (`uv sync --locked` in `core/` and `backend/`, `pnpm install --frozen-lockfile` in `frontend/`)
+- `make lint` — ruff check, ruff format --check and mypy (strict) for core and backend; eslint, prettier --check and `tsc` for frontend
+- `make test` — pytest (core, backend) and Vitest (frontend)
+- `make fmt` — ruff fix/format, prettier, eslint --fix
+- `make up` / `make down` — start/stop db, backend and frontend with `$(COMPOSE)` (default `podman compose`); frontend http://localhost:8080, backend http://localhost:8000
+- `make logs`, `make ps` — follow logs, show containers
+- `make images` — build images with `$(CONTAINER_ENGINE)`
+- `make licenses` — fail on dependency licences incompatible with AGPL-3.0
+- `make labels` — create GitHub labels from `.github/labels.yml` (needs `gh auth login`)
+- `make clean` / `make distclean` — remove caches and build output / also virtualenvs and node_modules
+- Per component: `make lint-core`, `test-core`, `lint-backend`, `test-backend`, `lint-frontend`, `test-frontend`
+- Docker instead of Podman: `CONTAINER_ENGINE=docker COMPOSE="docker compose" make up`
 
 Run `make lint test` before every commit. Do not mark work done if either fails.
 

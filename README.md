@@ -36,15 +36,27 @@ A degraded facility is not automatically treated as lost service. The platform e
 
 ## Planned capabilities
 
-| Module | Purpose |
-| --- | --- |
-| `accessibility` | Travel distance/time, available capacity, population coverage and alternative facilities, via GIS and network analysis |
-| `latent_need` | Probabilistic estimation of total need, including the part that is not directly observed |
-| `vulnerability` | Probabilistic vulnerability of population groups under disruption scenarios |
-| `operations` | Operational indicators from anonymous request data: demand rate, waiting time, service delay, appointment adherence, unmet demand |
-| `dynamics` | Dynamic Bayesian Networks for temporal evolution of service state and recovery |
-| `resilience` | Multidimensional resilience indicators and Bayesian updating from observed data |
-| `validation` | Sensitivity and uncertainty analysis, comparison against observations |
+Modules of the `core` library, following the module map in [`docs/specs/00-domain-model.md`](docs/specs/00-domain-model.md) §6:
+
+| Module | Papers | Purpose |
+| --- | --- | --- |
+| `model` | all | Entities and the typed container for `spatial unit × social group × service × time` |
+| `bayes` | 1–4 | Discrete variables, CPTs, expert elicitation, inference and parameter-learning interfaces |
+| `accessibility` | 1 §5 | Travel times, access weights, group- and mode-specific accessibility |
+| `demand` | 1 §6 | Estimated demand (visible use, not need) |
+| `capacity` | 1 §7 | Physical, functional and effective capacity, supply (2SFCA allocation) |
+| `service_gap` | 1 §8–9 | Service gap and its Bayesian network |
+| `latent_need` | 2 | Social susceptibility, hidden need, estimated total need |
+| `scenarios` | 1 §13, 3 §7–10 | Counterfactual and disruption scenarios |
+| `vulnerability` | 3 §11–21 | Group exposure, service loss, the vulnerability relationship |
+| `operations` | 4 §4–5 | Anonymous request tickets, operational indicators, facility functional state |
+| `dynamics` | 4 §7–9, 12 | Territorial state, expected and observed consequence, Dynamic Bayesian Network |
+| `resilience` | 4 §10–13 | Bayesian updating of vulnerability, recovery trajectories, resilience |
+| `uncertainty` | 1 §11, 2 §14, 3 §22 | Monte Carlo propagation |
+| `sensitivity` | 1 §12, 2 §16, 3 §23 | Sensitivity analysis |
+| `validation` | 1 §14, 2 §18, 3 §24 | Validation tools |
+
+At this stage the modules expose typed interfaces only; methods are implemented once their open questions are decided (see [`docs/specs/open-questions.md`](docs/specs/open-questions.md)).
 
 A **Digital Twin** is a possible long-term direction, not a starting assumption. The architecture aims not to rule it out, while the framework first investigates whether a probabilistic, dynamic model can serve as its foundation.
 
@@ -71,7 +83,15 @@ Social service data can be sensitive.
 
 ## Getting started
 
-Setup instructions will be added as the first modules land. The goal is a single command (`docker compose up`) that starts the full platform for local development.
+Requirements: `git`, `make`, [`uv`](https://docs.astral.sh/uv/), Node.js 26 with `pnpm` 12, and Podman (default) or Docker.
+
+```bash
+make setup        # install dependencies
+make lint test    # lint, type check and test everything
+make up           # start database, backend and frontend (Podman by default)
+```
+
+Then open http://localhost:8080. With Docker: `CONTAINER_ENGINE=docker COMPOSE="docker compose" make up`. See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/architecture.md](docs/architecture.md).
 
 ## Roadmap
 
@@ -87,9 +107,9 @@ The roadmap is tracked in GitHub Issues and Projects.
 
 Contributions of all kinds are welcome: code, documentation, methodological review, test data, translations.
 
-- Read [CONTRIBUTING.md](CONTRIBUTING.md) (coming soon) before opening a pull request.
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 - Look for issues labelled `good first issue`.
-- Be respectful: see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) (coming soon).
+- Be respectful: see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## License
 
@@ -97,7 +117,7 @@ SolidarityNode is licensed under the **GNU Affero General Public License v3.0** 
 
 In short: you may use, study, modify and share the software, including offering services around it, but modified versions (including those run as a network service) must remain open under the same license.
 
-The name "SolidarityNode" is not covered by the license. A trademark policy will be published in this repository.
+The name "SolidarityNode" is not covered by the license. See the draft [trademark policy](TRADEMARK.md).
 
 ## Background
 
