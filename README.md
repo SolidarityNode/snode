@@ -75,7 +75,7 @@ Modules of the `core` library, following the module map in [`docs/specs/00-domai
 | `vulnerability` | 3 §11–21 | Group exposure, service loss, the vulnerability relationship |
 | `operations` | 4 §4–5 | Anonymous request tickets, operational indicators, facility functional state |
 | `dynamics` | 4 §7–9, 12 | Territorial state, expected and observed consequence, Dynamic Bayesian Network |
-| `resilience` | 4 §10–13 | Bayesian updating of vulnerability, recovery trajectories, resilience |
+| `resilience` | 4 §10–13 | Bayesian parameter learning of the vulnerability relationship, recovery trajectories, resilience |
 | `uncertainty` | 1 §11, 2 §14, 3 §22 | Monte Carlo propagation |
 | `sensitivity` | 1 §12, 2 §16, 3 §23 | Sensitivity analysis |
 | `validation` | 1 §14, 2 §18, 3 §24 | Validation tools |
