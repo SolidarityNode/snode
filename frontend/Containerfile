@@ -1,0 +1,18 @@
+# Frontend image. Works with Podman and Docker. Build context: frontend/
+#   $(CONTAINER_ENGINE) build -f frontend/Containerfile frontend
+FROM docker.io/library/node:26-alpine AS build
+RUN npm install --global pnpm@12.23.0
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+COPY . .
+RUN pnpm build
+
+# Unprivileged nginx listens on 8080 (no privileged ports, rootless-friendly).
+FROM docker.io/nginxinc/nginx-unprivileged:1.30-alpine AS runtime
+ENV BACKEND_UPSTREAM=http://backend:8000
+COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 8080
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=5 \
+  CMD ["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]

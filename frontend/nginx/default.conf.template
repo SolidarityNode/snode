@@ -1,0 +1,18 @@
+# Rendered by the nginx image entrypoint (envsubst) at container start.
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    # API: same-origin proxy to the backend, so the browser needs no CORS.
+    location /api/ {
+        proxy_pass ${BACKEND_UPSTREAM}/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Single-page app routing.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
