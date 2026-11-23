@@ -1,0 +1,13 @@
+# Read by Podman/Buildah; .dockerignore is a symlink to this file for Docker.
+.git
+**/.venv
+**/__pycache__
+**/.mypy_cache
+**/.ruff_cache
+**/.pytest_cache
+**/node_modules
+frontend/dist
+.env
+.env.*
+data
+docs

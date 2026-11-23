@@ -1,0 +1,67 @@
+[project]
+name = "solidaritynode-backend"
+version = "0.0.1"
+description = "SolidarityNode API: scenario and run management, anonymous request logging."
+readme = "README.md"
+license = "AGPL-3.0-or-later"
+requires-python = ">=3.12,<3.13"
+authors = [{ name = "SolidarityNode contributors" }]
+dependencies = [
+  "solidaritynode-core",
+  "fastapi==0.165.0",
+  "pydantic==2.14.4",
+  "pydantic-settings==2.16.3",
+  "sqlalchemy==2.1.9",
+  "alembic==1.20.1",
+  "psycopg[binary]==3.3.9",
+  "uvicorn==0.54.0",
+]
+
+[dependency-groups]
+dev = [
+  "httpx==0.28.1",
+  "mypy==2.4.1",
+  "pytest==9.2.0",
+  "ruff==0.17.6",
+]
+
+[tool.uv.sources]
+# Local path dependency (backend → core). Never the other way round.
+solidaritynode-core = { path = "../core", editable = true }
+
+[build-system]
+requires = ["uv_build>=0.13.9,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "solidaritynode_backend"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF", "ANN", "PT", "D"]
+ignore = ["D203", "D213", "D100", "D104", "RUF001", "RUF002", "RUF003"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "ANN"]
+"migrations/**" = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+mypy_path = "src"
+packages = ["solidaritynode_backend"]
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "--import-mode=importlib"]
+pythonpath = ["."]
+# Starlette recommends httpx2 for TestClient; switching is a follow-up (see PR notes).
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient` is deprecated"]
