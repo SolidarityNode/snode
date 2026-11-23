@@ -1,0 +1,73 @@
+# Compose spec file. Works with `podman compose` (default) and `docker compose`.
+# Start with `make up`; engine and compose command come from the Makefile variables
+# CONTAINER_ENGINE and COMPOSE. All values can be overridden in .env (see .env.example).
+# Ports are non-privileged and bound to 127.0.0.1. No bind mounts: data lives in a named volume.
+name: solidaritynode
+
+services:
+  db:
+    image: docker.io/postgis/postgis:18-3.6
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-solidaritynode}
+      POSTGRES_USER: ${POSTGRES_USER:-solidaritynode}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-local-only}
+    volumes:
+      # PostgreSQL 18+ images keep data under /var/lib/postgresql/<major>/.
+      - db-data:/var/lib/postgresql
+    ports:
+      - "127.0.0.1:${DB_HOST_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Containerfile
+    image: localhost/solidaritynode-backend:dev
+    environment:
+      SOLIDARITYNODE_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-solidaritynode}:${POSTGRES_PASSWORD:-change-me-local-only}@db:5432/${POSTGRES_DB:-solidaritynode}
+      SOLIDARITYNODE_ENVIRONMENT: ${SOLIDARITYNODE_ENVIRONMENT:-development}
+      SOLIDARITYNODE_LOG_LEVEL: ${SOLIDARITYNODE_LOG_LEVEL:-info}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${BACKEND_HOST_PORT:-8000}:8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2).status == 200 else 1)"
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Containerfile
+    image: localhost/solidaritynode-frontend:dev
+    environment:
+      BACKEND_UPSTREAM: http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${FRONTEND_HOST_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  db-data:
