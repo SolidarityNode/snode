@@ -1,0 +1,52 @@
+name: licenses
+
+# Fails when a dependency licence is incompatible with AGPL-3.0 or unknown
+# (scripts/check_licenses.py; policy in CLAUDE.md "Licensing").
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "core/pyproject.toml"
+      - "core/uv.lock"
+      - "backend/pyproject.toml"
+      - "backend/uv.lock"
+      - "frontend/package.json"
+      - "frontend/pnpm-lock.yaml"
+      - "scripts/check_licenses.py"
+      - ".github/workflows/licenses.yml"
+  pull_request:
+    paths:
+      - "core/pyproject.toml"
+      - "core/uv.lock"
+      - "backend/pyproject.toml"
+      - "backend/uv.lock"
+      - "frontend/package.json"
+      - "frontend/pnpm-lock.yaml"
+      - "scripts/check_licenses.py"
+      - ".github/workflows/licenses.yml"
+  schedule:
+    - cron: "17 5 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          version: "0.13.9"
+          python-version: "3.12"
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "26"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: make setup
+      - run: make licenses

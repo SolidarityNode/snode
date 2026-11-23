@@ -1,0 +1,5 @@
+# PLACEHOLDER: replace with real maintainers (users or a team) before enabling
+# "Require review from Code Owners". GitHub ignores owners that do not exist.
+*            @SolidarityNode/maintainers
+/core/       @SolidarityNode/maintainers
+/docs/specs/ @SolidarityNode/maintainers

@@ -1,0 +1,39 @@
+# Optional local hooks. Install once with:  uvx pre-commit install
+# CI does not depend on pre-commit; `make lint test` is the source of truth.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        exclude: \.md$
+      - id: detect-private-key
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.6
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+        files: ^(core|backend)/
+      - id: ruff-format
+        files: ^(core|backend)/
+
+  - repo: local
+    hooks:
+      - id: core-independence
+        name: core must not import web or database packages
+        entry: bash -c 'cd core && uv run --frozen pytest -q tests/test_package.py'
+        language: system
+        pass_filenames: false
+        files: ^core/
+      - id: frontend-lint
+        name: frontend eslint + prettier
+        entry: bash -c 'cd frontend && pnpm run lint'
+        language: system
+        pass_filenames: false
+        files: ^frontend/

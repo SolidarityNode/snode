@@ -1,0 +1,46 @@
+name: containers
+
+# Builds the images with both supported engines. The engine is passed to the Makefile
+# through CONTAINER_ENGINE; nothing here hard-codes an engine in a build command.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "core/**"
+      - "frontend/**"
+      - "compose.yaml"
+      - "Makefile"
+      - ".containerignore"
+      - ".github/workflows/containers.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "core/**"
+      - "frontend/**"
+      - "compose.yaml"
+      - "Makefile"
+      - ".containerignore"
+      - ".github/workflows/containers.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [podman, docker]
+    steps:
+      - uses: actions/checkout@v7
+      - name: Engine version
+        run: ${{ matrix.engine }} --version
+      - name: Build images
+        run: make images CONTAINER_ENGINE=${{ matrix.engine }}

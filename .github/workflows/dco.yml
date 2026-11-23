@@ -1,0 +1,23 @@
+name: dco
+
+# Developer Certificate of Origin: every commit in a pull request must carry a
+# "Signed-off-by:" trailer matching its author (git commit -s). See CONTRIBUTING.md.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  signoff:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Check Signed-off-by on every commit
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: scripts/check-dco.sh "$BASE" "$HEAD"

@@ -1,0 +1,57 @@
+name: backend
+
+on:
+  push:
+    branches: [main]
+    paths: ["backend/**", "core/**", "Makefile", ".github/workflows/backend.yml"]
+  pull_request:
+    paths: ["backend/**", "core/**", "Makefile", ".github/workflows/backend.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          version: "0.13.9"
+          python-version: "3.12"
+      - run: make setup-backend
+      - run: make lint-backend
+      - run: make test-backend
+
+  migrations:
+    # Applies the Alembic migrations to a real PostGIS database.
+    runs-on: ubuntu-24.04
+    services:
+      db:
+        image: docker.io/postgis/postgis:18-3.6
+        env:
+          POSTGRES_DB: solidaritynode
+          POSTGRES_USER: solidaritynode
+          POSTGRES_PASSWORD: ci-only
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U solidaritynode -d solidaritynode"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      SOLIDARITYNODE_DATABASE_URL: postgresql+psycopg://solidaritynode:ci-only@localhost:5432/solidaritynode
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          version: "0.13.9"
+          python-version: "3.12"
+      - run: make setup-backend
+      - working-directory: backend
+        run: |
+          uv run --frozen alembic upgrade head
+          uv run --frozen alembic current
+          uv run --frozen alembic downgrade base

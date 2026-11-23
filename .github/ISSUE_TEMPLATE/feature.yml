@@ -1,0 +1,55 @@
+name: Feature ticket
+description: A unit of implementation work with acceptance criteria and a spec reference.
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        One ticket, one branch (`feat/<issue-number>-short-name`), one PR. If the spec is silent
+        or ambiguous, do not invent methodology: open a **research question** instead.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What should exist when this ticket is done?
+    validations:
+      required: true
+  - type: input
+    id: spec
+    attributes:
+      label: Spec reference
+      description: Paper and section, or spec file and section (for example "Paper 1 §7", "docs/specs/00-domain-model.md §4.1").
+      placeholder: Paper 1 §7
+    validations:
+      required: true
+  - type: input
+    id: oq
+    attributes:
+      label: Open-question dependencies
+      description: OQ-n this ticket touches (see docs/specs/open-questions.md). Write "none" if none. Tickets that depend on an open OQ get the `needs-spec` label.
+      placeholder: OQ-3, OQ-5
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options: [core, backend, frontend, docs, infra]
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Testable statements; each must be covered by a test.
+      value: |
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Invariants to respect (CLAUDE.md), data needs (synthetic only), new dependencies and their licences.

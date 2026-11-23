@@ -1,0 +1,30 @@
+# Python projects are managed with uv and locked in uv.lock, so they use Dependabot's
+# "uv" ecosystem (the "pip" ecosystem would not update uv.lock).
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /core
+    schedule: { interval: weekly }
+    labels: [core, infra]
+    commit-message: { prefix: "chore(deps)" }
+
+  - package-ecosystem: uv
+    directory: /backend
+    schedule: { interval: weekly }
+    labels: [backend, infra]
+    commit-message: { prefix: "chore(deps)" }
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule: { interval: weekly }
+    labels: [frontend, infra]
+    commit-message: { prefix: "chore(deps)" }
+    groups:
+      dev-tooling:
+        dependency-type: development
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+    labels: [infra]
+    commit-message: { prefix: "chore(ci)" }
