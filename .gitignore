@@ -1,0 +1,50 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+build/
+dist/
+
+# --- Node ---
+node_modules/
+frontend/dist/
+frontend/coverage/
+*.tsbuildinfo
+.pnpm-store/
+
+# --- Environment and secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Data ---
+# Only synthetic data is ever committed (see CLAUDE.md). Real data stays outside the repo.
+data/*
+!data/synthetic/
+!data/README.md
+*.parquet
+*.gpkg
+*.shp
+*.dbf
+*.shx
+*.prj
+!core/tests/fixtures/**
+!data/synthetic/**
+
+# --- Editors and OS ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Re-apply cache ignores below the data exceptions above.
+**/__pycache__/
+*.py[cod]
