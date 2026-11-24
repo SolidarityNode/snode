@@ -50,7 +50,7 @@ Open the database shell with `make db-shell`, then type each query (end with `;`
 | 19 | `SELECT f.facility_id, m.municipality_id FROM demo.facilities f JOIN demo.municipalities m ON ST_Within(f.geom, m.geom) ORDER BY 1;` | `F1`, `F2`, `F3` in `M-A`; **`F4` in `M-B`** (the facility across the border). | ☐ |
 | 20 | `SELECT DISTINCT ST_SRID(geom) FROM demo.spatial_units;` | `2100` | ☐ |
 | 21 | `SELECT mode, travel_time_min FROM demo.hand_check_travel_times WHERE scenario_id = 'baseline' AND unit_id = 'A4' AND facility_id = 'F2' ORDER BY mode;` | `car 15` and `walk 90`. Check by hand: 5 + 2 + 0.5 km at 2 and 12 min/km (see the demo README). | ☐ |
-| 22 | `SELECT scenario_id, travel_time_min FROM demo.hand_check_travel_times WHERE mode = 'walk' AND unit_id = 'A1' AND facility_id = 'F2' ORDER BY 1;` | `C-DEMO-REF 78` and `baseline 66`: closing edge E02 makes the trip longer. | ☐ |
+| 22 | `SELECT scenario_id, travel_time_min FROM demo.hand_check_travel_times WHERE mode = 'walk' AND unit_id = 'A1' AND facility_id = 'F2' ORDER BY 1;` | `baseline 66` and `C-DEMO-REF 78`: closing edge E02 makes the trip longer. | ☐ |
 | 23 | `SELECT body->'facility_severities', body->'network_disruption'->'affected_link_ids' FROM demo.scenarios;` | `{"F1": 0.5}` and `["E02"]`. | ☐ |
 | 24 | `\dt public.*` | Only `alembic_version` and `spatial_ref_sys`: nothing from the demo is in `public`. | ☐ |
 | 25 | `\q` | Back at the normal prompt. | ☐ |
@@ -68,7 +68,7 @@ grid in open sea; F4 just east of the municipal boundary.
 | 28 | `make check-config` | `configuration OK (APP_ENV=development)` | ☐ |
 | 29 | `make reset`, then type `no` | `Aborted.`; `make ps` still shows the three containers, and step 18 still returns 8 rows. | ☐ |
 | 30 | `git status --short` | No changes listed (in particular `.env` and `data/local/` never appear). | ☐ |
-| 31 | `grep -n '127.0.0.1' compose.yaml` | Three port lines, all starting with `127.0.0.1:`. | ☐ |
+| 31 | `grep -n '"127.0.0.1:' compose.yaml` | Three port lines (database, backend, frontend), all starting with `127.0.0.1:`. | ☐ |
 
 ## F. Finish
 
