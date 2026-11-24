@@ -120,6 +120,85 @@ make uat          # or: clean database + synthetic demo data, then print the URL
 
 Then open http://127.0.0.1:8080 (services listen on `127.0.0.1` only). Manual testing: [docs/uat/](docs/uat/README.md). With Docker: `CONTAINER_ENGINE=docker COMPOSE="docker compose" make up`. See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/architecture.md](docs/architecture.md).
 
+# SolidarityNode: Platform features
+ 
+SolidarityNode is an open-source platform (AGPL-3.0) that shows municipalities and researchers how well social services cover the needs of the population, who is left out, what happens when something breaks down, and how quickly the system recovers. Every result comes with its uncertainty, never as a single number.
+ 
+The platform foundation (A) is built first. The analytical tools (B) are added through the tickets of the four papers.
+ 
+## A. Platform foundation
+ 
+The foundation provides the map, scenarios, runs and data management that the analytical tools later plug into.
+ 
+### Users and roles
+ 
+- Sign-in with an account.
+- Roles: **admin** (users, data), **analyst** (scenarios, runs), **viewer** (sees shared work).
+### Study area on a map
+ 
+- Spatial units, facilities and the road network of one or more municipalities, plus a **buffer** of neighbouring areas, so that people served across the boundary are counted correctly.
+- A **quality** flag on every feature (open data, estimate, verified by the municipality) and an **edge-effect warning** where data on neighbours is missing.
+### "What if…" scenarios
+ 
+- Built by clicking on the map: increase or reduce capacity, add a facility, degrade or close a facility, close a road.
+- Every change is kept as a **version**. Scenarios are private or shared.
+### Runs
+ 
+- Run in the background, with progress and cancellation.
+- Every run is **fully reproducible**: it records the data version, code, model, parameters and random seed.
+### Results
+ 
+- Maps and tables by spatial unit, social group and service, with uncertainty always visible.
+- **Comparison** with the current situation (side by side or a difference map).
+- **Export** to CSV and GeoPackage, together with the reproducibility details.
+### Data and updates
+ 
+- Import of **data packages** with integrity checks and a **preview of changes** before they are applied.
+- Past results never change. Scenarios can be rerun on new data and compared.
+### Central hub
+ 
+- Registration of national sources (boundaries, network, population) without processing the whole country.
+- Step-by-step **onboarding** of a municipality, with a coverage matrix showing what is available and what is missing.
+- Import and extension of facilities from Excel, CSV or GeoPackage, with an error report and change history.
+- Publication of packages per municipality, and a notice when onboarding a neighbour improves another municipality's data.
+## B. Analytical tools
+ 
+Each paper adds an analytical tool on top of the foundation, in the order 1 → 2 → 3 → 4.
+ 
+### Accessibility and adequacy (Paper 1)
+ 
+- Travel times by group and transport mode (walking, car, public transport).
+- Actual service supply per area, taking into account that several areas share the same facilities.
+- **Service gap** by group, with an explanation of why (low capacity, poor access or high demand).
+### Hidden need (Paper 2)
+ 
+- Estimate of the **share of each group with need that is not visible**, for example "7–17 % of older people in local community X".
+- A map of areas where recorded demand most likely underestimates reality.
+### Vulnerability (Paper 3)
+ 
+- What each group loses when a facility is degraded or closed, or a road is cut, taking alternatives into account.
+- Maps at standard reference scenarios (minor, moderate, severe disruption), so that areas are compared fairly.
+- How many people are affected and how deeply, not only how much service is lost overall.
+### Real operation and resilience (Paper 4)
+ 
+- **Anonymous request logging** (QR code or appointments) at facilities, with no personal data.
+- Operational indicators: waiting time, delay, unmet requests, coverage.
+- **State of each facility** (normal, under pressure, degraded, critical, recovering) and an **operational view**: "which facility needs help now, and of what kind".
+- Monitoring of **recovery** after a disruption and estimation of **resilience** by spatial unit, group and service.
+- Estimates **learn** from real operation over time.
+### Shared tools
+ 
+- Uncertainty analysis (Monte Carlo) and sensitivity analysis ("which factor matters most").
+- Expert elicitation tools that feed the probabilistic models.
+## C. Principles that apply everywhere
+ 
+- **Open source**, with no closed editions.
+- **Privacy by design:** no personal data. Operational data stays with the municipality; only anonymous aggregates are shared upwards, and only if the municipality chooses to.
+- **One installation per municipality**, or group of municipalities, with a shared hub for open data.
+- **Reproducibility:** every result can be reproduced exactly.
+- **Transparency:** every dataset has a source and a processing note, and every method decision is recorded.
+ 
+
 ## Roadmap
 
 - [ ] **v0.1**: `core` with a minimal model on synthetic data; `docs/architecture.md`
