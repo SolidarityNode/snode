@@ -150,6 +150,31 @@
         "title": "CapacityChangeIn",
         "type": "object"
       },
+      "CatalogOut": {
+        "description": "Groups and services of a data version.",
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/GroupOut"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceOut"
+            },
+            "title": "Services",
+            "type": "array"
+          }
+        },
+        "required": [
+          "groups",
+          "services"
+        ],
+        "title": "CatalogOut",
+        "type": "object"
+      },
       "CompareOut": {
         "description": "Comparison of run ``a`` (scenario) with run ``b`` (baseline or another run).",
         "properties": {
@@ -463,6 +488,30 @@
           "fields"
         ],
         "title": "FieldChange",
+        "type": "object"
+      },
+      "GroupOut": {
+        "description": "A population group of a data version (never a measure of need; OQ-6).",
+        "properties": {
+          "definition_rule": {
+            "title": "Definition Rule",
+            "type": "string"
+          },
+          "group_id": {
+            "title": "Group Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "group_id",
+          "name",
+          "definition_rule"
+        ],
+        "title": "GroupOut",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -1827,6 +1876,41 @@
         "title": "ServiceCapacityIn",
         "type": "object"
       },
+      "ServiceOut": {
+        "description": "A service of a data version with its service unit (OQ-24).",
+        "properties": {
+          "max_acceptable_wait": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Acceptable Wait"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "service_id": {
+            "title": "Service Id",
+            "type": "string"
+          },
+          "service_unit": {
+            "title": "Service Unit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "service_id",
+          "name",
+          "service_unit"
+        ],
+        "title": "ServiceOut",
+        "type": "object"
+      },
       "SeverityIn": {
         "additionalProperties": false,
         "description": "Disruption severity ``DS_{f,c}`` of one facility (Paper 3 \u00a77\u201310).",
@@ -2324,15 +2408,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "items": {
-                      "additionalProperties": true,
-                      "type": "object"
-                    },
-                    "type": "array"
-                  },
-                  "title": "Response Catalog Data Versions  Data Version Id  Catalog Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/CatalogOut"
                 }
               }
             },

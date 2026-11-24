@@ -17,6 +17,7 @@ from solidaritynode_backend.db import get_session
 from solidaritynode_backend.orm import DataVersion
 from solidaritynode_backend.schemas.api import (
     AvailablePackage,
+    CatalogOut,
     CoverageOut,
     DataVersionOut,
     ImportIn,
@@ -121,8 +122,8 @@ def get_data_version(data_version_id: int, _: CurrentUser, db: Db) -> DataVersio
     return data_version_out(db, _get_dv(db, data_version_id))
 
 
-@router.get("/data-versions/{data_version_id}/catalog")
-def catalog(data_version_id: int, _: CurrentUser, db: Db) -> dict[str, list[dict[str, Any]]]:
+@router.get("/data-versions/{data_version_id}/catalog", response_model=CatalogOut)
+def catalog(data_version_id: int, _: CurrentUser, db: Db) -> CatalogOut:
     """Return the groups and services of a data version."""
     _get_dv(db, data_version_id)
     out: dict[str, list[dict[str, Any]]] = {"groups": [], "services": []}
@@ -133,8 +134,10 @@ def catalog(data_version_id: int, _: CurrentUser, db: Db) -> dict[str, list[dict
         ),
         {"dv": data_version_id},
     ):
-        out[table].append(props)
-    return out
+        out[table].append(
+            {k: (v or None) if k == "max_acceptable_wait" else v for k, v in props.items()}
+        )
+    return CatalogOut.model_validate(out)
 
 
 @router.get("/data-versions/{data_version_id}/layers/{layer}")

@@ -116,14 +116,24 @@ test-backend: test-db
 test-frontend:
 	cd frontend && $(PNPM) run test
 
-e2e-setup: ## Install the Playwright browser for the end-to-end test (once)
+# The end-to-end test runs Playwright in its official image (browsers and system libraries
+# included), on the host network so it reaches the stack at $(FRONTEND_URL). E2E_LOCAL=1 runs
+# it with a browser installed on the host instead (`make e2e-setup`).
+PLAYWRIGHT_IMAGE ?= mcr.microsoft.com/playwright:v1.65.1-noble
+
+e2e-setup: ## Install the Playwright browser on the host (only for E2E_LOCAL=1)
 	cd frontend && $(PNPM) exec playwright install chromium
 
 test-e2e: ## End-to-end test (Playwright) against the stack; starts and seeds it first
 	$(MAKE) --no-print-directory up
 	$(MAKE) --no-print-directory wait
 	$(MAKE) --no-print-directory seed
-	cd frontend && E2E_BASE_URL=$(FRONTEND_URL) $(PNPM) run test:e2e
+	@if [ "$(E2E_LOCAL)" = "1" ]; then \
+	  cd frontend && E2E_BASE_URL=$(FRONTEND_URL) $(PNPM) run test:e2e; \
+	else \
+	  $(CONTAINER_ENGINE) run --rm --network host -v "$(CURDIR)/frontend:/work:Z" -w /work \
+	    -e E2E_BASE_URL=$(FRONTEND_URL) $(PLAYWRIGHT_IMAGE) npx playwright test; \
+	fi
 
 # --- Formatting ----------------------------------------------------------------------------
 

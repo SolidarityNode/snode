@@ -12,6 +12,7 @@ from solidaritynode_backend.schemas.scenario import ScenarioBody
 
 __all__ = [
     "AppConfigOut",
+    "CatalogOut",
     "CompareOut",
     "CompareRow",
     "CoverageOut",
@@ -121,6 +122,30 @@ class DataVersionOut(BaseModel):
     sources: list[dict[str, Any]]
     coverage: list[CoverageOut]
     edge_effect_units: list[str]
+
+
+class GroupOut(BaseModel):
+    """A population group of a data version (never a measure of need; OQ-6)."""
+
+    group_id: str
+    name: str
+    definition_rule: str
+
+
+class ServiceOut(BaseModel):
+    """A service of a data version with its service unit (OQ-24)."""
+
+    service_id: str
+    name: str
+    service_unit: str
+    max_acceptable_wait: str | None = None
+
+
+class CatalogOut(BaseModel):
+    """Groups and services of a data version."""
+
+    groups: list[GroupOut]
+    services: list[ServiceOut]
 
 
 class AvailablePackage(BaseModel):
