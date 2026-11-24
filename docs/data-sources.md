@@ -6,6 +6,16 @@ Every third-party dataset used by SolidarityNode is listed here with its licence
 | --- | --- | --- | --- | --- | --- |
 | *(none yet)* | | | | | |
 
+## Real open data stays local
+
+Open datasets planned for the first application (OpenStreetMap, ELSTAT population, a DEM,
+GTFS public transport feeds) will be **downloaded to `data/local/` by scripts in later
+tickets**. `data/local/` is git-ignored: nothing in it is ever committed. Each downloaded source
+gets a row in the table above and each processed dataset a `DP-NNN` note in
+[`docs/data-processing/`](data-processing/README.md). No real data has been downloaded yet.
+
+The synthetic demo dataset (`data/synthetic/demo/`, DP-001) uses no third-party source.
+
 How to add a source:
 
 1. Check that the licence allows our use (and redistribution of derived results, if any).

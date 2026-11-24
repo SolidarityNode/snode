@@ -1,0 +1,4 @@
+group_id,name,definition_rule
+G-OLD,Older people (synthetic),age >= 65 (placeholder rule)
+G-MOB,Mobility-limited (synthetic),reported mobility limitation (placeholder rule)
+G-LOW,Low income (synthetic),household income below a threshold (placeholder rule)
