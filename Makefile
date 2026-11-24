@@ -31,7 +31,7 @@ BACKEND_URL := http://127.0.0.1:$(BACKEND_HOST_PORT)
 .PHONY: help check-tools check-engine env check-config setup setup-core setup-backend setup-frontend \
         lint lint-core lint-backend lint-frontend \
         test test-core test-backend test-frontend \
-        fmt up down logs ps wait db-shell seed reset uat images licenses labels clean distclean
+        fmt stop up down logs ps wait db-shell seed reset uat images licenses labels clean distclean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -106,6 +106,10 @@ fmt: ## Auto-format and auto-fix (ruff, prettier, eslint)
 	cd frontend && $(PNPM) run fmt
 
 # --- Containers ----------------------------------------------------------------------------
+
+stop: ## Stop one service, keep the others (SERVICE=backend|frontend|db)
+	@[ -n "$(SERVICE)" ] || { echo "Usage: make stop SERVICE=backend|frontend|db" >&2; exit 1; }
+	$(COMPOSE) stop $(SERVICE)
 
 up: check-engine ## Build and start db, backend and frontend with $(COMPOSE)
 	$(COMPOSE) up -d --build

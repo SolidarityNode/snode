@@ -48,7 +48,7 @@ Requires `uv`, Node.js 26 with `pnpm` 12, and Podman (or Docker). `make help` li
 - `make test` — pytest (core, backend) and Vitest (frontend)
 - `make fmt` — ruff fix/format, prettier, eslint --fix
 - `make up` / `make down` — start/stop db, backend and frontend with `$(COMPOSE)` (default `podman compose`); frontend http://127.0.0.1:8080, backend http://127.0.0.1:8000; passes `GIT_COMMIT` to the image builds
-- `make logs`, `make ps`, `make wait` — follow logs, show containers, wait until the backend is ready
+- `make logs`, `make ps`, `make wait`, `make stop SERVICE=…` — follow logs, show containers, wait until the backend is ready, stop one service
 - `make db-shell` — `psql` in the database container with the credentials from `.env`
 - `make seed` — load the synthetic demo dataset into the temporary schema `demo` (idempotent)
 - `make reset` — **delete the database volume**, start, migrate and seed; asks for `yes` unless `FORCE=1`
