@@ -125,7 +125,8 @@
 - **Add:** the actual rationing pattern (how shortage is spread among people) is estimated from tickets (fulfilled, overdue, expired requests per person), replacing the bounding cases of Paper 3.
 - **Add:** tickets inform take-up `τ` (Paper 2) once need prevalence `p` is known, through learning of the Paper 2 CPT parameters, using only facilities with full or known recording coverage.
 
-### §4.1 Ticket fields (OQ-8, OQ-6, OQ-21)
+### §4.1 Ticket fields (OQ-8, OQ-6, OQ-21, OQ-29)
+- **Add:** the `facility_id` where the request is made or scheduled (OQ-29), needed for facility functional state (§5), operational output (§14) and recording coverage; state that it falls under the same privacy rules (minimum cell sizes, aggregation, retention).
 - **Add:** a "first request in this period" flag (yes/no, no identifier) so that people can be counted without being identified; a rule for tickets of people belonging to several groups (OQ-6); and recording coverage per facility and period.
 
 ### Future work to mention

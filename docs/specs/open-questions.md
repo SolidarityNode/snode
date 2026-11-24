@@ -36,6 +36,7 @@
 | OQ-26 | delay versus loss | approach decided (2026-11-23), values open |
 | OQ-27 | weight of expert priors against observed data | open |
 | OQ-28 | study-area buffer and cross-border demand | open |
+| OQ-29 | facility on anonymous tickets | decided (2026-11-24) |
 
 Future-work notes (`N-…`): N-2a 3SFCA, N-2b constrained allocation for sensitivity, N-2c constrained allocation in Paper 4, N-8a intensity of hidden need, N-8b small area estimation, N-8c direct validation of hidden need, N-24a severity weighting, N-24b breadth as BN parent.
 
@@ -220,7 +221,7 @@ Future-work notes (`N-…`): N-2a 3SFCA, N-2b constrained allocation for sensiti
   1. **Maps at reference scenarios.** Vulnerability is mapped at standardised **reference scenarios** (for example minor, moderate, severe disruption), so that areas and groups are compared at the same intensity. Risk maps are produced separately, only if disruption probabilities become available.
   2. **Weight of experts against data:** new question OQ-27.
   3. **Observation node.** Because Vulnerability is latent, Paper 4 needs a measurement node `P(ObservedConsequence | V)` stating what is observed for each vulnerability level. To be specified together with OQ-18.
-- **Spec impact.** Paper 3 §2 and §17 (wording), Paper 3 §25–26 (maps at reference scenarios), Paper 4 §2.1, §8, §10 and the diagram in §15 must be rewritten. CLAUDE.md invariant 2 is updated accordingly.
+- **Spec impact.** Paper 3 §2 and §17 (wording), Paper 3 §25–26 (maps at reference scenarios), Paper 4 §2.1, §8, §10 and the diagram in §15 must be rewritten. The domain invariant 2 (now in the root `AGENTS.md`) is updated accordingly.
 
 ## Paper 4 (operations, dynamics, resilience)
 
@@ -243,3 +244,10 @@ Future-work notes (`N-…`): N-2a 3SFCA, N-2b constrained allocation for sensiti
 **OQ-23 (Digital Twin wording).** Paper 1's conclusion calls the result a "probabilistic baseline Digital Twin", while the research description says a Digital Twin is not assumed from the start. Keep wording consistent in README and docs. Status: open.
 
 **OQ-28 (study-area buffer and cross-border demand; raised 2026-11-24 with the deployment model).** People near a municipal boundary use facilities in neighbouring municipalities, and neighbouring residents use facilities inside it. A municipal installation therefore needs its municipality **plus a buffer** of neighbouring units, facilities and network. Open: buffer definition (fixed distance, travel-time threshold, or whole neighbouring municipalities); whether demand from buffer units competes for capacity in the 2SFCA allocation (OQ-2) while results are reported only for the municipality's own units; and how edge effects are tested. **Added:** when a buffer municipality is not yet onboarded (for example `facilities: missing`), results near that boundary are biased; decide whether to report a warning only (current platform behaviour), widen uncertainty, or use open-data facility estimates for the buffer. Status: open.
+
+**OQ-29 (facility on anonymous tickets; raised 2026-11-24 in the bootstrap PR).** Paper 4 §4.1 and the privacy rule list spatial unit, group, service and timestamps, but not the facility. Facility functional state (Paper 4 §5), facility operational output (§14) and recording coverage (OQ-8) are per facility, so they cannot be computed without it. **Status: decided (2026-11-24).**
+
+- **Decision.** Every ticket records the `facility_id` of the facility where the request is made or scheduled (in practice the facility that issues the QR or appointment).
+- **Rationale.** A facility is not personal data, and it is required for the facility layer of Paper 4. Without it, facility state would need a separate data source and recording coverage could not be measured.
+- **Privacy constraint.** The combination spatial unit × group × service × facility × time raises re-identification risk in small units. The facility field is subject to the rules decided in OQ-21 / ADR 0010 (minimum cell sizes, aggregation, retention); until those are decided, no ticket is stored (as today).
+- **Spec impact.** Paper 4 §4.1 (ticket fields), §5 and §14; the privacy rule in AGENTS.md (allowed ticket fields).

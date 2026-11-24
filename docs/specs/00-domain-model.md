@@ -131,7 +131,7 @@ Two layers: **Layer 1** is computational (scenario, disruption, simulation, evid
 
 | Variable | As stated | Kind |
 | --- | --- | --- |
-| Ticket | anonymous request: spatial unit, group (overlap rule: OQ-6), service/need, request time `t_r`, scheduled time `t_a`, service time `t_f`, expiry `t_e`, and a flag "first request in this period" (yes/no, no identifier) to count people without identifying them (OQ-8, OQ-21) | OBSERVED |
+| Ticket | anonymous request: spatial unit, group (overlap rule: OQ-6), service/need, facility where the request is made or scheduled (OQ-29), request time `t_r`, scheduled time `t_a`, service time `t_f`, expiry `t_e`, and a flag "first request in this period" (yes/no, no identifier) to count people without identifying them (OQ-8, OQ-21) | OBSERVED |
 | Recording coverage | share of a facility's requests captured by the ticket system, per facility and period; observations are used for learning only where coverage is full or known (OQ-8) | OBSERVED |
 | Operational indicators | demand rate, waiting time, fulfilment delay, appointment adherence, overdue requests, expired requests, service coverage, unfulfilled need | COMPUTED |
 | Facility functional state | Normal → Under Pressure → Degraded → Critical → Recovering → Normal, from operational indicators | LATENT/STATE |
@@ -178,4 +178,4 @@ DBN (Paper 4 §12): `State(t−1) → FunctionalState(t) → ObservedConsequence
 
 ## 7. Invariants
 
-See `CLAUDE.md` ("Domain invariants"). The most important: keep BN nodes, computed simulation variables and scenario parameters separate (section 4); never mix vulnerability and resilience; never treat estimated demand as total need.
+See the root `AGENTS.md` ("Domain invariants"). The most important: keep BN nodes, computed simulation variables and scenario parameters separate (section 4); never mix vulnerability and resilience; never treat estimated demand as total need.
