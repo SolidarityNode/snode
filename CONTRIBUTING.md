@@ -118,7 +118,7 @@ Scientific methods (formulas, CPTs, thresholds, inference schemes) are **specifi
 ## Data and privacy
 
 - Never commit real personal or operational data. Synthetic data only, under `core/tests/fixtures/` and `data/synthetic/`.
-- Request tickets are anonymous by design: spatial unit of origin, social group, service and timestamps only (see OQ-21).
+- Request tickets are anonymous by design: spatial unit of origin, social group, service, facility (OQ-29) and timestamps only (see OQ-21).
 - No secrets in the repository. Use `.env` (gitignored) and keep `.env.example` current.
 - Attribute third-party data and record it in [`docs/data-sources.md`](docs/data-sources.md).
 - Real open data (OpenStreetMap, ELSTAT, DEM, GTFS) is downloaded to `data/local/` (git-ignored) by scripts, never committed.

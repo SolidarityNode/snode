@@ -105,7 +105,7 @@ sequenceDiagram
     participant DB as PostGIS
     participant J as background job
     participant C as core.operations / dynamics / resilience
-    P->>API: unit, group, service, timestamps, first-request flag
+    P->>API: unit, group, service, facility (OQ-29), timestamps, first-request flag
     Note over API: schema rejects any other field (no names, contacts, addresses, device ids)
     API->>DB: store ticket (only after ADR 0010 / OQ-21 rules exist)
     J->>DB: read tickets + recording coverage per facility and period
@@ -116,7 +116,7 @@ sequenceDiagram
 
 - Privacy rules (minimum cell sizes, retention, aggregation) are **open (OQ-21)** and must be decided in ADR 0010 before any ticket is stored.
 - Only facilities with full or known recording coverage feed learning (OQ-8).
-- Spec gap to raise: tickets carry no facility, but indicators, functional state and recording coverage are per facility (see `core/src/solidaritynode_core/operations/__init__.py`).
+- Tickets record the facility where the request is made or scheduled (OQ-29, decided), so indicators, functional state and recording coverage can be computed per facility. The facility field follows the OQ-21 rules.
 
 ## 5. Background jobs
 

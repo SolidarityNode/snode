@@ -77,7 +77,7 @@ Run `make lint test` before every commit. Do not mark work done if either fails.
 ## Data and privacy rules
 
 - **Never commit real personal or operational data.** Only synthetic data under `core/tests/fixtures/` and `data/synthetic/`.
-- The request-logging mechanism must be anonymous by design: store only spatial unit of origin, social group, service type and timestamps. No names, contact details, exact addresses or device identifiers.
+- The request-logging mechanism must be anonymous by design: store only spatial unit of origin, social group, service type, the facility where the request is made or scheduled (OQ-29) and timestamps. No names, contact details, exact addresses or device identifiers. The facility raises re-identification risk in small units and follows the OQ-21 rules (minimum cell sizes, aggregation, retention); no ticket is stored until they are decided (ADR 0010).
 - No secrets in the repo. Use `.env` (gitignored) and keep `.env.example` current.
 - **Configuration:** the platform must run in development with no manual editing of `.env`. `make setup` creates `.env` from `.env.example` if missing and warns about keys present in `.env.example` but missing from `.env`. Every new setting is added to `.env.example` in the same PR, with a safe development default (secrets as `change-me`), a one-line comment, and an entry in the configuration section of `CONTRIBUTING.md`. Production values are never committed.
 - Third-party data (for example OpenStreetMap) must be attributed and its license respected; record sources in `docs/data-sources.md`.

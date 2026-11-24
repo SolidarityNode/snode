@@ -2,7 +2,9 @@
 
 Only the fields of the core ticket are accepted; unknown fields are **rejected**, so no personal
 data (names, contacts, addresses, device identifiers) can slip in (AGENTS.md privacy rules;
-OQ-21). Group handling for people in several groups is open (OQ-6).
+OQ-21). The facility where the request is made is recorded (OQ-29) and follows the same privacy
+rules. Group handling for people in several groups is open (OQ-6). Nothing is persisted until
+ADR 0010 is accepted.
 """
 
 from __future__ import annotations
@@ -10,7 +12,7 @@ from __future__ import annotations
 from typing import Self
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
-from solidaritynode_core.model import GroupId, ServiceId, Ticket, UnitId
+from solidaritynode_core.model import FacilityId, GroupId, ServiceId, Ticket, UnitId
 
 __all__ = ["TicketRequest", "TicketResponse"]
 
@@ -23,6 +25,7 @@ class _TicketFields(BaseModel):
     unit: str = _ID
     group: str = _ID
     service: str = _ID
+    facility_id: str = _ID
     requested_at: AwareDatetime
     scheduled_at: AwareDatetime | None = None
     fulfilled_at: AwareDatetime | None = None
@@ -40,6 +43,7 @@ class _TicketFields(BaseModel):
             unit=UnitId(self.unit),
             group=GroupId(self.group),
             service=ServiceId(self.service),
+            facility_id=FacilityId(self.facility_id),
             requested_at=self.requested_at,
             scheduled_at=self.scheduled_at,
             fulfilled_at=self.fulfilled_at,
@@ -62,6 +66,7 @@ class TicketResponse(_TicketFields):
             unit=ticket.unit,
             group=ticket.group,
             service=ticket.service,
+            facility_id=ticket.facility_id,
             requested_at=ticket.requested_at,
             scheduled_at=ticket.scheduled_at,
             fulfilled_at=ticket.fulfilled_at,
