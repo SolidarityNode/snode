@@ -15,17 +15,45 @@ SHELL := /bin/bash
 
 UV_RUN := $(UV) run --frozen
 
-.PHONY: help setup setup-core setup-backend setup-frontend \
+# Host ports and other values from .env (if present), with the same defaults as compose.yaml.
+-include .env
+BACKEND_HOST_PORT ?= 8000
+FRONTEND_HOST_PORT ?= 8080
+
+# Build identity shown by /version and the frontend footer.
+GIT_COMMIT ?= $(shell git rev-parse --short=12 HEAD 2>/dev/null || echo unknown)$(shell git diff --quiet HEAD 2>/dev/null || echo -dirty)
+export GIT_COMMIT
+
+FRONTEND_URL := http://127.0.0.1:$(FRONTEND_HOST_PORT)
+BACKEND_URL := http://127.0.0.1:$(BACKEND_HOST_PORT)
+
+.PHONY: help check-tools check-engine setup setup-core setup-backend setup-frontend \
         lint lint-core lint-backend lint-frontend \
         test test-core test-backend test-frontend \
-        fmt up down logs ps images licenses labels clean distclean
+        fmt up down logs ps wait db-shell seed reset uat images licenses labels clean distclean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
 # --- Setup -------------------------------------------------------------------------------
 
-setup: setup-core setup-backend setup-frontend ## Install all dependencies (locked)
+check-tools: ## Check that uv, node and pnpm are on PATH
+	@missing=""; \
+	for tool in $(UV) node $(PNPM); do command -v "$$tool" >/dev/null 2>&1 || missing="$$missing $$tool"; done; \
+	if [ -n "$$missing" ]; then \
+	  echo "Missing required tools:$$missing" >&2; \
+	  echo "Install them (see CONTRIBUTING.md, Setup) and make sure they are on PATH," >&2; \
+	  echo "for example by opening a new login shell." >&2; \
+	  exit 1; \
+	fi
+
+check-engine:
+	@command -v $(CONTAINER_ENGINE) >/dev/null 2>&1 || { \
+	  echo "Container engine '$(CONTAINER_ENGINE)' not found. Install it or set CONTAINER_ENGINE and COMPOSE." >&2; exit 1; }
+	@$(COMPOSE) version >/dev/null 2>&1 || { \
+	  echo "Compose command '$(COMPOSE)' does not work. Install it or set COMPOSE." >&2; exit 1; }
+
+setup: check-tools setup-core setup-backend setup-frontend ## Install all dependencies (locked)
 
 setup-core:
 	cd core && $(UV) sync --locked
@@ -71,9 +99,9 @@ fmt: ## Auto-format and auto-fix (ruff, prettier, eslint)
 
 # --- Containers ----------------------------------------------------------------------------
 
-up: ## Build and start db, backend and frontend with $(COMPOSE)
+up: check-engine ## Build and start db, backend and frontend with $(COMPOSE)
 	$(COMPOSE) up -d --build
-	@echo "Frontend: http://localhost:$${FRONTEND_HOST_PORT:-8080}  Backend: http://localhost:$${BACKEND_HOST_PORT:-8000}/health"
+	@echo "Build $(GIT_COMMIT). Frontend: $(FRONTEND_URL)  Backend: $(BACKEND_URL)/health"
 
 down: ## Stop the stack (keeps the database volume)
 	$(COMPOSE) down
@@ -83,6 +111,47 @@ logs: ## Follow container logs
 
 ps: ## Show container status
 	$(COMPOSE) ps
+
+wait: ## Wait until the backend reports ready (database reachable)
+	@echo "Waiting for the backend to become ready..."
+	@for i in $$(seq 1 60); do \
+	  if $(COMPOSE) exec -T backend python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2).status == 200 else 1)" >/dev/null 2>&1; then \
+	    echo "Backend ready."; exit 0; \
+	  fi; \
+	  sleep 2; \
+	done; \
+	echo "Backend not ready after 120 s. Check 'make logs'." >&2; exit 1
+
+db-shell: ## Open psql in the database container (credentials from .env)
+	$(COMPOSE) exec db sh -c 'exec psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
+
+seed: ## Load the synthetic demo dataset into schema 'demo' (idempotent)
+	$(COMPOSE) exec -T backend python -m solidaritynode_backend.demo_seed
+
+reset: check-engine ## DELETE the database volume, restart, migrate and seed (asks unless FORCE=1)
+	@if [ "$(FORCE)" != "1" ]; then \
+	  echo "This stops the stack and DELETES the database volume (all local data)."; \
+	  read -r -p "Type 'yes' to continue: " answer || answer=""; \
+	  [ "$$answer" = "yes" ] || { echo "Aborted."; exit 1; }; \
+	fi
+	$(COMPOSE) down --volumes
+	$(MAKE) --no-print-directory up
+	$(MAKE) --no-print-directory wait
+	$(COMPOSE) exec -T backend alembic upgrade head
+	$(MAKE) --no-print-directory seed
+
+uat: ## Fresh state for manual testing: reset, up, then print the URLs to open
+	$(MAKE) --no-print-directory reset
+	$(MAKE) --no-print-directory up
+	$(MAKE) --no-print-directory wait
+	@echo ""
+	@echo "UAT environment ready (build $(GIT_COMMIT)). Open:"
+	@echo "  Frontend:       $(FRONTEND_URL)"
+	@echo "  Health page:    $(FRONTEND_URL)/health"
+	@echo "  Backend docs:   $(BACKEND_URL)/docs"
+	@echo "  Backend health: $(BACKEND_URL)/health"
+	@echo "  Version:        $(BACKEND_URL)/version"
+	@echo "Checklist: docs/uat/00-bootstrap.md. Database: make db-shell. Logs: make logs."
 
 images: ## Build the container images with $(CONTAINER_ENGINE)
 	$(CONTAINER_ENGINE) build -f backend/Containerfile -t localhost/solidaritynode-backend:dev .
