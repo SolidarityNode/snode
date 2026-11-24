@@ -46,6 +46,15 @@ def test_production_refuses_placeholder_secrets(monkeypatch: pytest.MonkeyPatch,
         Settings()
 
 
+def test_validation_errors_do_not_echo_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("SOLIDARITYNODE_LOG_LEVEL", "loud")
+    monkeypatch.setenv("SOLIDARITYNODE_DATABASE_URL", REAL_URL)
+    with pytest.raises(ValidationError) as excinfo:
+        Settings()
+    assert "s3cr3t" not in str(excinfo.value)
+
+
 def test_production_accepts_real_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("APP_ENV", "production")
     monkeypatch.setenv("SOLIDARITYNODE_DATABASE_URL", REAL_URL)

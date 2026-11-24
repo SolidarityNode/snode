@@ -39,7 +39,12 @@ class Settings(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_prefix="SOLIDARITYNODE_", env_file=".env", extra="ignore", frozen=True
+        env_prefix="SOLIDARITYNODE_",
+        env_file=".env",
+        extra="ignore",
+        frozen=True,
+        # Never echo inputs (for example the database URL with its password) in errors.
+        hide_input_in_errors=True,
     )
 
     app_env: AppEnv = Field(default="development", validation_alias=AliasChoices("APP_ENV"))
