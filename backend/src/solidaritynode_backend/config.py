@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal, Self
 
 from pydantic import AliasChoices, Field, SecretStr, model_validator
@@ -33,6 +34,8 @@ class Settings(BaseSettings):
         log_level: Uvicorn/application log level.
         database_url: SQLAlchemy URL for PostgreSQL/PostGIS. Kept secret in logs and reprs.
         cors_origins: Origins allowed to call the API from a browser.
+        demo_data_dir: Synthetic demo dataset loaded by ``make seed`` (relative to the working
+            directory; ``/app`` in the container).
     """
 
     model_config = SettingsConfigDict(
@@ -46,6 +49,7 @@ class Settings(BaseSettings):
         "postgresql+psycopg://solidaritynode@localhost:5432/solidaritynode"
     )
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
+    demo_data_dir: Path = Path("data/synthetic/demo")
 
     def placeholder_secrets(self) -> list[str]:
         """Return the names of secrets whose value starts with ``change-me``."""

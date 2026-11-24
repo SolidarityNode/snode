@@ -21,6 +21,8 @@ RUN useradd --system --uid 10001 --home-dir /app --shell /usr/sbin/nologin app
 COPY --from=build /opt/venv /opt/venv
 COPY --chown=10001:10001 backend/alembic.ini /app/alembic.ini
 COPY --chown=10001:10001 backend/migrations /app/migrations
+# Synthetic demo dataset for `make seed` (temporary, ADR 0013).
+COPY --chown=10001:10001 data/synthetic/demo /app/data/synthetic/demo
 ENV PATH="/opt/venv/bin:$PATH" \
     GIT_COMMIT=${GIT_COMMIT} \
     PYTHONUNBUFFERED=1 \

@@ -3,9 +3,9 @@ name: core
 on:
   push:
     branches: [main]
-    paths: ["core/**", "Makefile", ".github/workflows/core.yml"]
+    paths: ["core/**", "data/synthetic/**", "Makefile", ".github/workflows/core.yml"]
   pull_request:
-    paths: ["core/**", "Makefile", ".github/workflows/core.yml"]
+    paths: ["core/**", "data/synthetic/**", "Makefile", ".github/workflows/core.yml"]
 
 permissions:
   contents: read
