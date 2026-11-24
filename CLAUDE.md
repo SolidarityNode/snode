@@ -73,6 +73,7 @@ Run `make lint test` before every commit. Do not mark work done if either fails.
 - The request-logging mechanism must be anonymous by design: store only spatial unit of origin, social group, service type and timestamps. No names, contact details, exact addresses or device identifiers.
 - No secrets in the repo. Use `.env` (gitignored) and keep `.env.example` current.
 - Third-party data (for example OpenStreetMap) must be attributed and its license respected; record sources in `docs/data-sources.md`.
+- **Every processed dataset has a processing note** in `docs/data-processing/` (`DP-NNN`, from `TEMPLATE.md`), with exact steps, versions and checks. Reusable processing lives in `data-processing/qgis/` (Processing models, scripts, projects with relative paths). When code or a ticket changes how data are prepared, update or add the note in the same PR. QGIS is a tool for preparing data, never a runtime dependency of `core` or `backend`.
 
 ## Licensing
 
