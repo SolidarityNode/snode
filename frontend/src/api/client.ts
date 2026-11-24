@@ -15,7 +15,13 @@ export interface Version {
   name: string;
   version: string;
   core_version: string;
+  git_commit: string;
+  app_env: string;
 }
+
+/** Git commit the frontend bundle was built from (`VITE_GIT_COMMIT`, set at image build). */
+export const FRONTEND_COMMIT: string =
+  (import.meta.env.VITE_GIT_COMMIT as string | undefined) ?? "unknown";
 
 export class ApiError extends Error {
   readonly status: number;

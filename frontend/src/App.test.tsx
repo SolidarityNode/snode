@@ -34,8 +34,17 @@ describe("api client", () => {
   });
 });
 
+const VERSION = {
+  name: "solidaritynode-backend",
+  version: "0.0.1",
+  core_version: "0.0.1",
+  git_commit: "0123abcd",
+  app_env: "development",
+};
+
 describe("App", () => {
   it("renders the shell and home page", () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(VERSION)));
     renderAt("/");
     expect(screen.getByRole("navigation", { name: "Main" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "SolidarityNode" })).toBeInTheDocument();
@@ -46,13 +55,7 @@ describe("App", () => {
       "fetch",
       vi.fn((input: string) =>
         Promise.resolve(
-          input.endsWith("/health")
-            ? jsonResponse({ status: "ok" })
-            : jsonResponse({
-                name: "solidaritynode-backend",
-                version: "0.0.1",
-                core_version: "0.0.1",
-              }),
+          input.endsWith("/health") ? jsonResponse({ status: "ok" }) : jsonResponse(VERSION),
         ),
       ),
     );
@@ -60,9 +63,18 @@ describe("App", () => {
     expect(await screen.findByTestId("health-status")).toHaveTextContent("Backend status: ok");
   });
 
+  it("shows backend version and commit in the footer", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(VERSION)));
+    renderAt("/");
+    expect(await screen.findByTestId("build-info")).toHaveTextContent(
+      "backend 0.0.1 (0123abcd, development) · frontend",
+    );
+  });
+
   it("shows an error when the backend is down", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("network down")));
     renderAt("/health");
     expect(await screen.findByRole("alert")).toHaveTextContent("network down");
+    expect(await screen.findByTestId("build-info")).toHaveTextContent("backend unavailable");
   });
 });

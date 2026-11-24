@@ -2,6 +2,8 @@
 # Start with `make up`; engine and compose command come from the Makefile variables
 # CONTAINER_ENGINE and COMPOSE. All values can be overridden in .env (see .env.example).
 # Ports are non-privileged and bound to 127.0.0.1. No bind mounts: data lives in a named volume.
+# GIT_COMMIT is passed as a build argument by `make up` so /version and the frontend footer
+# show which build is under test.
 name: solidaritynode
 
 services:
@@ -10,7 +12,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-solidaritynode}
       POSTGRES_USER: ${POSTGRES_USER:-solidaritynode}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-local-only}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
     volumes:
       # PostgreSQL 18+ images keep data under /var/lib/postgresql/<major>/.
       - db-data:/var/lib/postgresql
@@ -28,10 +30,12 @@ services:
     build:
       context: .
       dockerfile: backend/Containerfile
+      args:
+        GIT_COMMIT: ${GIT_COMMIT:-unknown}
     image: localhost/solidaritynode-backend:dev
     environment:
-      SOLIDARITYNODE_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-solidaritynode}:${POSTGRES_PASSWORD:-change-me-local-only}@db:5432/${POSTGRES_DB:-solidaritynode}
-      SOLIDARITYNODE_ENVIRONMENT: ${SOLIDARITYNODE_ENVIRONMENT:-development}
+      SOLIDARITYNODE_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-solidaritynode}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-solidaritynode}
+      APP_ENV: ${APP_ENV:-development}
       SOLIDARITYNODE_LOG_LEVEL: ${SOLIDARITYNODE_LOG_LEVEL:-info}
     depends_on:
       db:
@@ -54,6 +58,8 @@ services:
     build:
       context: frontend
       dockerfile: Containerfile
+      args:
+        GIT_COMMIT: ${GIT_COMMIT:-unknown}
     image: localhost/solidaritynode-frontend:dev
     environment:
       BACKEND_UPSTREAM: http://backend:8000

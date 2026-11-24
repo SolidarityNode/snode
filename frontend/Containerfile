@@ -6,6 +6,8 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
+ARG GIT_COMMIT=unknown
+ENV VITE_GIT_COMMIT=${GIT_COMMIT}
 RUN pnpm build
 
 # Unprivileged nginx listens on 8080 (no privileged ports, rootless-friendly).

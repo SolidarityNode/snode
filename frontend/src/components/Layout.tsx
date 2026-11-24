@@ -1,5 +1,7 @@
 import { NavLink, Outlet } from "react-router";
 
+import { BuildInfo } from "./BuildInfo";
+
 export function Layout() {
   return (
     <div className="layout">
@@ -15,7 +17,9 @@ export function Layout() {
       <main className="layout__main">
         <Outlet />
       </main>
-      <footer className="layout__footer">AGPL-3.0 · synthetic data only</footer>
+      <footer className="layout__footer">
+        AGPL-3.0 · synthetic data only · <BuildInfo />
+      </footer>
     </div>
   );
 }
