@@ -1,0 +1,4 @@
+# Code owners: review is requested from these users for matching paths.
+*            @sroumelis
+/core/       @sroumelis
+/docs/specs/ @sroumelis

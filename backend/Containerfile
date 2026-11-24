@@ -1,0 +1,33 @@
+# Backend image. Works with Podman and Docker. Build context: repository root
+# (the backend depends on ../core):  $(CONTAINER_ENGINE) build -f backend/Containerfile .
+FROM ghcr.io/astral-sh/uv:0.13.9 AS uv
+
+FROM docker.io/library/python:3.12-slim AS build
+COPY --from=uv /uv /usr/local/bin/uv
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PROJECT_ENVIRONMENT=/opt/venv
+WORKDIR /src
+COPY core/ core/
+COPY backend/pyproject.toml backend/uv.lock backend/README.md backend/
+RUN cd backend && uv sync --locked --no-dev --no-editable --no-install-project
+COPY backend/ backend/
+RUN cd backend && uv sync --locked --no-dev --no-editable
+
+FROM docker.io/library/python:3.12-slim AS runtime
+ARG GIT_COMMIT=unknown
+RUN useradd --system --uid 10001 --home-dir /app --shell /usr/sbin/nologin app
+COPY --from=build /opt/venv /opt/venv
+COPY --chown=10001:10001 backend/alembic.ini /app/alembic.ini
+COPY --chown=10001:10001 backend/migrations /app/migrations
+# Synthetic demo dataset for `make seed` (temporary, ADR 0013).
+COPY --chown=10001:10001 data/synthetic/demo /app/data/synthetic/demo
+ENV PATH="/opt/venv/bin:$PATH" \
+    GIT_COMMIT=${GIT_COMMIT} \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+WORKDIR /app
+USER 10001
+EXPOSE 8000
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn solidaritynode_backend.main:app --host 0.0.0.0 --port 8000 --log-level ${SOLIDARITYNODE_LOG_LEVEL:-info}"]

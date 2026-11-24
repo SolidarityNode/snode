@@ -1,0 +1,38 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #1d2433;
+  background: #f7f8fa;
+}
+
+body {
+  margin: 0;
+}
+
+.layout {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.layout__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.layout__header nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.layout__header a.active {
+  font-weight: 700;
+}
+
+.layout__footer {
+  margin-top: 2rem;
+  font-size: 0.85rem;
+  color: #5b6475;
+}

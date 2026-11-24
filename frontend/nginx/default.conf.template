@@ -1,0 +1,25 @@
+# Rendered by the nginx image entrypoint (envsubst) at container start.
+# NGINX_LOCAL_RESOLVERS is the container's DNS server (Podman or Docker), filled in by the
+# entrypoint because NGINX_ENTRYPOINT_LOCAL_RESOLVERS is set in the Containerfile.
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    # Re-resolve the backend name, so a restarted backend container (new IP) is found again.
+    resolver ${NGINX_LOCAL_RESOLVERS} valid=10s ipv6=off;
+
+    # API: same-origin proxy to the backend, so the browser needs no CORS.
+    location /api/ {
+        set $backend_upstream ${BACKEND_UPSTREAM};
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass $backend_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Single-page app routing.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

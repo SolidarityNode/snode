@@ -1,0 +1,44 @@
+name: Bug report
+description: Something does not work as specified.
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Never paste real personal or operational data. Use synthetic examples only.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      description: Cite the spec section if the expected behaviour comes from a paper or spec.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Commands, inputs (synthetic), and output.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options: [core, backend, frontend, docs, infra]
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS, container engine (Podman/Docker) and version, Python/Node versions.

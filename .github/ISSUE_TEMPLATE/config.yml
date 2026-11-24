@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/SolidarityNode/snode/security/advisories/new
+    about: Report vulnerabilities privately (see SECURITY.md). Do not open a public issue.
+  - name: Specification and open questions
+    url: https://github.com/SolidarityNode/snode/blob/main/docs/specs/open-questions.md
+    about: Check whether your question is already listed as an OQ before opening an issue.

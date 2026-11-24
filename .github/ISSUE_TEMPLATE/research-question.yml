@@ -1,0 +1,41 @@
+name: Research question
+description: A methodological question the papers or specs leave open (becomes or refines an OQ).
+labels: [research-question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Research questions are **decided by people**, not in code. Record the outcome in
+        `docs/specs/open-questions.md` (and `paper-revisions.md` if the method changes), or in an ADR.
+  - type: input
+    id: oq
+    attributes:
+      label: OQ number
+      description: Existing OQ-n, or "new" (a number is assigned when it is added to open-questions.md).
+      placeholder: OQ-3
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source in the papers or specs
+      placeholder: Paper 1 §5
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What is unspecified, inconsistent or contested?
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options considered
+      description: Candidate approaches with their consequences and references (verify references before citing).
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Modules, tickets (`needs-spec`) and paper sections affected.

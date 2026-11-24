@@ -1,0 +1,23 @@
+{
+  "schema": "solidaritynode-scenario/0.1-draft",
+  "id": "C-DEMO-REF",
+  "version": 1,
+  "name": "Demo reference disruption (synthetic)",
+  "kind": "disruption",
+  "description": "Synthetic disruption for testing mechanics: facility F1 at severity 0.5 and edge E02 closed for all modes. Not an OQ-16 reference level (minor, moderate, severe).",
+  "facility_severities": {
+    "F1": 0.5
+  },
+  "network_disruption": {
+    "modes": [
+      "walk",
+      "car"
+    ],
+    "affected_link_ids": [
+      "E02"
+    ]
+  },
+  "interventions": [],
+  "rationing": "uniform",
+  "reference_level": null
+}

@@ -1,0 +1,13 @@
+node_id,x,y,kind
+N-A1,131000,3.881e+06,unit_centroid
+N-A2,133000,3.881e+06,unit_centroid
+N-A3,135000,3.881e+06,unit_centroid
+N-A4,131000,3.883e+06,unit_centroid
+N-A5,133000,3.883e+06,unit_centroid
+N-A6,135000,3.883e+06,unit_centroid
+N-B1,137000,3.881e+06,unit_centroid
+N-B2,137000,3.883e+06,unit_centroid
+N-F1,133000,3.8815e+06,facility
+N-F2,135000,3.8825e+06,facility
+N-F3,131000,3.8805e+06,facility
+N-F4,136500,3.881e+06,facility

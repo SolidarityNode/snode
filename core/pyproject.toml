@@ -1,0 +1,79 @@
+[project]
+name = "solidaritynode-core"
+version = "0.0.1"
+description = "SolidarityNode core: spatial probabilistic modelling of social service networks (no web or database dependencies)."
+readme = "README.md"
+license = "AGPL-3.0-or-later"
+requires-python = ">=3.12,<3.13"
+authors = [{ name = "SolidarityNode contributors" }]
+# Keep this list short. core MUST NOT depend on web frameworks or database drivers
+# (CLAUDE.md, enforced by tests/test_package.py and the ruff banned-api rule below).
+dependencies = [
+  "numpy>=2.5,<3",
+  "xarray>=2026.9.0",
+]
+
+[dependency-groups]
+dev = [
+  "mypy==2.4.1",
+  "pytest==9.2.0",
+  "ruff==0.17.6",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.9,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "solidaritynode_core"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF", "TID", "D", "ANN", "PT"]
+ignore = [
+  "D203",  # one-blank-line-before-class (conflicts with D211)
+  "D213",  # multi-line-summary-second-line (conflicts with D212)
+  "RUF001", "RUF002", "RUF003",  # Greek letters and math symbols are intentional (notation, OQ-1)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "ANN"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+# Automated core-independence rule (CLAUDE.md "Architecture rules").
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"fastapi".msg = "core must not depend on web frameworks"
+"starlette".msg = "core must not depend on web frameworks"
+"flask".msg = "core must not depend on web frameworks"
+"django".msg = "core must not depend on web frameworks"
+"uvicorn".msg = "core must not depend on web servers"
+"pydantic_settings".msg = "core must not depend on application settings"
+"sqlalchemy".msg = "core must not depend on a database layer"
+"alembic".msg = "core must not depend on a database layer"
+"psycopg".msg = "core must not depend on a database driver"
+"psycopg2".msg = "core must not depend on a database driver"
+"asyncpg".msg = "core must not depend on a database driver"
+"geoalchemy2".msg = "core must not depend on a database layer"
+"solidaritynode_backend".msg = "core must not import from backend"
+"backend".msg = "core must not import from backend"
+"frontend".msg = "core must not import from frontend"
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+mypy_path = "src"
+packages = ["solidaritynode_core"]
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "--import-mode=importlib"]
+pythonpath = ["."]
