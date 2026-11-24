@@ -22,6 +22,11 @@ updates:
     groups:
       dev-tooling:
         dependency-type: development
+    ignore:
+      # typescript-eslint does not support TypeScript 7 yet (typescript-eslint#10940,
+      # support expected from TS 7.1). Remove this rule when it does.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /

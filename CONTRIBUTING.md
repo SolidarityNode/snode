@@ -80,7 +80,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:
 git commit -s -m "feat(core): add travel time interface"
 ```
 
-The sign-off certifies the [Developer Certificate of Origin](https://developercertificate.org/): you wrote the change or have the right to submit it under the project licence (AGPL-3.0). The `dco` CI check rejects PRs with unsigned commits. To fix the last commit: `git commit --amend -s --no-edit`; for several: `git rebase --signoff main`.
+The sign-off certifies the [Developer Certificate of Origin](https://developercertificate.org/): you wrote the change or have the right to submit it under the project licence (AGPL-3.0). The `dco` CI check rejects PRs with unsigned commits. Commits by Dependabot are exempt, since it cannot sign off. To fix the last commit: `git commit --amend -s --no-edit`; for several: `git rebase --signoff main`.
 
 ### Pull requests
 
