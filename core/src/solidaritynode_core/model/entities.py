@@ -366,9 +366,12 @@ class NewFacility:
     Attributes:
         facility: The facility to add. Its id must not exist in the baseline (checked when the
             scenario is applied, not here).
+        node_id: Existing network node the new facility is reached at (stable node id of the
+            data package, ADR 0016), or ``None`` when not placed on the network.
     """
 
     facility: Facility
+    node_id: str | None = None
 
 
 type Intervention = CapacityChange | NewFacility

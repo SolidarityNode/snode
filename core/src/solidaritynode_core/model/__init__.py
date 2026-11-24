@@ -12,6 +12,10 @@ Public API:
 * Values: :class:`IndexedValues` (Paper 4 §3, ADR 0003), :data:`Uncertain`,
   :class:`LevelLMH`, :class:`ServiceQuantity` (OQ-24, OQ-25).
 * Variable catalogue (Spec 00 §4): :data:`CATALOGUE`, :class:`VariableKind`.
+* Study area of one data package version: :class:`StudyArea`, :class:`NetworkEdge`,
+  :class:`HandCheck` (Spec 00 §3).
+* Model registry (Spec 00 §3, Run): :class:`ModelSpec`, :class:`ModelResult`,
+  :class:`ResultCell`, :class:`CellSamples`, :class:`IndicatorSpec`, :func:`get_registry`.
 """
 
 from solidaritynode_core.model.catalogue import (
@@ -50,6 +54,19 @@ from solidaritynode_core.model.quantity import (
     ServiceUnit,
     UnitMismatchError,
 )
+from solidaritynode_core.model.registry import (
+    STATIC_TIME,
+    CellSamples,
+    IndicatorSpec,
+    ModelFn,
+    ModelRegistry,
+    ModelResult,
+    ModelSpec,
+    ProgressFn,
+    ResultCell,
+    get_registry,
+)
+from solidaritynode_core.model.study_area import HandCheck, NetworkEdge, NodeId, StudyArea, UnitRole
 from solidaritynode_core.model.tickets import TICKET_FIELDS, Period, RecordingCoverage, Ticket
 from solidaritynode_core.model.trajectory import RecoveryTrajectory, TrajectoryKind
 from solidaritynode_core.model.uncertain import (
@@ -61,11 +78,13 @@ from solidaritynode_core.model.uncertain import (
 
 __all__ = [
     "CATALOGUE",
+    "STATIC_TIME",
     "TICKET_FIELDS",
     "UNIT_OF_ANALYSIS",
     "CapacityChange",
     "CapacityChangeMode",
     "CapacityInputs",
+    "CellSamples",
     "Dim",
     "DimensionMismatchError",
     "DiscreteDistribution",
@@ -75,19 +94,29 @@ __all__ = [
     "GeoInterface",
     "GroupId",
     "GroupProfiles",
+    "HandCheck",
     "IndexedValues",
+    "IndicatorSpec",
     "Intervention",
     "LevelLMH",
+    "ModelFn",
+    "ModelRegistry",
+    "ModelResult",
+    "ModelSpec",
     "NetworkDisruption",
+    "NetworkEdge",
     "NewFacility",
+    "NodeId",
     "Period",
     "PointValue",
     "PopulationGroup",
+    "ProgressFn",
     "Rationing",
     "RecordingCoverage",
     "RecoveryTrajectory",
     "ReferencePeriod",
     "ReferenceScenarioLevel",
+    "ResultCell",
     "Samples",
     "Scenario",
     "ScenarioId",
@@ -97,13 +126,16 @@ __all__ = [
     "ServiceQuantity",
     "ServiceUnit",
     "SpatialUnit",
+    "StudyArea",
     "Ticket",
     "TrajectoryKind",
     "TransportMode",
     "Uncertain",
     "UnitId",
     "UnitMismatchError",
+    "UnitRole",
     "VariableKind",
     "VariableSpec",
+    "get_registry",
     "variables_of_kind",
 ]

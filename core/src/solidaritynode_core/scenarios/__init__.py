@@ -4,6 +4,9 @@ One shared engine serves controlled interventions (Paper 1 §13, for example cap
 disruption scenarios (Paper 3 §7–10), as stated in Spec 00 §5. Disruption severities
 ``DS_{f,c}`` are scenario parameters, not BN nodes. Construction of the standardised reference
 scenarios (minor, moderate, severe; OQ-16) is not defined.
+
+:func:`apply_overlay` applies the mechanical part of an overlay (capacity inputs, new facilities,
+closed edges); severities are recorded only (see :mod:`solidaritynode_core.scenarios.overlay`).
 """
 
 from __future__ import annotations
@@ -16,8 +19,23 @@ from solidaritynode_core.model import (
     ReferenceScenarioLevel,
     Scenario,
 )
+from solidaritynode_core.scenarios.overlay import (
+    FacilityChange,
+    OverlayResult,
+    ScenarioReferenceError,
+    apply_overlay,
+    check_references,
+)
 
-__all__ = ["ReferenceScenarioFactory", "ScenarioEngine"]
+__all__ = [
+    "FacilityChange",
+    "OverlayResult",
+    "ReferenceScenarioFactory",
+    "ScenarioEngine",
+    "ScenarioReferenceError",
+    "apply_overlay",
+    "check_references",
+]
 
 
 class ScenarioEngine(Protocol):

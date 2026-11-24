@@ -9,6 +9,7 @@ authors = [{ name = "SolidarityNode contributors" }]
 # Keep this list short. core MUST NOT depend on web frameworks or database drivers
 # (AGENTS.md, enforced by tests/test_package.py and the ruff banned-api rule below).
 dependencies = [
+  "networkx>=3.5,<4",
   "numpy>=2.5,<3",
   "xarray>=2026.9.0",
 ]
@@ -18,6 +19,7 @@ dev = [
   "mypy==2.4.1",
   "pytest==9.2.0",
   "ruff==0.17.6",
+  "types-networkx==3.6.1.20261122",
 ]
 
 [build-system]
