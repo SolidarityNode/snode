@@ -29,6 +29,16 @@ def test_version(client: TestClient) -> None:
     body = client.get("/version").json()
     assert body["name"] == "solidaritynode-backend"
     assert body["core_version"] == solidaritynode_core.__version__
+    assert body["app_env"] == "test"
+    assert body["git_commit"]
+
+
+def test_version_reports_git_commit(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    from solidaritynode_backend.config import Settings, get_settings
+
+    monkeypatch.setenv("GIT_COMMIT", "0123abcd")
+    client.app.dependency_overrides[get_settings] = lambda: Settings()  # type: ignore[attr-defined]
+    assert client.get("/version").json()["git_commit"] == "0123abcd"
 
 
 def test_ready_reports_database_state(client: TestClient) -> None:
