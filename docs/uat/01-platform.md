@@ -10,6 +10,9 @@ Before you start, complete the one-time setup in [`README.md`](README.md#1-one-t
 Tick each step when the result matches. If a step does not match, stop and report it (step
 number, what you saw, build commit from the footer) as a comment on the PR.
 
+Screenshots of every screen, taken on the synthetic data while walking through this checklist,
+are in [`screenshots/01-platform/`](screenshots/01-platform/).
+
 Two browsers help: use a normal window for the analyst and a private window for the
 administrator or viewer, so both stay logged in.
 
