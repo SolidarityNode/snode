@@ -131,7 +131,7 @@ Two layers: **Layer 1** is computational (scenario, disruption, simulation, evid
 
 | Variable | As stated | Kind |
 | --- | --- | --- |
-| Ticket | anonymous request: spatial unit, group (overlap rule: OQ-6), service/need, request time `t_r`, scheduled time `t_a`, service time `t_f`, expiry `t_e`, and a flag "first request in this period" (yes/no, no identifier) to count people without identifying them (OQ-8, OQ-21) | OBSERVED |
+| Ticket | anonymous request: spatial unit, group (overlap rule: OQ-6), service/need, facility where the request is made or scheduled (OQ-29), request time `t_r`, scheduled time `t_a`, service time `t_f`, expiry `t_e`, and a flag "first request in this period" (yes/no, no identifier) to count people without identifying them (OQ-8, OQ-21) | OBSERVED |
 | Recording coverage | share of a facility's requests captured by the ticket system, per facility and period; observations are used for learning only where coverage is full or known (OQ-8) | OBSERVED |
 | Operational indicators | demand rate, waiting time, fulfilment delay, appointment adherence, overdue requests, expired requests, service coverage, unfulfilled need | COMPUTED |
 | Facility functional state | Normal → Under Pressure → Degraded → Critical → Recovering → Normal, from operational indicators | LATENT/STATE |
@@ -171,11 +171,11 @@ DBN (Paper 4 §12): `State(t−1) → FunctionalState(t) → ObservedConsequence
 | `vulnerability` | 3 §11–21 | exposure, service loss, vulnerability BBN |
 | `operations` | 4 §4–5 | tickets, indicators, facility functional state |
 | `dynamics` | 4 §7–9, 12 | territorial state, expected/observed consequence, DBN |
-| `resilience` | 4 §10–13 | Bayesian parameter learning of the vulnerability relationship (OQ-16), trajectories, resilience |
+| `resilience` | 4 §10–13 | Bayesian update of vulnerability, trajectories, resilience |
 | `uncertainty` | 1 §11, 2 §14, 3 §22 | Monte Carlo propagation |
 | `sensitivity` | 1 §12, 2 §16, 3 §23 | sensitivity analysis |
 | `validation` | 1 §14, 2 §18, 3 §24 | validation tools |
 
 ## 7. Invariants
 
-See `AGENTS.md` ("Domain invariants"). The most important: keep BN nodes, computed simulation variables and scenario parameters separate (section 4); never mix vulnerability and resilience; never treat estimated demand as total need.
+See the root `AGENTS.md` ("Domain invariants"). The most important: keep BN nodes, computed simulation variables and scenario parameters separate (section 4); never mix vulnerability and resilience; never treat estimated demand as total need.
