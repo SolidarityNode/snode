@@ -1,0 +1,276 @@
+{
+ "crs": {
+  "properties": {
+   "name": "urn:ogc:def:crs:EPSG::2100"
+  },
+  "type": "name"
+ },
+ "features": [
+  {
+   "geometry": {
+    "coordinates": [
+     131000.0,
+     3881000.0
+    ],
+    "type": "Point"
+   },
+   "id": "N-A1",
+   "properties": {
+    "kind": "unit_centroid",
+    "municipality_id": "M-A",
+    "node_id": "N-A1",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "unit_id": "A1",
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     133000.0,
+     3881000.0
+    ],
+    "type": "Point"
+   },
+   "id": "N-A2",
+   "properties": {
+    "kind": "unit_centroid",
+    "municipality_id": "M-A",
+    "node_id": "N-A2",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "unit_id": "A2",
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     135000.0,
+     3881000.0
+    ],
+    "type": "Point"
+   },
+   "id": "N-A3",
+   "properties": {
+    "kind": "unit_centroid",
+    "municipality_id": "M-A",
+    "node_id": "N-A3",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "unit_id": "A3",
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     131000.0,
+     3883000.0
+    ],
+    "type": "Point"
+   },
+   "id": "N-A4",
+   "properties": {
+    "kind": "unit_centroid",
+    "municipality_id": "M-A",
+    "node_id": "N-A4",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "unit_id": "A4",
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     133000.0,
+     3883000.0
+    ],
+    "type": "Point"
+   },
+   "id": "N-A5",
+   "properties": {
+    "kind": "unit_centroid",
+    "municipality_id": "M-A",
+    "node_id": "N-A5",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "unit_id": "A5",
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     135000.0,
+     3883000.0
+    ],
+    "type": "Point"
+   },
+   "id": "N-A6",
+   "properties": {
+    "kind": "unit_centroid",
+    "municipality_id": "M-A",
+    "node_id": "N-A6",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "unit_id": "A6",
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     137000.0,
+     3881000.0
+    ],
+    "type": "Point"
+   },
+   "id": "N-B1",
+   "properties": {
+    "kind": "unit_centroid",
+    "municipality_id": "M-B",
+    "node_id": "N-B1",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "buffer",
+    "unit_id": "B1",
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     137000.0,
+     3883000.0
+    ],
+    "type": "Point"
+   },
+   "id": "N-B2",
+   "properties": {
+    "kind": "unit_centroid",
+    "municipality_id": "M-B",
+    "node_id": "N-B2",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "buffer",
+    "unit_id": "B2",
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     133000.0,
+     3881500.0
+    ],
+    "type": "Point"
+   },
+   "id": "N-F1",
+   "properties": {
+    "kind": "facility_access",
+    "municipality_id": "M-A",
+    "node_id": "N-F1",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "unit_id": "A2",
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     135000.0,
+     3882500.0
+    ],
+    "type": "Point"
+   },
+   "id": "N-F2",
+   "properties": {
+    "kind": "facility_access",
+    "municipality_id": "M-A",
+    "node_id": "N-F2",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "unit_id": "A6",
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     131000.0,
+     3880500.0
+    ],
+    "type": "Point"
+   },
+   "id": "N-F3",
+   "properties": {
+    "kind": "facility_access",
+    "municipality_id": "M-A",
+    "node_id": "N-F3",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "unit_id": "A1",
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     136500.0,
+     3881000.0
+    ],
+    "type": "Point"
+   },
+   "id": "N-F4",
+   "properties": {
+    "kind": "facility_access",
+    "municipality_id": "M-B",
+    "node_id": "N-F4",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "buffer",
+    "unit_id": "B1",
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  }
+ ],
+ "name": "network_nodes",
+ "type": "FeatureCollection"
+}

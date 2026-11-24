@@ -1,0 +1,428 @@
+{
+ "crs": {
+  "properties": {
+   "name": "urn:ogc:def:crs:EPSG::2100"
+  },
+  "type": "name"
+ },
+ "features": [
+  {
+   "geometry": {
+    "coordinates": [
+     [
+      131000.0,
+      3881000.0
+     ],
+     [
+      133000.0,
+      3881000.0
+     ]
+    ],
+    "type": "LineString"
+   },
+   "id": "E01",
+   "properties": {
+    "closable": false,
+    "edge_id": "E01",
+    "from_node_id": "N-A1",
+    "length_m": 2000,
+    "municipality_id": "M-A",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "to_node_id": "N-A2",
+    "travel_time_car_min": 4.0,
+    "travel_time_walk_min": 24.0,
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     [
+      133000.0,
+      3881000.0
+     ],
+     [
+      135000.0,
+      3881000.0
+     ]
+    ],
+    "type": "LineString"
+   },
+   "id": "E02",
+   "properties": {
+    "closable": true,
+    "edge_id": "E02",
+    "from_node_id": "N-A2",
+    "length_m": 2000,
+    "municipality_id": "M-A",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "to_node_id": "N-A3",
+    "travel_time_car_min": 4.0,
+    "travel_time_walk_min": 24.0,
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     [
+      135000.0,
+      3881000.0
+     ],
+     [
+      136500.0,
+      3881000.0
+     ]
+    ],
+    "type": "LineString"
+   },
+   "id": "E03",
+   "properties": {
+    "closable": false,
+    "edge_id": "E03",
+    "from_node_id": "N-A3",
+    "length_m": 1500,
+    "municipality_id": "M-A",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "to_node_id": "N-F4",
+    "travel_time_car_min": 3.0,
+    "travel_time_walk_min": 18.0,
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     [
+      136500.0,
+      3881000.0
+     ],
+     [
+      137000.0,
+      3881000.0
+     ]
+    ],
+    "type": "LineString"
+   },
+   "id": "E04",
+   "properties": {
+    "closable": false,
+    "edge_id": "E04",
+    "from_node_id": "N-F4",
+    "length_m": 500,
+    "municipality_id": "M-B",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "buffer",
+    "to_node_id": "N-B1",
+    "travel_time_car_min": 1.0,
+    "travel_time_walk_min": 6.0,
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     [
+      133000.0,
+      3883000.0
+     ],
+     [
+      135000.0,
+      3883000.0
+     ]
+    ],
+    "type": "LineString"
+   },
+   "id": "E05",
+   "properties": {
+    "closable": false,
+    "edge_id": "E05",
+    "from_node_id": "N-A5",
+    "length_m": 2000,
+    "municipality_id": "M-A",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "to_node_id": "N-A6",
+    "travel_time_car_min": 4.0,
+    "travel_time_walk_min": 24.0,
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     [
+      135000.0,
+      3883000.0
+     ],
+     [
+      137000.0,
+      3883000.0
+     ]
+    ],
+    "type": "LineString"
+   },
+   "id": "E06",
+   "properties": {
+    "closable": false,
+    "edge_id": "E06",
+    "from_node_id": "N-A6",
+    "length_m": 2000,
+    "municipality_id": "M-A",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "to_node_id": "N-B2",
+    "travel_time_car_min": 4.0,
+    "travel_time_walk_min": 24.0,
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     [
+      133000.0,
+      3881000.0
+     ],
+     [
+      133000.0,
+      3881500.0
+     ]
+    ],
+    "type": "LineString"
+   },
+   "id": "E07",
+   "properties": {
+    "closable": false,
+    "edge_id": "E07",
+    "from_node_id": "N-A2",
+    "length_m": 500,
+    "municipality_id": "M-A",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "to_node_id": "N-F1",
+    "travel_time_car_min": 1.0,
+    "travel_time_walk_min": 6.0,
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     [
+      133000.0,
+      3881500.0
+     ],
+     [
+      133000.0,
+      3883000.0
+     ]
+    ],
+    "type": "LineString"
+   },
+   "id": "E08",
+   "properties": {
+    "closable": false,
+    "edge_id": "E08",
+    "from_node_id": "N-F1",
+    "length_m": 1500,
+    "municipality_id": "M-A",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "to_node_id": "N-A5",
+    "travel_time_car_min": 3.0,
+    "travel_time_walk_min": 18.0,
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     [
+      135000.0,
+      3881000.0
+     ],
+     [
+      135000.0,
+      3882500.0
+     ]
+    ],
+    "type": "LineString"
+   },
+   "id": "E09",
+   "properties": {
+    "closable": false,
+    "edge_id": "E09",
+    "from_node_id": "N-A3",
+    "length_m": 1500,
+    "municipality_id": "M-A",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "to_node_id": "N-F2",
+    "travel_time_car_min": 3.0,
+    "travel_time_walk_min": 18.0,
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     [
+      135000.0,
+      3882500.0
+     ],
+     [
+      135000.0,
+      3883000.0
+     ]
+    ],
+    "type": "LineString"
+   },
+   "id": "E10",
+   "properties": {
+    "closable": false,
+    "edge_id": "E10",
+    "from_node_id": "N-F2",
+    "length_m": 500,
+    "municipality_id": "M-A",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "to_node_id": "N-A6",
+    "travel_time_car_min": 1.0,
+    "travel_time_walk_min": 6.0,
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     [
+      137000.0,
+      3881000.0
+     ],
+     [
+      137000.0,
+      3883000.0
+     ]
+    ],
+    "type": "LineString"
+   },
+   "id": "E11",
+   "properties": {
+    "closable": false,
+    "edge_id": "E11",
+    "from_node_id": "N-B1",
+    "length_m": 2000,
+    "municipality_id": "M-B",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "buffer",
+    "to_node_id": "N-B2",
+    "travel_time_car_min": 4.0,
+    "travel_time_walk_min": 24.0,
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     [
+      131000.0,
+      3881000.0
+     ],
+     [
+      131000.0,
+      3880500.0
+     ]
+    ],
+    "type": "LineString"
+   },
+   "id": "E12",
+   "properties": {
+    "closable": false,
+    "edge_id": "E12",
+    "from_node_id": "N-A1",
+    "length_m": 500,
+    "municipality_id": "M-A",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "to_node_id": "N-F3",
+    "travel_time_car_min": 1.0,
+    "travel_time_walk_min": 6.0,
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  },
+  {
+   "geometry": {
+    "coordinates": [
+     [
+      131000.0,
+      3883000.0
+     ],
+     [
+      133000.0,
+      3883000.0
+     ]
+    ],
+    "type": "LineString"
+   },
+   "id": "E13",
+   "properties": {
+    "closable": false,
+    "edge_id": "E13",
+    "from_node_id": "N-A4",
+    "length_m": 5000,
+    "municipality_id": "M-A",
+    "processing_note": "DP-002",
+    "quality": "open_data",
+    "role": "core",
+    "to_node_id": "N-A5",
+    "travel_time_car_min": 10.0,
+    "travel_time_walk_min": 60.0,
+    "valid_from": "2026-01-01",
+    "valid_to": null
+   },
+   "type": "Feature"
+  }
+ ],
+ "name": "network_edges",
+ "type": "FeatureCollection"
+}
