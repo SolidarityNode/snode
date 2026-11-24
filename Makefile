@@ -134,8 +134,8 @@ wait: ## Wait until the backend reports ready (database reachable)
 	done; \
 	echo "Backend not ready after 120 s. Check 'make logs'." >&2; exit 1
 
-db-shell: ## Open psql in the database container (credentials from .env)
-	$(COMPOSE) exec db sh -c 'exec psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
+db-shell: ## Open psql in the database container (credentials from .env; also reads SQL from stdin)
+	$(COMPOSE) exec $$([ -t 0 ] || echo -T) db sh -c 'exec psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
 
 seed: ## Load the synthetic demo dataset into schema 'demo' (idempotent)
 	$(COMPOSE) exec -T backend python -m solidaritynode_backend.demo_seed
