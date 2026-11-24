@@ -68,7 +68,7 @@ administrator or viewer, so both stay logged in.
 | # | Do | Expected result | ✓ |
 | --- | --- | --- | --- |
 | 26 | Open **UAT close E02** from **Scenarios** and click **Run this version** | The run page opens with a yellow banner "**Diagnostic model: not a research result.** …". **Status** goes from **queued** to **running** with a moving progress bar and "… % done", then to **succeeded** (a few seconds). | ☐ |
-| 27 | Under **Show** choose **Group** Older people, **Service** Home care, **Indicator** "Walking time to nearest facility (diagnostic)" | The map colours the six A units; B units are grey and dashed ("Not reported"). A3 and A6 have an orange outline. The table row **Unit A3** shows value `66 (deterministic, no uncertainty)`, **Before the scenario** `30`, **Changed: changed**, and "⚠ edge effect (OQ-28)". | ☐ |
+| 27 | Under **Show** choose **Group** Older people, **Service** Home care, **Indicator** "Walking time to nearest facility (diagnostic)" | The map colours the six A units; B units are grey and dashed ("Not reported"). A3 and A6 have an orange outline. The table row **Unit A3** shows value `66 min (deterministic, no uncertainty)`, **Before the scenario** `30`, **Changed: changed**, and "⚠ edge effect (OQ-28)". | ☐ |
 | 28 | Choose **Indicator** "Diagnostic noise (meaningless)" | Each value is shown with an interval, for example `0.05 [-1.6 – 1.7] 90 % interval`. | ☐ |
 | 29 | Look below the table | "Hand-check of baseline travel times: 48 of 48 match. With the scenario: 48 of 48 match." **What changed per unit** lists A2 ("F1: S-HC staff 4 -> 4.8; F1: DS = 0.5 (recorded only); edge E02 closed") and A3 ("edge E02 closed"). The severity is recorded only: no method turns it into lost capacity yet. | ☐ |
 | 30 | Look at **Reproducibility** | Scenario and version (`UAT close E02 (v2)`), data package `demo-study-area-a 1.0.0`, code version (the commit), model `diagnostic-v0 0.1.0`, seed `1`, configuration, input hash, created and finished times. | ☐ |
@@ -87,7 +87,7 @@ administrator or viewer, so both stay logged in.
 | # | Do | Expected result | ✓ |
 | --- | --- | --- | --- |
 | 35 | Open the succeeded run of step 26 (Scenarios → status link) and click **Compare with baseline** | The **Compare runs** page shows the diagnostic banner, "Same data version 1.0.0", three maps (A: UAT close E02, B: Baseline (no changes), Difference A − B) and a legend. | ☐ |
-| 36 | Choose Home care and the walking indicator | Row A3: A `66`, B `30`, difference `36`. Units without a change show difference `0`. | ☐ |
+| 36 | Choose Home care and the walking indicator | Row A3: A `66 min`, B `30 min`, difference `36`. Units without a change show difference `0`. | ☐ |
 
 ## I. Worker stops during a run
 
@@ -116,8 +116,8 @@ administrator or viewer, so both stay logged in.
 | 47 | Open **Scenarios** | **UAT F3 staff** shows "Needs attention with the current data: facility F3: closed or missing …" and has no **Run** button. **UAT close E02** still lists its latest run on 1.0.0. The footer shows data 1.1.0. | ☐ |
 | 48 | Open **Study area** | No edge-effect banner; A3 and A6 have no orange outline. A fourth dot **F4** appears in B. **F3** is white with a grey dashed ring; clicking it shows "Valid to (closed) 2026-12-01" and "Closed true". Coverage: M-B facilities **verified**. | ☐ |
 | 49 | Open the run of step 26 | An orange note: "This run used data 1.0.0; the active data is 1.1.0." with **Rerun on data 1.1.0**. Its results are unchanged (A3 still 66). | ☐ |
-| 50 | Click **Rerun on data 1.1.0** and wait for **succeeded**; choose Home care and walking | A3 now shows `18` (F4 across the border) without an edge-effect warning; A1 shows `30` (F3 closed, so A1 goes to F1). | ☐ |
-| 51 | Under **Runs of this scenario**, next to the 1.0.0 run, click **Compare with this run** | The comparison page says "Same scenario across data versions 1.0.0 → 1.1.0. Only allowed because both runs belong to the same scenario." Row A3: A `18`, B `66`, difference `-48`. | ☐ |
+| 50 | Click **Rerun on data 1.1.0** and wait for **succeeded**; choose Home care and walking | A3 now shows `18 min` (F4 across the border) without an edge-effect warning; A1 shows `30 min` (F3 closed, so A1 goes to F1). | ☐ |
+| 51 | Under **Runs of this scenario**, next to the 1.0.0 run, click **Compare with this run** | The comparison page says "Same scenario across data versions 1.0.0 → 1.1.0. Only allowed because both runs belong to the same scenario." Row A3: A `18 min`, B `66 min`, difference `-48`. | ☐ |
 | 52 | Change the address to `/runs/<id of this 1.1.0 run>/compare?with=<id of the Baseline run on 1.0.0>` (ids are in the addresses of those run pages) | Refused with a message: "the runs use different data versions (1.1.0 and 1.0.0); compare runs on the same data version, or two runs of the same scenario". | ☐ |
 
 ## L. Viewer
