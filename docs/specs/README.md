@@ -1,6 +1,6 @@
 # Specifications
 
-The specification is the **source of truth for the science** (CLAUDE.md). If code and spec disagree, stop and flag it; do not silently pick one.
+The specification is the **source of truth for the science** (AGENTS.md). If code and spec disagree, stop and flag it; do not silently pick one.
 
 ## Files
 

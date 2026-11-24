@@ -1,7 +1,7 @@
 """Variable catalogue: what each quantity is, not how it is computed (Spec 00 §4).
 
 Every quantity of Papers 1–4 is classified by **kind**, so that BN nodes, computed simulation
-variables, evidence and scenario parameters stay distinct (Spec 00 §4; CLAUDE.md). The
+variables, evidence and scenario parameters stay distinct (Spec 00 §4; AGENTS.md). The
 catalogue holds no formulas. The "As stated" column of Spec 00 §4 remains the source of truth;
 this module mirrors it and is checked by tests. Where Spec 00 gives no paper section, the
 Spec 00 section is cited instead.

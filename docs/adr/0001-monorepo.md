@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-24
-- Related: CLAUDE.md "Architecture rules"
+- Related: AGENTS.md "Architecture rules"
 
 ## Context
 

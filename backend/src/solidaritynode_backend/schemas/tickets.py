@@ -1,7 +1,7 @@
 """Anonymous ticket schemas mirroring ``solidaritynode_core.model.Ticket`` (Paper 4 §4.1).
 
 Only the fields of the core ticket are accepted; unknown fields are **rejected**, so no personal
-data (names, contacts, addresses, device identifiers) can slip in (CLAUDE.md privacy rules;
+data (names, contacts, addresses, device identifiers) can slip in (AGENTS.md privacy rules;
 OQ-21). Group handling for people in several groups is open (OQ-6).
 """
 

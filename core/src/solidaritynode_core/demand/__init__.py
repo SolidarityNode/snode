@@ -1,6 +1,6 @@
 """Estimated demand (Paper 1 §6). Interfaces only.
 
-Paper 1 demand is **visible use under average conditions**, not need (OQ-8, CLAUDE.md
+Paper 1 demand is **visible use under average conditions**, not need (OQ-8, AGENTS.md
 invariant 4). It is labelled *Estimated*, never *Observed*, and measured in service units per
 reference period (OQ-24, OQ-25).
 """

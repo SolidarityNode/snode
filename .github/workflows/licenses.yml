@@ -1,7 +1,7 @@
 name: licenses
 
 # Fails when a dependency licence is incompatible with AGPL-3.0 or unknown
-# (scripts/check_licenses.py; policy in CLAUDE.md "Licensing").
+# (scripts/check_licenses.py; policy in AGENTS.md "Licensing").
 
 on:
   push:

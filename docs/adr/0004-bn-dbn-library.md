@@ -2,7 +2,7 @@
 
 - Status: Proposed (stub, needs a human decision)
 - Date: 2026-11-24
-- Related: OQ-7, OQ-17, OQ-27; CLAUDE.md stack (pgmpy, "evaluate limits via ADR before committing")
+- Related: OQ-7, OQ-17, OQ-27; AGENTS.md stack (pgmpy, "evaluate limits via ADR before committing")
 
 ## Context
 

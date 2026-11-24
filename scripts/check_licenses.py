@@ -5,7 +5,7 @@ Usage:
     python check_licenses.py python          # inspects the running interpreter's environment
     pnpm licenses list --json --long | python3 check_licenses.py pnpm
 
-Standard library only, so it runs inside any project environment. Policy (CLAUDE.md,
+Standard library only, so it runs inside any project environment. Policy (AGENTS.md,
 "Licensing"): permissive and weak-copyleft licences, GPL-3.0 and AGPL-3.0 are accepted;
 anything else, including unknown licences, fails unless listed in EXCEPTIONS with a reason.
 """
@@ -136,7 +136,7 @@ def main(argv: list[str]) -> int:
     for package, licence in failures:
         print(f"  NOT ALLOWED: {package}: {licence}")
     if failures:
-        print("Review these licences (CLAUDE.md 'Licensing'); add a reasoned EXCEPTION if compatible.")
+        print("Review these licences (AGENTS.md 'Licensing'); add a reasoned EXCEPTION if compatible.")
         return 1
     return 0
 

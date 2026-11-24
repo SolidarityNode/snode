@@ -65,4 +65,4 @@ body:
     id: notes
     attributes:
       label: Notes
-      description: Invariants to respect (CLAUDE.md), data needs (synthetic only), new dependencies and their licences.
+      description: Invariants to respect (AGENTS.md), data needs (synthetic only), new dependencies and their licences.

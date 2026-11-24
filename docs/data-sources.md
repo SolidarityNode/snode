@@ -1,6 +1,6 @@
 # Data sources
 
-Every third-party dataset used by SolidarityNode is listed here with its licence and required attribution (CLAUDE.md "Data and privacy rules"). Real data is **never** committed to the repository; only synthetic data lives under `data/synthetic/` and `core/tests/fixtures/`. Choice of sources: ADR 0009.
+Every third-party dataset used by SolidarityNode is listed here with its licence and required attribution (AGENTS.md "Data and privacy rules"). Real data is **never** committed to the repository; only synthetic data lives under `data/synthetic/` and `core/tests/fixtures/`. Choice of sources: ADR 0009.
 
 | Source | Provider | Licence | Required attribution | Use in SolidarityNode | Added |
 | --- | --- | --- | --- | --- | --- |

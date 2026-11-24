@@ -114,7 +114,7 @@ class PopulationGroup:
     """Population group ``g`` (Spec 00 §3; Paper 1 §4; Paper 2 §7).
 
     A group says **who is examined**; it is not a measure of need and not a measure of social
-    susceptibility (CLAUDE.md invariants 4 and 5). Groups may overlap (OQ-6, open).
+    susceptibility (AGENTS.md invariants 4 and 5). Groups may overlap (OQ-6, open).
 
     Attributes:
         id: Group identifier.
@@ -230,7 +230,7 @@ class FacilityFunctionalState(StrEnum):
 class Facility:
     """Facility ``f`` (Spec 00 §3; Paper 1 §7).
 
-    A facility's state is never automatically a spatial unit's service loss (CLAUDE.md
+    A facility's state is never automatically a spatial unit's service loss (AGENTS.md
     invariant 3): coverage is computed at the network level.
 
     Attributes:

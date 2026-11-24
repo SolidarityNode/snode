@@ -6,7 +6,7 @@
 
 ## Context
 
-Scenarios have an **owner and visibility** (private, shared) (Spec 00 §3). Installations have their own users; the hub has its own. Tickets are entered by staff at facilities and must stay anonymous (CLAUDE.md). The bootstrap has no authentication: all endpoints are open and the stack binds to `127.0.0.1` only.
+Scenarios have an **owner and visibility** (private, shared) (Spec 00 §3). Installations have their own users; the hub has its own. Tickets are entered by staff at facilities and must stay anonymous (AGENTS.md). The bootstrap has no authentication: all endpoints are open and the stack binds to `127.0.0.1` only.
 
 ## Options to evaluate
 

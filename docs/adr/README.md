@@ -1,6 +1,6 @@
 # Architecture decision records
 
-Short records of significant decisions (CLAUDE.md). One file per decision, numbered, never renumbered. Status: `Proposed`, `Accepted`, `Superseded by NNNN`, `Rejected`. Copy [`template.md`](template.md) for a new record.
+Short records of significant decisions (AGENTS.md). One file per decision, numbered, never renumbered. Status: `Proposed`, `Accepted`, `Superseded by NNNN`, `Rejected`. Copy [`template.md`](template.md) for a new record.
 
 Methodological decisions (formulas, model structure) are recorded in [`docs/specs/open-questions.md`](../specs/open-questions.md); ADRs record technical and project decisions. An ADR may implement or depend on an `OQ-n`.
 

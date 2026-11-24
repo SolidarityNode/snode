@@ -8,7 +8,7 @@ Decided (OQ-8, OQ-9, OQ-10, OQ-11):
   alternatives outside the network.
 * Take-up ``τ`` is the share of people with need who **express** it, served or not.
 
-Observed demand is not need, and a group is not its susceptibility (CLAUDE.md invariants 4,
+Observed demand is not need, and a group is not its susceptibility (AGENTS.md invariants 4,
 5). State bounds of non-take-up are set with experts; CPT size: OQ-7, OQ-11.
 """
 

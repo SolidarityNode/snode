@@ -1,1 +1,1 @@
-"""Synthetic test fixtures (CLAUDE.md: synthetic data only)."""
+"""Synthetic test fixtures (AGENTS.md: synthetic data only)."""

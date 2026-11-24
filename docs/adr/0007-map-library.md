@@ -6,7 +6,7 @@
 
 ## Context
 
-The frontend will show indicators per spatial unit, group and service, with uncertainty (CLAUDE.md invariant 6), and vulnerability maps at reference scenarios (OQ-16). No map library is installed yet.
+The frontend will show indicators per spatial unit, group and service, with uncertainty (AGENTS.md invariant 6), and vulnerability maps at reference scenarios (OQ-16). No map library is installed yet.
 
 ## Options to evaluate
 

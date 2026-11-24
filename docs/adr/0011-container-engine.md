@@ -2,11 +2,11 @@
 
 - Status: Proposed (stub, needs a human decision)
 - Date: 2026-11-24
-- Related: CLAUDE.md "Stack"; `Makefile`, `compose.yaml`
+- Related: AGENTS.md "Stack"; `Makefile`, `compose.yaml`
 
 ## Context
 
-Contributors work on Linux, macOS and Windows/WSL2. CLAUDE.md sets Podman (rootless) as the default engine and requires Docker to keep working. The bootstrap implements this: the Makefile defines `CONTAINER_ENGINE ?= podman` and `COMPOSE ?= podman compose`; images use fully qualified names; ports are non-privileged; no bind mounts; healthchecks live in `compose.yaml` because Podman's OCI image format ignores `HEALTHCHECK`; CI builds images with both engines.
+Contributors work on Linux, macOS and Windows/WSL2. AGENTS.md sets Podman (rootless) as the default engine and requires Docker to keep working. The bootstrap implements this: the Makefile defines `CONTAINER_ENGINE ?= podman` and `COMPOSE ?= podman compose`; images use fully qualified names; ports are non-privileged; no bind mounts; healthchecks live in `compose.yaml` because Podman's OCI image format ignores `HEALTHCHECK`; CI builds images with both engines.
 
 ## Options to evaluate
 
