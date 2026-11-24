@@ -26,7 +26,9 @@ frontend/coverage/
 
 # --- Data ---
 # Only synthetic data is ever committed (see CLAUDE.md). Real data stays outside the repo.
+# Real open data (OpenStreetMap, ELSTAT, DEM, GTFS) is downloaded to data/local/ by scripts.
 data/*
+data/local/
 !data/synthetic/
 !data/README.md
 *.parquet
@@ -37,6 +39,14 @@ data/*
 *.prj
 !core/tests/fixtures/**
 !data/synthetic/**
+
+# --- QGIS and GeoPackage temporary files (also inside data/synthetic/) ---
+*.qgz~
+*.qgs~
+.qgis*
+*.gpkg-wal
+*.gpkg-shm
+*.gpkg-journal
 
 # --- Editors and OS ---
 .vscode/*

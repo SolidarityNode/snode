@@ -10,4 +10,6 @@ frontend/dist
 .env
 .env.*
 data
+# The backend image carries the synthetic demo dataset for `make seed`.
+!data/synthetic/demo
 docs
