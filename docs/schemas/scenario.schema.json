@@ -1,0 +1,299 @@
+{
+  "$defs": {
+    "CapacityChangeIn": {
+      "additionalProperties": false,
+      "description": "Change one capacity input of an existing facility (Paper 1 \u00a713).",
+      "properties": {
+        "amount": {
+          "description": "Signed change",
+          "title": "Amount",
+          "type": "number"
+        },
+        "capacity_input": {
+          "enum": [
+            "places",
+            "staff",
+            "throughput"
+          ],
+          "title": "Capacity Input",
+          "type": "string"
+        },
+        "facility_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "title": "Facility Id",
+          "type": "string"
+        },
+        "mode": {
+          "description": "absolute: in the input's own unit; relative: percent of the baseline value",
+          "enum": [
+            "absolute",
+            "relative"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "service_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "title": "Service Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "facility_id",
+        "service_id",
+        "capacity_input",
+        "mode",
+        "amount"
+      ],
+      "title": "CapacityChangeIn",
+      "type": "object"
+    },
+    "NetworkClosureIn": {
+      "additionalProperties": false,
+      "description": "Network edges closed for the given modes (Paper 3 \u00a79).",
+      "properties": {
+        "edge_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Edge Ids",
+          "type": "array"
+        },
+        "modes": {
+          "items": {
+            "enum": [
+              "walk",
+              "car",
+              "public_transport"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Modes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "edge_ids",
+        "modes"
+      ],
+      "title": "NetworkClosureIn",
+      "type": "object"
+    },
+    "NewFacilityIn": {
+      "additionalProperties": false,
+      "description": "Add a facility that is not in the baseline, at an existing network node (Paper 1 \u00a713).",
+      "properties": {
+        "facility_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "title": "Facility Id",
+          "type": "string"
+        },
+        "facility_type": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Facility Type",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "node_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "title": "Node Id",
+          "type": "string"
+        },
+        "services": {
+          "items": {
+            "$ref": "#/$defs/ServiceCapacityIn"
+          },
+          "minItems": 1,
+          "title": "Services",
+          "type": "array"
+        }
+      },
+      "required": [
+        "facility_id",
+        "name",
+        "facility_type",
+        "node_id",
+        "services"
+      ],
+      "title": "NewFacilityIn",
+      "type": "object"
+    },
+    "ServiceCapacityIn": {
+      "additionalProperties": false,
+      "description": "Capacity inputs of a new facility for one service.",
+      "properties": {
+        "places": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Places"
+        },
+        "service_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "title": "Service Id",
+          "type": "string"
+        },
+        "staff": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Staff"
+        },
+        "throughput": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Throughput"
+        }
+      },
+      "required": [
+        "service_id"
+      ],
+      "title": "ServiceCapacityIn",
+      "type": "object"
+    },
+    "SeverityIn": {
+      "additionalProperties": false,
+      "description": "Disruption severity ``DS_{f,c}`` of one facility (Paper 3 \u00a77\u201310).",
+      "properties": {
+        "facility_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "title": "Facility Id",
+          "type": "string"
+        },
+        "severity": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Severity",
+          "type": "number"
+        }
+      },
+      "required": [
+        "facility_id",
+        "severity"
+      ],
+      "title": "SeverityIn",
+      "type": "object"
+    }
+  },
+  "$id": "urn:solidaritynode:schema:scenario:1.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The overlay of one scenario version (Spec 00 \u00a73; ADR 0016).\n\n``reference_level`` is the reference-scenario flag: ``null`` for an ordinary scenario, or\nthe standardised level it stands for (OQ-16; how reference scenarios are constructed is\nopen). Disruption scenarios (any severity or closed edge) must state a ``rationing`` case\n(OQ-24).",
+  "properties": {
+    "capacity_changes": {
+      "items": {
+        "$ref": "#/$defs/CapacityChangeIn"
+      },
+      "title": "Capacity Changes",
+      "type": "array"
+    },
+    "closed_edges": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NetworkClosureIn"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "new_facilities": {
+      "items": {
+        "$ref": "#/$defs/NewFacilityIn"
+      },
+      "title": "New Facilities",
+      "type": "array"
+    },
+    "rationing": {
+      "anyOf": [
+        {
+          "enum": [
+            "uniform",
+            "concentrated"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rationing"
+    },
+    "reference_level": {
+      "anyOf": [
+        {
+          "enum": [
+            "minor",
+            "moderate",
+            "severe"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reference Level"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "severities": {
+      "items": {
+        "$ref": "#/$defs/SeverityIn"
+      },
+      "title": "Severities",
+      "type": "array"
+    }
+  },
+  "title": "ScenarioBody",
+  "type": "object"
+}

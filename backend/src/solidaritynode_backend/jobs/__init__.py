@@ -1,11 +1,25 @@
-"""Background jobs: a minimal interface and an in-process implementation.
+"""Background jobs: the :class:`JobRunner` interface, a PostgreSQL queue and the worker.
 
 Long-running simulations run as background jobs, never inside a request handler (AGENTS.md).
-The production queue (for example a database-backed queue, RQ, Celery, Dramatiq or Arq) is
-**not chosen**: see ADR 0006. Callers depend only on :class:`JobRunner`.
+v0.1 uses a queue in PostgreSQL (``SELECT … FOR UPDATE SKIP LOCKED``) consumed by a separate
+worker process (ADR 0006, accepted for v0.1, to be revisited). Routers depend only on
+:class:`JobRunner`, so the queue can change without touching them.
 """
 
-from solidaritynode_backend.jobs.base import JobInfo, JobRunner, JobStatus
-from solidaritynode_backend.jobs.inprocess import InProcessJobRunner
+from solidaritynode_backend.jobs.base import (
+    JobCancelledError,
+    JobContext,
+    JobInfo,
+    JobRunner,
+    JobStatus,
+)
+from solidaritynode_backend.jobs.postgres import PostgresJobRunner
 
-__all__ = ["InProcessJobRunner", "JobInfo", "JobRunner", "JobStatus"]
+__all__ = [
+    "JobCancelledError",
+    "JobContext",
+    "JobInfo",
+    "JobRunner",
+    "JobStatus",
+    "PostgresJobRunner",
+]
