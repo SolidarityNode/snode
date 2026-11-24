@@ -58,7 +58,7 @@ export function MapView({ label, layers, basemap, height = 420 }: Props) {
         : new ResizeObserver(() => {
             m.invalidateSize();
             const bounds = group.current?.getBounds();
-            if (bounds?.isValid()) m.fitBounds(bounds, { padding: [12, 12] });
+            if (bounds?.isValid()) m.fitBounds(bounds, { padding: [12, 12], animate: false });
           });
     observer?.observe(container.current);
     return () => {
