@@ -14,6 +14,17 @@ Closes #
 
 - [ ]
 
+## How to test (UAT)
+
+<!-- MANDATORY. Numbered manual steps a non-developer can follow, each with the expected result.
+     Start from a fresh state with `make uat` (see docs/uat/README.md). If a step fails, the
+     maintainer comments here and adds the `uat-failed` label. -->
+
+1. Run `make uat` → expected: the URLs are printed and the build commit matches this PR's head.
+2. <!-- step --> → expected: <!-- result -->
+
+- [ ] UAT passed by maintainer
+
 ## Dependencies and licences
 
 <!-- Every new dependency with its licence (must be AGPL-3.0 compatible). Write "none" if none. -->

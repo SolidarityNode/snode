@@ -49,6 +49,19 @@ body:
     validations:
       required: true
   - type: textarea
+    id: uat
+    attributes:
+      label: Acceptance test (UAT)
+      description: >-
+        How a user checks this by hand, written from the user's point of view: numbered steps,
+        starting from `make uat`, each with the expected result. The PR's "How to test (UAT)"
+        section is written from this.
+      value: |
+        1. Run `make uat` and open the frontend. Expected:
+        2.
+    validations:
+      required: true
+  - type: textarea
     id: notes
     attributes:
       label: Notes
