@@ -45,7 +45,7 @@ Requires `uv`, Node.js 26 with `pnpm` 12, and Podman (or Docker). `make help` li
 
 - `make setup` — check that `uv`, `node` and `pnpm` are on PATH (names any missing), create `.env` from `.env.example` if missing (warns about missing keys), then install locked dependencies (`uv sync --locked` in `core/` and `backend/`, `pnpm install --frozen-lockfile` in `frontend/`)
 - `make lint` — ruff check, ruff format --check and mypy (strict) for core and backend; eslint, prettier --check and `tsc` for frontend
-- `make test` — pytest (core; backend on a throw-away PostGIS database, started with `make test-db`), Vitest (frontend) and the Playwright end-to-end test (`make test-e2e`: starts and seeds the stack, runs Playwright in its official image; `E2E_LOCAL=1` uses a host browser)
+- `make test` — pytest (core; backend on a throw-away PostGIS database, started with `make test-db`), Vitest (frontend) and the Playwright end-to-end test (`make test-e2e`: a separate throw-away stack, compose project `solidaritynode-e2e` on ports 18080/18000/15432, seeded with demo package 1.0.0 and removed afterwards; Playwright runs in its official image, `E2E_LOCAL=1` uses a host browser)
 - `make fmt` — ruff fix/format, prettier, eslint --fix
 - `make up` / `make down` — start/stop db, backend, worker and frontend with `$(COMPOSE)` (default `podman compose`); frontend http://127.0.0.1:8080, backend http://127.0.0.1:8000; passes `GIT_COMMIT` to the image builds
 - `make logs`, `make ps`, `make wait`, `make stop SERVICE=…` — follow logs, show containers, wait until the backend is ready, stop one service (for example `worker`)

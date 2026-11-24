@@ -116,24 +116,39 @@ test-backend: test-db
 test-frontend:
 	cd frontend && $(PNPM) run test
 
-# The end-to-end test runs Playwright in its official image (browsers and system libraries
-# included), on the host network so it reaches the stack at $(FRONTEND_URL). E2E_LOCAL=1 runs
-# it with a browser installed on the host instead (`make e2e-setup`).
+# The end-to-end test runs in its own throw-away stack (compose project $(E2E_PROJECT), its own
+# volumes and ports), so it always starts from demo package 1.0.0 and never touches your local
+# data; the stack is removed afterwards. Playwright runs in its official image (browsers and
+# system libraries included) on the host network. E2E_LOCAL=1 uses a host browser instead
+# (`make e2e-setup` once).
 PLAYWRIGHT_IMAGE ?= mcr.microsoft.com/playwright:v1.65.1-noble
+E2E_PROJECT ?= solidaritynode-e2e
+E2E_FRONTEND_PORT ?= 18080
+E2E_BACKEND_PORT ?= 18000
+E2E_DB_PORT ?= 15432
+E2E_COMPOSE := $(COMPOSE) -p $(E2E_PROJECT)
+E2E_URL := http://127.0.0.1:$(E2E_FRONTEND_PORT)
 
 e2e-setup: ## Install the Playwright browser on the host (only for E2E_LOCAL=1)
 	cd frontend && $(PNPM) exec playwright install chromium
 
-test-e2e: ## End-to-end test (Playwright) against the stack; starts and seeds it first
-	$(MAKE) --no-print-directory up
-	$(MAKE) --no-print-directory wait
-	$(MAKE) --no-print-directory seed
-	@if [ "$(E2E_LOCAL)" = "1" ]; then \
-	  cd frontend && E2E_BASE_URL=$(FRONTEND_URL) $(PNPM) run test:e2e; \
-	else \
-	  $(CONTAINER_ENGINE) run --rm --network host -v "$(CURDIR)/frontend:/work:Z" -w /work \
-	    -e E2E_BASE_URL=$(FRONTEND_URL) $(PLAYWRIGHT_IMAGE) npx playwright test; \
-	fi
+test-e2e: check-engine ## End-to-end test (Playwright) in a separate throw-away stack
+	$(E2E_COMPOSE) down --volumes >/dev/null 2>&1 || true
+	@status=0; \
+	$(MAKE) --no-print-directory up wait seed COMPOSE="$(E2E_COMPOSE)" \
+	  FRONTEND_HOST_PORT=$(E2E_FRONTEND_PORT) BACKEND_HOST_PORT=$(E2E_BACKEND_PORT) \
+	  DB_HOST_PORT=$(E2E_DB_PORT) || status=$$?; \
+	if [ $$status -eq 0 ]; then \
+	  if [ "$(E2E_LOCAL)" = "1" ]; then \
+	    (cd frontend && E2E_BASE_URL=$(E2E_URL) $(PNPM) run test:e2e) || status=$$?; \
+	  else \
+	    $(CONTAINER_ENGINE) run --rm --network host -v "$(CURDIR)/frontend:/work:Z" -w /work \
+	      -e E2E_BASE_URL=$(E2E_URL) $(PLAYWRIGHT_IMAGE) npx playwright test || status=$$?; \
+	  fi; \
+	fi; \
+	FRONTEND_HOST_PORT=$(E2E_FRONTEND_PORT) BACKEND_HOST_PORT=$(E2E_BACKEND_PORT) DB_HOST_PORT=$(E2E_DB_PORT) \
+	  $(E2E_COMPOSE) down --volumes >/dev/null 2>&1 || true; \
+	exit $$status
 
 # --- Formatting ----------------------------------------------------------------------------
 
