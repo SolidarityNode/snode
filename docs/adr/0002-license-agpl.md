@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-24
-- Related: `LICENSE`, `TRADEMARK.md`, CLAUDE.md "Licensing"
+- Related: `LICENSE`, `TRADEMARK.md`, AGENTS.md "Licensing"
 
 ## Context
 

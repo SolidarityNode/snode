@@ -42,7 +42,7 @@ Closes #
 ## Checklist
 
 - [ ] `make lint test` passes locally
-- [ ] Domain invariants in `CLAUDE.md` still hold
+- [ ] Domain invariants in `AGENTS.md` still hold
 - [ ] Public API documented (docstrings cite the spec section)
 - [ ] Docs, specs cross-reference and ADRs updated where behaviour or decisions changed
 - [ ] Commits follow Conventional Commits and are signed off (`git commit -s`)

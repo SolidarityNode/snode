@@ -2,7 +2,7 @@
 
 - Status: Proposed (stub, needs a human decision)
 - Date: 2026-11-24
-- Related: OQ-21, OQ-6, OQ-8; CLAUDE.md "Data and privacy rules"; `core.model.Ticket`
+- Related: OQ-21, OQ-6, OQ-8; AGENTS.md "Data and privacy rules"; `core.model.Ticket`
 
 ## Context
 

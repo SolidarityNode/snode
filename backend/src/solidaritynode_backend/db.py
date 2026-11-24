@@ -1,7 +1,7 @@
 """Database wiring: SQLAlchemy engine, sessions and declarative base (PostgreSQL/PostGIS).
 
 Large datasets live in Parquet files; the database holds metadata and result indexes
-(CLAUDE.md, ADR 0008). No tables exist yet.
+(AGENTS.md, ADR 0008). No tables exist yet.
 """
 
 from __future__ import annotations

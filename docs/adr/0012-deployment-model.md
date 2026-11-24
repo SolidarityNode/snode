@@ -6,7 +6,7 @@
 
 ## Context
 
-Spec 00 §3 describes one codebase running in two roles: a **municipal installation** (one per study area, with its own users, scenarios, runs and tickets) and a **hub** (national raw sources, onboarding, curated data, data packages, optional aggregated indicators shared upwards). Tickets and operational data must stay inside the municipality (CLAUDE.md privacy rules, OQ-21). Everything must keep running locally with `make up` (Podman default, Docker supported).
+Spec 00 §3 describes one codebase running in two roles: a **municipal installation** (one per study area, with its own users, scenarios, runs and tickets) and a **hub** (national raw sources, onboarding, curated data, data packages, optional aggregated indicators shared upwards). Tickets and operational data must stay inside the municipality (AGENTS.md privacy rules, OQ-21). Everything must keep running locally with `make up` (Podman default, Docker supported).
 
 ## Options to evaluate
 

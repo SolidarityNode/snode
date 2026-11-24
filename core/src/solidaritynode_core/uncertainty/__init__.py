@@ -2,8 +2,8 @@
 
 Sample uncertain inputs and CPT parameters, run the model, collect ``P(·)`` or a distribution
 (Spec 00 §5). Randomness always goes through an explicit :class:`numpy.random.Generator`
-(CLAUDE.md conventions). Outputs carry a ``sample`` dimension; uncertainty is never collapsed
-silently (CLAUDE.md invariant 6).
+(AGENTS.md conventions). Outputs carry a ``sample`` dimension; uncertainty is never collapsed
+silently (AGENTS.md invariant 6).
 """
 
 from __future__ import annotations

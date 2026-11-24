@@ -6,7 +6,7 @@
 
 ## Context
 
-The unit of analysis is `spatial unit × social group × service × time` (Paper 4 §3). Many quantities omit some of these dimensions (for example `SS_{i,g,s}` has no time; `DemandRate^g` has only group and service) or add others (facility, mode, scenario, Monte Carlo sample, discrete state). Outputs must carry uncertainty (CLAUDE.md invariant 6). Quantities of different services must never be summed (OQ-24), and groups may overlap (OQ-6).
+The unit of analysis is `spatial unit × social group × service × time` (Paper 4 §3). Many quantities omit some of these dimensions (for example `SS_{i,g,s}` has no time; `DemandRate^g` has only group and service) or add others (facility, mode, scenario, Monte Carlo sample, discrete state). Outputs must carry uncertainty (AGENTS.md invariant 6). Quantities of different services must never be summed (OQ-24), and groups may overlap (OQ-6).
 
 We need (a) immutable typed entities and (b) one container for indexed values that every module can share.
 

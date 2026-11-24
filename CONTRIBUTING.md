@@ -8,7 +8,10 @@ By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md). Report 
 
 Read, in this order:
 
-1. [`CLAUDE.md`](CLAUDE.md): domain invariants, architecture rules and conventions. They apply to every contributor, human or AI.
+1. [`AGENTS.md`](AGENTS.md): domain invariants, architecture rules and conventions. They apply to every contributor, human or AI (Claude Code, Codex, Cursor and other coding agents all read this file).
+   - Also read the `AGENTS.md` of the folder you work in ([`core/`](core/AGENTS.md), [`backend/`](backend/AGENTS.md), [`frontend/`](frontend/AGENTS.md), [`data-processing/`](data-processing/AGENTS.md)). The root file always applies; if the two conflict, the root wins and the conflict should be reported.
+   - The same area rules with short explanations and examples are in [`docs/conventions/`](docs/conventions/README.md).
+   - `CLAUDE.md` files only import `AGENTS.md` for Claude Code; they never contain rules.
 2. [`docs/specs/README.md`](docs/specs/README.md): how the specification is organised.
 3. [`docs/specs/00-domain-model.md`](docs/specs/00-domain-model.md) and [`docs/specs/open-questions.md`](docs/specs/open-questions.md).
 4. [`docs/architecture.md`](docs/architecture.md).
@@ -54,7 +57,7 @@ All configuration comes from `.env` (git-ignored), created by `make setup` from 
 | `GIT_COMMIT` | image builds | set by `make up` | Build identity shown by `/version` and the footer |
 | `CONTAINER_ENGINE`, `COMPOSE` | Makefile | `podman`, `podman compose` | Container engine and compose command |
 
-**Adding a setting:** add it to `.env.example` in the same PR with a safe development default (secrets as `change-me`) and a one-line comment, and add a row to this table (CLAUDE.md, "Configuration").
+**Adding a setting:** add it to `.env.example` in the same PR with a safe development default (secrets as `change-me`) and a one-line comment, and add a row to this table (AGENTS.md, "Configuration").
 
 ## Testing by hand (UAT)
 
@@ -84,6 +87,17 @@ The sign-off certifies the [Developer Certificate of Origin](https://developerce
 - Fill in every section of the PR template, including the acceptance-criteria checklist, the dependency/licence table and the data/privacy checklist.
 - New dependencies must have an AGPL-compatible licence (MIT, BSD, Apache-2.0, ISC, MPL-2.0, LGPL, GPL-3.0, AGPL-3.0). The `licenses` CI check fails otherwise. State each new dependency's licence in the PR.
 - CI runs only the workflows affected by your change (`core`, `backend`, `frontend`, `containers`, `licenses`, plus `dco`).
+
+## Changing the rules
+
+Rules live only in `AGENTS.md` files (root and area folders). To add, change or remove one:
+
+1. Open an issue or a PR on a branch `docs/rule-<short-name>`, titled `docs(rules): <summary>`, and list each rule added, changed or removed.
+2. Put the rule in the right file: the root `AGENTS.md` if it applies everywhere, otherwise the area `AGENTS.md`, in short imperative wording. Add the same rule with a one-line reason (and an example if useful) to `docs/conventions/<area>.md`.
+3. If the rule can be enforced automatically (lint, type check, formatter, test, CI check), add that check instead or as well.
+4. Point out any conflict or overlap with existing rules in the PR instead of silently overriding them. Rules that change the method or a technical choice need an ADR or a decision in `docs/specs/open-questions.md` first.
+
+The full procedure is in "Maintaining these instructions" in [`AGENTS.md`](AGENTS.md). Claude Code users can run `/add-rule <area>: <rule>`, which follows it and asks for confirmation before editing.
 
 ## Proposing a method
 

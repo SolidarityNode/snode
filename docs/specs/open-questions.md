@@ -220,7 +220,7 @@ Future-work notes (`N-…`): N-2a 3SFCA, N-2b constrained allocation for sensiti
   1. **Maps at reference scenarios.** Vulnerability is mapped at standardised **reference scenarios** (for example minor, moderate, severe disruption), so that areas and groups are compared at the same intensity. Risk maps are produced separately, only if disruption probabilities become available.
   2. **Weight of experts against data:** new question OQ-27.
   3. **Observation node.** Because Vulnerability is latent, Paper 4 needs a measurement node `P(ObservedConsequence | V)` stating what is observed for each vulnerability level. To be specified together with OQ-18.
-- **Spec impact.** Paper 3 §2 and §17 (wording), Paper 3 §25–26 (maps at reference scenarios), Paper 4 §2.1, §8, §10 and the diagram in §15 must be rewritten. CLAUDE.md invariant 2 is updated accordingly.
+- **Spec impact.** Paper 3 §2 and §17 (wording), Paper 3 §25–26 (maps at reference scenarios), Paper 4 §2.1, §8, §10 and the diagram in §15 must be rewritten. AGENTS.md invariant 2 is updated accordingly.
 
 ## Paper 4 (operations, dynamics, resilience)
 

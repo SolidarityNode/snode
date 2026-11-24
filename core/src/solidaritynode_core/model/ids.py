@@ -1,6 +1,6 @@
 """Typed identifiers for domain entities (Spec 00 §3).
 
-Identifiers are opaque strings. They must never encode personal data (CLAUDE.md, "Data and
+Identifiers are opaque strings. They must never encode personal data (AGENTS.md, "Data and
 privacy rules").
 """
 

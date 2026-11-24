@@ -1,6 +1,6 @@
 """Anonymous request tickets and recording coverage (Paper 4 §4.1; OQ-8, OQ-21).
 
-Tickets are **anonymous by design** (CLAUDE.md, "Data and privacy rules"): they store only the
+Tickets are **anonymous by design** (AGENTS.md, "Data and privacy rules"): they store only the
 spatial unit of origin, the social group, the service and timestamps, plus a yes/no flag
 "first request in this period" that lets people be counted without being identified (OQ-8).
 No names, contact details, exact addresses or device identifiers. Re-identification risk in
@@ -100,7 +100,7 @@ class RecordingCoverage:
     """Share of a facility's requests captured by the ticket system in a period (OQ-8).
 
     Observations are used for learning only where coverage is full or known (OQ-8). Note that
-    tickets themselves carry no facility (Paper 4 §4.1, CLAUDE.md privacy rules); coverage is
+    tickets themselves carry no facility (Paper 4 §4.1, AGENTS.md privacy rules); coverage is
     recorded separately per facility and period.
 
     Attributes:

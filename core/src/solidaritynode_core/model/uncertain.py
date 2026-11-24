@@ -1,4 +1,4 @@
-"""Types for uncertain quantities (CLAUDE.md invariant 6; Paper 1 §11, Paper 2 §14, Paper 3 §22).
+"""Types for uncertain quantities (AGENTS.md invariant 6; Paper 1 §11, Paper 2 §14, Paper 3 §22).
 
 An uncertain quantity is one of:
 

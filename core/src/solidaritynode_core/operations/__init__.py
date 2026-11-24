@@ -6,7 +6,7 @@ The derivation of facility functional state from indicators is **OQ-17 (open)**.
 
 Spec gap to raise: Paper 4 computes indicators and functional state **per facility**, and
 recording coverage is per facility, but the ticket fields of Paper 4 §4.1 (and the privacy
-rules in CLAUDE.md) carry no facility. How tickets are attributed to facilities is not
+rules in AGENTS.md) carry no facility. How tickets are attributed to facilities is not
 specified; the interfaces below take the attribution as an explicit input.
 """
 

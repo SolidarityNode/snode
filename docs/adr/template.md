@@ -7,7 +7,7 @@
 
 ## Context
 
-What problem are we solving, and what constraints apply (CLAUDE.md invariants, licence, Podman/Docker, privacy)?
+What problem are we solving, and what constraints apply (AGENTS.md invariants, licence, Podman/Docker, privacy)?
 
 ## Options
 

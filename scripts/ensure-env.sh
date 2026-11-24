@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Create .env from .env.example if it is missing, then warn about keys that are set in
 # .env.example but missing from .env. Never overwrites or edits an existing .env.
-# Used by `make setup` (CLAUDE.md, "Configuration").
+# Used by `make setup` (AGENTS.md, "Configuration").
 set -euo pipefail
 
 example="${1:-.env.example}"

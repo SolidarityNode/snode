@@ -2,11 +2,11 @@
 
 - Status: Proposed (stub, needs a human decision)
 - Date: 2026-11-24
-- Related: Spec 00 §3 (Run, Result), CLAUDE.md invariant 6 (uncertainty); ADR 0006, 0008, 0013, 0016
+- Related: Spec 00 §3 (Run, Result), AGENTS.md invariant 6 (uncertainty); ADR 0006, 0008, 0013, 0016
 
 ## Context
 
-Spec 00 §3: a **run** is one **immutable** execution of a scenario and records everything needed to reproduce it: scenario version, data package version, code version (git commit), model and parameter version (CPTs, priors), random seed, configuration. Lifecycle `queued → running → succeeded | failed | cancelled`, with progress. Identical inputs may reuse results. A **result** belongs to one run: summary values per `unit × group × service` (probabilities, intervals) in the database for maps; full Monte Carlo samples in Parquet files. Randomness goes through an explicit seed (CLAUDE.md). `/version` already reports the git commit of the running build.
+Spec 00 §3: a **run** is one **immutable** execution of a scenario and records everything needed to reproduce it: scenario version, data package version, code version (git commit), model and parameter version (CPTs, priors), random seed, configuration. Lifecycle `queued → running → succeeded | failed | cancelled`, with progress. Identical inputs may reuse results. A **result** belongs to one run: summary values per `unit × group × service` (probabilities, intervals) in the database for maps; full Monte Carlo samples in Parquet files. Randomness goes through an explicit seed (AGENTS.md). `/version` already reports the git commit of the running build.
 
 ## Options to evaluate
 

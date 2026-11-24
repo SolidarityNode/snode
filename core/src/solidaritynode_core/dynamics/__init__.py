@@ -3,7 +3,7 @@
 Interfaces only. Decided (OQ-16): Expected Consequence is the Paper 3 vulnerability relationship
 evaluated at **observed** ``GE(t)``, ``SL(t)`` and ``SS``; the disruption enters once. Operational
 support and resource mobilisation are a **system response**, not a resilience measure
-(CLAUDE.md invariant 7).
+(AGENTS.md invariant 7).
 
 Open: DBN topology, time slice and state derivation (OQ-17); observed consequence and the
 measurement node ``P(ObservedConsequence | V)`` (OQ-18); resource mobilisation parameters
@@ -31,7 +31,7 @@ class TerritorialStateModel(Protocol):
     """Territorial (unit-level) coverage and functional state (Paper 4 §7).
 
     Combines facility coverages and network redundancy. A degraded facility does not imply
-    lost coverage for a unit if alternatives exist (CLAUDE.md invariant 3).
+    lost coverage for a unit if alternatives exist (AGENTS.md invariant 3).
     """
 
     def territorial_state(
@@ -99,7 +99,7 @@ class ObservedConsequenceModel(Protocol):
 class ResponseModel(Protocol):
     """Need for support and resource mobilisation (Paper 4 §6; **OQ-20 open**).
 
-    A system response (CLAUDE.md invariant 7). Volunteer resources are approved and
+    A system response (AGENTS.md invariant 7). Volunteer resources are approved and
     controlled.
     """
 

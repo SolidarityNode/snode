@@ -2,11 +2,11 @@
 
 - Status: Proposed (stub, needs a human decision)
 - Date: 2026-11-24
-- Related: CLAUDE.md "Large datasets live in files (Parquet)"; ADR 0003
+- Related: AGENTS.md "Large datasets live in files (Parquet)"; ADR 0003
 
 ## Context
 
-Results are indexed by `unit × group × service × time` plus scenario and Monte Carlo sample, and can be large. CLAUDE.md states that large datasets live in Parquet files with metadata and result indexes in PostgreSQL/PostGIS. `core` represents arrays as `IndexedValues` (xarray, ADR 0003).
+Results are indexed by `unit × group × service × time` plus scenario and Monte Carlo sample, and can be large. AGENTS.md states that large datasets live in Parquet files with metadata and result indexes in PostgreSQL/PostGIS. `core` represents arrays as `IndexedValues` (xarray, ADR 0003).
 
 ## Options to evaluate
 

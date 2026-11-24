@@ -1,4 +1,4 @@
-"""Tickets are anonymous by design (Paper 4 §4.1; OQ-8, OQ-21; CLAUDE.md privacy rules)."""
+"""Tickets are anonymous by design (Paper 4 §4.1; OQ-8, OQ-21; AGENTS.md privacy rules)."""
 
 from __future__ import annotations
 

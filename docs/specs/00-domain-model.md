@@ -178,4 +178,4 @@ DBN (Paper 4 §12): `State(t−1) → FunctionalState(t) → ObservedConsequence
 
 ## 7. Invariants
 
-See `CLAUDE.md` ("Domain invariants"). The most important: keep BN nodes, computed simulation variables and scenario parameters separate (section 4); never mix vulnerability and resilience; never treat estimated demand as total need.
+See `AGENTS.md` ("Domain invariants"). The most important: keep BN nodes, computed simulation variables and scenario parameters separate (section 4); never mix vulnerability and resilience; never treat estimated demand as total need.

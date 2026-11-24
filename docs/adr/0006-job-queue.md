@@ -2,7 +2,7 @@
 
 - Status: Proposed (stub, needs a human decision)
 - Date: 2026-11-24
-- Related: CLAUDE.md "Long-running simulations run as background jobs"; `backend/src/solidaritynode_backend/jobs/`
+- Related: AGENTS.md "Long-running simulations run as background jobs"; `backend/src/solidaritynode_backend/jobs/`
 
 ## Context
 

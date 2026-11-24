@@ -2,7 +2,7 @@
 
 Paper 4 §10–13. Interfaces only. Resilience is a dynamic property derived from the
 loss-and-recovery trajectory; it is **not** vulnerability and never just the inverse of
-recovery time (CLAUDE.md invariant 2).
+recovery time (AGENTS.md invariant 2).
 
 Decided (OQ-16): the update learns the **parameters** of the vulnerability relationship with the
 expert CPT as prior. Open: prior weight (OQ-27), how trajectory indicators combine into

@@ -42,7 +42,7 @@ class Dim(StrEnum):
     TIME = "time"
     STATE = "state"
     # Not a paper index: the Monte Carlo sample axis used to carry uncertainty
-    # (Paper 1 §11, Paper 2 §14, Paper 3 §22; CLAUDE.md invariant 6).
+    # (Paper 1 §11, Paper 2 §14, Paper 3 §22; AGENTS.md invariant 6).
     SAMPLE = "sample"
 
     @property

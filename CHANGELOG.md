@@ -25,5 +25,6 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ### Changed
 
+- Agent instructions moved to the open `AGENTS.md` convention: root `AGENTS.md` (former `CLAUDE.md` content) plus area files for `core/`, `backend/`, `frontend/` and `data-processing/`, human-readable versions in `docs/conventions/`, `CLAUDE.md` files reduced to import bridges, and a Claude Code `/add-rule` command.
 - `SOLIDARITYNODE_ENVIRONMENT` replaced by `APP_ENV`; `.env.example` placeholders are plain `change-me`, with a comment per setting.
 - Ports and URLs use `127.0.0.1`.

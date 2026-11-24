@@ -16,7 +16,7 @@ from solidaritynode_core import SUBPACKAGES
 CORE_ROOT = Path(__file__).resolve().parents[1]
 SRC = CORE_ROOT / "src" / "solidaritynode_core"
 
-# Web frameworks, servers, database layers and drivers, and the other apps (CLAUDE.md).
+# Web frameworks, servers, database layers and drivers, and the other apps (AGENTS.md).
 FORBIDDEN_MODULES = {
     "fastapi",
     "starlette",

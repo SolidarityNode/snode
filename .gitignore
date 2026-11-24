@@ -25,7 +25,7 @@ frontend/coverage/
 !.env.example
 
 # --- Data ---
-# Only synthetic data is ever committed (see CLAUDE.md). Real data stays outside the repo.
+# Only synthetic data is ever committed (see AGENTS.md). Real data stays outside the repo.
 # Real open data (OpenStreetMap, ELSTAT, DEM, GTFS) is downloaded to data/local/ by scripts.
 data/*
 data/local/

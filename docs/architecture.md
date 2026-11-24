@@ -92,7 +92,7 @@ flowchart TB
 
 Cross-cutting modules used by all papers: `model`, `bayes`, `uncertainty` (Monte Carlo), `sensitivity`, `validation`.
 
-Key separations (CLAUDE.md invariants): vulnerability (a relationship, Paper 3) is not resilience (a trajectory property, Paper 4); a facility's state is not a unit's service loss; estimated demand is not need; a social group is not its susceptibility.
+Key separations (AGENTS.md invariants): vulnerability (a relationship, Paper 3) is not resilience (a trajectory property, Paper 4); a facility's state is not a unit's service loss; estimated demand is not need; a social group is not its susceptibility.
 
 ## 4. Ticket data flow
 
