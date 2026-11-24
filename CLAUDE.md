@@ -43,18 +43,25 @@ Source of truth for the science: `docs/specs/` (research description and per-mod
 
 Requires `uv`, Node.js 26 with `pnpm` 12, and Podman (or Docker). `make help` lists all targets.
 
-- `make setup` — install locked dependencies (`uv sync --locked` in `core/` and `backend/`, `pnpm install --frozen-lockfile` in `frontend/`)
+- `make setup` — check that `uv`, `node` and `pnpm` are on PATH (names any missing), create `.env` from `.env.example` if missing (warns about missing keys), then install locked dependencies (`uv sync --locked` in `core/` and `backend/`, `pnpm install --frozen-lockfile` in `frontend/`)
 - `make lint` — ruff check, ruff format --check and mypy (strict) for core and backend; eslint, prettier --check and `tsc` for frontend
 - `make test` — pytest (core, backend) and Vitest (frontend)
 - `make fmt` — ruff fix/format, prettier, eslint --fix
-- `make up` / `make down` — start/stop db, backend and frontend with `$(COMPOSE)` (default `podman compose`); frontend http://localhost:8080, backend http://localhost:8000
-- `make logs`, `make ps` — follow logs, show containers
+- `make up` / `make down` — start/stop db, backend and frontend with `$(COMPOSE)` (default `podman compose`); frontend http://127.0.0.1:8080, backend http://127.0.0.1:8000; passes `GIT_COMMIT` to the image builds
+- `make logs`, `make ps`, `make wait` — follow logs, show containers, wait until the backend is ready
+- `make db-shell` — `psql` in the database container with the credentials from `.env`
+- `make seed` — load the synthetic demo dataset into the temporary schema `demo` (idempotent)
+- `make reset` — **delete the database volume**, start, migrate and seed; asks for `yes` unless `FORCE=1`
+- `make uat` — `reset` then `up`, then print the URLs to open (UAT: `docs/uat/`)
+- `make env` — create `.env` if missing and warn about missing keys
+- `make check-config APP_ENV=production` — validate backend settings in a one-off container (refuses `change-me` secrets outside development and test)
 - `make images` — build images with `$(CONTAINER_ENGINE)`
 - `make licenses` — fail on dependency licences incompatible with AGPL-3.0
 - `make labels` — create GitHub labels from `.github/labels.yml` (needs `gh auth login`)
 - `make clean` / `make distclean` — remove caches and build output / also virtualenvs and node_modules
 - Per component: `make lint-core`, `test-core`, `lint-backend`, `test-backend`, `lint-frontend`, `test-frontend`
 - Docker instead of Podman: `CONTAINER_ENGINE=docker COMPOSE="docker compose" make up`
+- Regenerate the synthetic demo dataset: `python3 scripts/generate_demo_data.py` (update DP-001)
 
 Run `make lint test` before every commit. Do not mark work done if either fails.
 
@@ -72,6 +79,7 @@ Run `make lint test` before every commit. Do not mark work done if either fails.
 - **Never commit real personal or operational data.** Only synthetic data under `core/tests/fixtures/` and `data/synthetic/`.
 - The request-logging mechanism must be anonymous by design: store only spatial unit of origin, social group, service type and timestamps. No names, contact details, exact addresses or device identifiers.
 - No secrets in the repo. Use `.env` (gitignored) and keep `.env.example` current.
+- **Configuration:** the platform must run in development with no manual editing of `.env`. `make setup` creates `.env` from `.env.example` if missing and warns about keys present in `.env.example` but missing from `.env`. Every new setting is added to `.env.example` in the same PR, with a safe development default (secrets as `change-me`), a one-line comment, and an entry in the configuration section of `CONTRIBUTING.md`. Production values are never committed.
 - Third-party data (for example OpenStreetMap) must be attributed and its license respected; record sources in `docs/data-sources.md`.
 - **Every processed dataset has a processing note** in `docs/data-processing/` (`DP-NNN`, from `TEMPLATE.md`), with exact steps, versions and checks. Reusable processing lives in `data-processing/qgis/` (Processing models, scripts, projects with relative paths). When code or a ticket changes how data are prepared, update or add the note in the same PR. QGIS is a tool for preparing data, never a runtime dependency of `core` or `backend`.
 
