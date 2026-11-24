@@ -14,6 +14,27 @@ const LAYERS = ["municipalities", "spatial_units", "network_edges", "facilities"
 type LayerName = (typeof LAYERS)[number];
 
 const HIDDEN = new Set(["population", "services", "edge_effect_details", "processing_note"]);
+/** Display order of attributes; others follow alphabetically. */
+const ORDER = [
+  "unit_id",
+  "facility_id",
+  "edge_id",
+  "node_id",
+  "municipality_id",
+  "name",
+  "facility_type",
+  "role",
+  "quality",
+  "valid_from",
+  "valid_to",
+  "closed",
+];
+const INPUTS = ["places", "staff", "throughput"];
+
+function rank(key: string): number {
+  const i = ORDER.indexOf(key);
+  return i === -1 ? ORDER.length : i;
+}
 
 export function StudyAreaPage() {
   const { t } = useT();
@@ -231,6 +252,7 @@ function FeatureAttributes({ layer, feature }: { layer: LayerName; feature: Feat
       <dl>
         {Object.entries(props)
           .filter(([k]) => !HIDDEN.has(k) && !k.startsWith("edge_effect"))
+          .sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b))
           .map(([k, v]) => (
             <div key={k} className="dl-row">
               <dt>{label(t, "attr", k)}</dt>
@@ -250,7 +272,7 @@ function FeatureAttributes({ layer, feature }: { layer: LayerName; feature: Feat
               {Object.entries(props.services as Record<string, Record<string, number | null>>)
                 .map(
                   ([s, c]) =>
-                    `${s}: ${Object.entries(c)
+                    `${s}: ${INPUTS.map((k) => [k, c[k] ?? null] as const)
                       .map(([k, v]) => `${label(t, "attr", k)} ${v === null ? "—" : String(v)}`)
                       .join(", ")}`,
                 )
