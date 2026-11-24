@@ -16,10 +16,10 @@ SolidarityNode is public-interest research software for social services. It is l
 
 ## Decision
 
-License the project under AGPL-3.0 (the `LICENSE` file; package metadata uses `AGPL-3.0-or-later`). The project name is not covered by the licence; see `TRADEMARK.md`.
+License the project under **AGPL-3.0-or-later** (the `LICENSE` file holds the AGPL-3.0 text; package metadata uses the SPDX identifier `AGPL-3.0-or-later`). The project name is not covered by the licence; see `TRADEMARK.md`.
 
 ## Consequences
 
 - New dependencies must have AGPL-compatible licences (MIT, BSD, Apache-2.0, ISC, MPL-2.0, LGPL, GPL-3.0, AGPL-3.0). `scripts/check_licenses.py` and the `licenses` workflow enforce this; each PR states the licence of new dependencies.
 - Contributions are accepted under the same licence with a DCO sign-off (no CLA).
-- Open item: confirm whether `-only` or `-or-later` is intended. The `LICENSE` text is AGPL-3.0; package metadata currently says `AGPL-3.0-or-later`. Needs a maintainer decision.
+- `-or-later` was confirmed by the maintainer (2026-11-24): later versions of the AGPL published by the FSF may also be used.
