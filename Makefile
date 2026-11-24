@@ -203,7 +203,8 @@ import-package: check-engine ## Validate, preview and import a data package (PKG
 	@[ -n "$(PKG)" ] || { echo "Usage: make import-package PKG=<directory or .zip/.tar.gz>" >&2; exit 1; }
 	@[ -e "$(PKG)" ] || { echo "make import-package: $(PKG) not found" >&2; exit 1; }
 	@pack() { if [ -d "$(PKG)" ]; then tar -C "$(PKG)" -cf - .; else cat "$(PKG)"; fi; }; \
-	pack | $(COMPOSE) exec -T backend python -m solidaritynode_backend.cli import-package - --preview-only || exit 1; \
+	rc=0; pack | $(COMPOSE) exec -T backend python -m solidaritynode_backend.cli import-package - --preview-only || rc=$$?; \
+	[ $$rc -eq 3 ] && exit 0; [ $$rc -eq 0 ] || exit $$rc; \
 	if [ "$(YES)" != "1" ]; then \
 	  read -r -p "Import this package? Type 'yes' to confirm: " answer || answer=""; \
 	  [ "$$answer" = "yes" ] || { echo "Aborted; nothing imported."; exit 1; }; \

@@ -225,3 +225,13 @@ def test_layers_are_served_in_wgs84_with_metadata(as_admin) -> None:  # type: ig
     b1 = next(f for f in units["features"] if f["id"] == "B1")
     assert (b1["properties"]["role"], b1["properties"]["quality"]) == ("buffer", "estimated")
     assert as_admin.get(f"/data-versions/{dv}/layers/nope").status_code == 404
+
+
+def test_cli_preview_only_signals_nothing_to_do(as_admin, settings, capsys) -> None:  # type: ignore[no-untyped-def]
+    from solidaritynode_backend.cli import NOTHING_TO_DO, import_command
+
+    pkg = str(PACKAGES / "demo-1.0.0")
+    assert import_command(settings, pkg, yes=False, preview_only=True) == 0
+    assert import_command(settings, pkg, yes=True, preview_only=False) == 0
+    assert import_command(settings, pkg, yes=False, preview_only=True) == NOTHING_TO_DO
+    assert "already imported: nothing to do" in capsys.readouterr().out

@@ -36,7 +36,10 @@ from solidaritynode_backend.services.packages import (
     read_package,
 )
 
-__all__ = ["DEMO_USERS", "main"]
+__all__ = ["DEMO_USERS", "NOTHING_TO_DO", "main"]
+
+#: Exit code of ``import-package --preview-only`` when the version is already imported.
+NOTHING_TO_DO = 3
 
 #: Demo accounts for UAT, created only when APP_ENV=development (docs/uat/README.md).
 #: These passwords are public on purpose; never use them outside a local development stack.
@@ -85,7 +88,7 @@ def _import(settings: Settings, source: Path, yes: bool, preview_only: bool) -> 
             return 1
         if preview["status"] == "same_version":
             print("This version is already imported: nothing to do.")
-            return 0
+            return NOTHING_TO_DO if preview_only else 0
         if preview_only:
             return 0
         if not yes:
@@ -186,7 +189,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     imp = sub.add_parser("import-package", help="validate, preview and import a data package")
     imp.add_argument("path", help="package directory or archive, or - for an archive on stdin")
     imp.add_argument("--yes", action="store_true", help="import without asking")
-    imp.add_argument("--preview-only", action="store_true", help="show the preview and stop")
+    imp.add_argument(
+        "--preview-only",
+        action="store_true",
+        help=f"show the preview and stop (exit {NOTHING_TO_DO} if already imported)",
+    )
     sub.add_parser("create-admin", help="create an administrator interactively")
     sub.add_parser("seed-demo-users", help="create UAT demo users (development only)")
     wait = sub.add_parser("wait-runs", help="wait until no job is pending")
