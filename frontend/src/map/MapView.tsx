@@ -51,7 +51,18 @@ export function MapView({ label, layers, basemap, height = 420 }: Props) {
     m.setView([35, 20], 11);
     group.current = L.featureGroup().addTo(m);
     map.current = m;
+    // Leaflet caches the container size; refit when the layout changes it (grids, panels).
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(() => {
+            m.invalidateSize();
+            const bounds = group.current?.getBounds();
+            if (bounds?.isValid()) m.fitBounds(bounds, { padding: [12, 12] });
+          });
+    observer?.observe(container.current);
     return () => {
+      observer?.disconnect();
       m.remove();
       map.current = null;
       group.current = null;
@@ -87,6 +98,7 @@ export function MapView({ label, layers, basemap, height = 420 }: Props) {
     }
     const bounds = g.getBounds();
     if (!fitted.current && bounds.isValid()) {
+      m.invalidateSize();
       m.fitBounds(bounds, { padding: [12, 12] });
       fitted.current = true;
     }
