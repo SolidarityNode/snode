@@ -35,6 +35,7 @@
 | OQ-25 | reference period | open |
 | OQ-26 | delay versus loss | approach decided (2026-11-23), values open |
 | OQ-27 | weight of expert priors against observed data | open |
+| OQ-28 | study-area buffer and cross-border demand | open |
 
 Future-work notes (`N-…`): N-2a 3SFCA, N-2b constrained allocation for sensitivity, N-2c constrained allocation in Paper 4, N-8a intensity of hidden need, N-8b small area estimation, N-8c direct validation of hidden need, N-24a severity weighting, N-24b breadth as BN parent.
 
@@ -240,3 +241,5 @@ Future-work notes (`N-…`): N-2a 3SFCA, N-2b constrained allocation for sensiti
 **OQ-22 (terminology).** "ΤΚ" (Local Community) versus a generic spatial unit; group names (Low-income, Economically vulnerable); language of identifiers and documentation. Status: open.
 
 **OQ-23 (Digital Twin wording).** Paper 1's conclusion calls the result a "probabilistic baseline Digital Twin", while the research description says a Digital Twin is not assumed from the start. Keep wording consistent in README and docs. Status: open.
+
+**OQ-28 (study-area buffer and cross-border demand; raised 2026-11-24 with the deployment model).** People near a municipal boundary use facilities in neighbouring municipalities, and neighbouring residents use facilities inside it. A municipal installation therefore needs its municipality **plus a buffer** of neighbouring units, facilities and network. Open: buffer definition (fixed distance, travel-time threshold, or whole neighbouring municipalities); whether demand from buffer units competes for capacity in the 2SFCA allocation (OQ-2) while results are reported only for the municipality's own units; and how edge effects are tested. **Added:** when a buffer municipality is not yet onboarded (for example `facilities: missing`), results near that boundary are biased; decide whether to report a warning only (current platform behaviour), widen uncertainty, or use open-data facility estimates for the buffer. Status: open.
