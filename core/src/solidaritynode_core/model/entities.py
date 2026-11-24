@@ -20,12 +20,16 @@ from solidaritynode_core.model.quantity import ServiceUnit
 from solidaritynode_core.model.uncertain import Uncertain
 
 __all__ = [
+    "CapacityChange",
+    "CapacityChangeMode",
     "CapacityInputs",
     "Facility",
     "FacilityFunctionalState",
     "GeoInterface",
     "GroupProfiles",
+    "Intervention",
     "NetworkDisruption",
+    "NewFacility",
     "PopulationGroup",
     "Rationing",
     "ReferenceScenarioLevel",
@@ -310,6 +314,67 @@ class NetworkDisruption:
     description: str = ""
 
 
+class CapacityChangeMode(StrEnum):
+    """How a capacity change is expressed (Paper 1 §13; Spec 00 §3).
+
+    Attributes:
+        ABSOLUTE: ``amount`` is in the capacity input's own unit (for example places or staff).
+        RELATIVE: ``amount`` is a percentage of the baseline value (for example ``20`` for +20 %).
+    """
+
+    ABSOLUTE = "absolute"
+    RELATIVE = "relative"
+
+
+@dataclass(frozen=True, slots=True)
+class CapacityChange:
+    """What-if intervention: change one capacity input of a facility (Paper 1 §13; Spec 00 §3).
+
+    A typed placeholder only. It records the change relative to the baseline (a scenario is an
+    overlay, never a copy of the data); how it is applied to capacity and supply is not
+    implemented here.
+
+    Attributes:
+        facility: Facility ``f`` whose capacity changes.
+        service: Service ``s`` the change applies to.
+        capacity_input: Name of the capacity input (a field of :class:`CapacityInputs`, for
+            example ``"staff"``).
+        mode: Absolute or relative change.
+        amount: Signed change (absolute units, or percent for relative changes).
+    """
+
+    facility: FacilityId
+    service: ServiceId
+    capacity_input: str
+    mode: CapacityChangeMode
+    amount: float
+
+    def __post_init__(self) -> None:
+        """Check that the input name exists and the amount is finite."""
+        if self.capacity_input not in CapacityInputs.__dataclass_fields__:
+            raise ValueError(f"unknown capacity input {self.capacity_input!r}")
+        if not math.isfinite(self.amount):
+            raise ValueError("capacity change amount must be finite")
+
+
+@dataclass(frozen=True, slots=True)
+class NewFacility:
+    """What-if intervention: add a facility that is not in the baseline (Paper 1 §13; Spec 00 §3).
+
+    A typed placeholder only; no behaviour.
+
+    Attributes:
+        facility: The facility to add. Its id must not exist in the baseline (checked when the
+            scenario is applied, not here).
+    """
+
+    facility: Facility
+
+
+type Intervention = CapacityChange | NewFacility
+"""A what-if intervention of a counterfactual scenario (Paper 1 §13; Spec 00 §3)."""
+
+
 @dataclass(frozen=True, slots=True)
 class Scenario:
     """Scenario ``c`` (Paper 1 §13; Paper 3 §7–10; Spec 00 §3).
@@ -325,6 +390,9 @@ class Scenario:
         facility_severities: ``DS_{f,c}`` in ``[0, 1]`` per affected facility; facilities not
             listed are undisrupted.
         network_disruption: Optional network disruption.
+        interventions: What-if interventions relative to the baseline (Paper 1 §13). Typed
+            placeholders without behaviour. Whether disruption scenarios may also carry
+            interventions is not specified; no rule is enforced.
         rationing: Rationing case (OQ-24); required for disruption scenarios.
         reference_level: Set when this is a standardised reference scenario (OQ-16).
         description: Free-text description.
@@ -335,12 +403,13 @@ class Scenario:
     kind: ScenarioKind
     facility_severities: Mapping[FacilityId, float] = field(default_factory=dict)
     network_disruption: NetworkDisruption | None = None
+    interventions: tuple[Intervention, ...] = ()
     rationing: Rationing | None = None
     reference_level: ReferenceScenarioLevel | None = None
     description: str = ""
 
     def __post_init__(self) -> None:
-        """Validate severity bounds and required fields; freeze the mapping."""
+        """Validate severity bounds and required fields; freeze mapping and interventions."""
         for facility, severity in self.facility_severities.items():
             if not math.isfinite(severity) or not 0.0 <= severity <= 1.0:
                 raise ValueError(
@@ -352,6 +421,7 @@ class Scenario:
         if self.reference_level is not None and self.kind is not ScenarioKind.DISRUPTION:
             raise ValueError("reference scenarios are disruption scenarios (OQ-16)")
         object.__setattr__(self, "facility_severities", _freeze(self.facility_severities))
+        object.__setattr__(self, "interventions", tuple(self.interventions))
 
     @property
     def is_reference(self) -> bool:

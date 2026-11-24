@@ -8,9 +8,12 @@ from datetime import timedelta
 import pytest
 
 from solidaritynode_core.model import (
+    CapacityChange,
+    CapacityChangeMode,
     CapacityInputs,
     Facility,
     FacilityId,
+    NewFacility,
     Rationing,
     ReferenceScenarioLevel,
     Scenario,
@@ -109,3 +112,24 @@ def test_group_definition_indicators_cannot_be_susceptibility_evidence() -> None
     group.check_susceptibility_indicators(frozenset({"living_alone"}))
     with pytest.raises(ValueError, match="OQ-9"):
         group.check_susceptibility_indicators(frozenset({"age", "living_alone"}))
+
+
+def test_what_if_interventions_are_typed_placeholders() -> None:
+    change = CapacityChange(
+        FacilityId("F-1"), ServiceId("S-1"), "staff", CapacityChangeMode.RELATIVE, 20.0
+    )
+    new = NewFacility(Facility(FacilityId("F-new"), "x", "t", frozenset({ServiceId("S-1")})))
+    scenario = Scenario(
+        ScenarioId("C-whatif"), "x", ScenarioKind.COUNTERFACTUAL, interventions=[change, new]
+    )
+    assert scenario.interventions == (change, new)
+    assert isinstance(scenario.interventions, tuple)
+
+
+def test_capacity_change_validates_input_name_and_amount() -> None:
+    with pytest.raises(ValueError, match="unknown capacity input"):
+        CapacityChange(FacilityId("F"), ServiceId("S"), "beds", CapacityChangeMode.ABSOLUTE, 1)
+    with pytest.raises(ValueError, match="finite"):
+        CapacityChange(
+            FacilityId("F"), ServiceId("S"), "places", CapacityChangeMode.ABSOLUTE, float("nan")
+        )

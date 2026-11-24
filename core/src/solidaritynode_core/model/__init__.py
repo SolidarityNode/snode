@@ -6,7 +6,8 @@ Public API:
 * Identifiers: :data:`UnitId`, :data:`FacilityId`, :data:`GroupId`, :data:`ServiceId`,
   :data:`ScenarioId`.
 * Entities (Spec 00 §3): :class:`SpatialUnit`, :class:`PopulationGroup`, :class:`Service`,
-  :class:`Facility`, :class:`TransportMode`, :class:`Scenario`, :class:`Ticket`,
+  :class:`Facility`, :class:`TransportMode`, :class:`Scenario` (with what-if
+  :data:`Intervention` placeholders :class:`CapacityChange`, :class:`NewFacility`), :class:`Ticket`,
   :class:`RecordingCoverage`, :class:`RecoveryTrajectory`.
 * Values: :class:`IndexedValues` (Paper 4 §3, ADR 0003), :data:`Uncertain`,
   :class:`LevelLMH`, :class:`ServiceQuantity` (OQ-24, OQ-25).
@@ -20,12 +21,16 @@ from solidaritynode_core.model.catalogue import (
     variables_of_kind,
 )
 from solidaritynode_core.model.entities import (
+    CapacityChange,
+    CapacityChangeMode,
     CapacityInputs,
     Facility,
     FacilityFunctionalState,
     GeoInterface,
     GroupProfiles,
+    Intervention,
     NetworkDisruption,
+    NewFacility,
     PopulationGroup,
     Rationing,
     ReferenceScenarioLevel,
@@ -58,6 +63,8 @@ __all__ = [
     "CATALOGUE",
     "TICKET_FIELDS",
     "UNIT_OF_ANALYSIS",
+    "CapacityChange",
+    "CapacityChangeMode",
     "CapacityInputs",
     "Dim",
     "DimensionMismatchError",
@@ -69,8 +76,10 @@ __all__ = [
     "GroupId",
     "GroupProfiles",
     "IndexedValues",
+    "Intervention",
     "LevelLMH",
     "NetworkDisruption",
+    "NewFacility",
     "Period",
     "PointValue",
     "PopulationGroup",
