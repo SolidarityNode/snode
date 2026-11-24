@@ -19,6 +19,7 @@ UV_RUN := $(UV) run --frozen
 -include .env
 BACKEND_HOST_PORT ?= 8000
 FRONTEND_HOST_PORT ?= 8080
+APP_ENV ?= development
 
 # Build identity shown by /version and the frontend footer.
 GIT_COMMIT ?= $(shell git rev-parse --short=12 HEAD 2>/dev/null || echo unknown)$(shell git diff --quiet HEAD 2>/dev/null || echo -dirty)
@@ -27,7 +28,7 @@ export GIT_COMMIT
 FRONTEND_URL := http://127.0.0.1:$(FRONTEND_HOST_PORT)
 BACKEND_URL := http://127.0.0.1:$(BACKEND_HOST_PORT)
 
-.PHONY: help check-tools check-engine setup setup-core setup-backend setup-frontend \
+.PHONY: help check-tools check-engine env check-config setup setup-core setup-backend setup-frontend \
         lint lint-core lint-backend lint-frontend \
         test test-core test-backend test-frontend \
         fmt up down logs ps wait db-shell seed reset uat images licenses labels clean distclean
@@ -53,7 +54,14 @@ check-engine:
 	@$(COMPOSE) version >/dev/null 2>&1 || { \
 	  echo "Compose command '$(COMPOSE)' does not work. Install it or set COMPOSE." >&2; exit 1; }
 
-setup: check-tools setup-core setup-backend setup-frontend ## Install all dependencies (locked)
+setup: check-tools env setup-core setup-backend setup-frontend ## Install all dependencies (locked)
+
+env: ## Create .env from .env.example if missing; warn about missing keys
+	@scripts/ensure-env.sh .env.example .env
+
+check-config: check-engine ## Validate backend settings in a one-off container (e.g. APP_ENV=production)
+	$(COMPOSE) run --rm --no-deps -e APP_ENV=$(APP_ENV) backend \
+	  python -c "from solidaritynode_backend.config import Settings; s = Settings(); print(f'configuration OK (APP_ENV={s.app_env})')"
 
 setup-core:
 	cd core && $(UV) sync --locked

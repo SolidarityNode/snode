@@ -7,7 +7,7 @@ license = "AGPL-3.0-or-later"
 requires-python = ">=3.12,<3.13"
 authors = [{ name = "SolidarityNode contributors" }]
 # Keep this list short. core MUST NOT depend on web frameworks or database drivers
-# (CLAUDE.md, enforced by tests/test_independence.py and the ruff banned-api rule below).
+# (CLAUDE.md, enforced by tests/test_package.py and the ruff banned-api rule below).
 dependencies = [
   "numpy>=2.5,<3",
   "xarray>=2026.9.0",
