@@ -22,4 +22,4 @@ If you distribute or host a modified version (as the AGPL allows), give it a dif
 
 ## Contact
 
-Open an issue or discussion in the repository to ask for permission. (A dedicated contact address will be added.)
+Write to solidarityNode@gmail.com to ask for permission, or open an issue or discussion in the repository.
