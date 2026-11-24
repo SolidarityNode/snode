@@ -1,7 +1,7 @@
 # 0006. Background job queue
 
-- Status: Proposed (stub, needs a human decision)
-- Date: 2026-11-24
+- Status: Accepted for v0.1, to be revisited
+- Date: 2026-11-24 (accepted for v0.1: 2026-11-25)
 - Related: AGENTS.md "Long-running simulations run as background jobs"; `backend/src/solidaritynode_backend/jobs/`
 
 ## Context
@@ -25,8 +25,30 @@ Monte Carlo runs and scenario sweeps can take minutes to hours and must not run 
 
 ## Decision
 
-Not decided.
+**Accepted for v0.1, to be revisited: option 1, a PostgreSQL-backed queue written by hand**
+(`SELECT … FOR UPDATE SKIP LOCKED`), consumed by a separate worker process.
+
+- Jobs are rows in table `jobs` (kind, JSON payload, status `queued → running → succeeded |
+  failed | cancelled`, progress 0–100, error, `cancel_requested`, worker name, timestamps).
+- The bootstrap `JobRunner` interface is kept but evolved: a job is a `kind` plus a JSON payload
+  (not a Python callable, so it can cross processes), and the interface gains `cancel`. The
+  in-process thread-pool runner is removed. `PostgresJobRunner` implements it; routers depend
+  only on the interface.
+- The worker (`python -m solidaritynode_backend.worker`) is its own compose service with the
+  backend image. It runs one job at a time, reports progress to the job row, stops a job at its
+  next progress step when cancellation is requested, marks the running job failed with a clear
+  message on `SIGTERM`/`SIGINT`, and on start marks jobs it was running when it died as failed
+  ("Interrupted: … Start the run again.").
+- Outputs are shared through the `results` volume mounted in both containers (ADR 0008).
+
+**Why:** no new service or dependency, job state lives next to the run metadata in one
+transaction, rootless Podman needs nothing extra, and runs are short at this stage. Cancellation
+and progress are simple column updates.
 
 ## Consequences
 
-To be written with the decision.
+- Polling (1 s) adds a little latency; `LISTEN/NOTIFY` can replace it later.
+- One worker process, one job at a time. Several workers are possible (`SKIP LOCKED`) but each
+  needs its own `SOLIDARITYNODE_WORKER_NAME` so restart recovery only fails its own jobs.
+- No retries or scheduling. Revisit when Monte Carlo runs get long or concurrent (procrastinate,
+  RQ or Celery remain options); the interface keeps that change local.

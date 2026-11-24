@@ -6,7 +6,7 @@ how to get a clean, repeatable test environment. Each PR has its own checklist: 
 (for example [`00-bootstrap.md`](00-bootstrap.md)).
 
 Everything runs on your own machine and listens on `127.0.0.1` only. The database contains
-**synthetic data only** ([`data/synthetic/demo/`](../../data/synthetic/demo/README.md)).
+**synthetic data only** ([`data/synthetic/packages/`](../../data/synthetic/packages/README.md)).
 
 ## 1. One-time setup on a fresh machine (Windows with WSL2 and Podman)
 
@@ -44,8 +44,9 @@ make uat
 ```
 
 `make uat` asks you to type `yes` because it **deletes the local database** and starts from a
-clean state. It then builds and starts everything, applies database migrations, loads the
-synthetic demo dataset and prints the addresses to open:
+clean state. It then builds and starts everything, applies database migrations, imports the
+synthetic demo data package 1.0.0 (which also runs the baseline), creates the demo accounts and
+prints the addresses to open:
 
 | What | Address |
 | --- | --- |
@@ -55,12 +56,29 @@ synthetic demo dataset and prints the addresses to open:
 | Backend health | http://127.0.0.1:8000/health |
 | Backend version | http://127.0.0.1:8000/version |
 
+### Demo accounts (development only)
+
+`make uat` and `make seed` create two accounts, **only when `APP_ENV=development`** (the default
+of `.env`). Their passwords are public on purpose; never use them outside your own machine.
+
+| Username | Password | Role | Can |
+| --- | --- | --- | --- |
+| `demo-admin` | `demo-admin-pass` | admin | everything, plus users and data package import |
+| `demo-analyst` | `demo-analyst-pass` | analyst | create, edit, run and share own scenarios |
+
+A viewer (sees shared scenarios and results only) is created by the admin during the checklist.
+For a real installation create the first administrator with `make create-admin` instead.
+
 **Which build am I testing?** The footer of every page shows the backend version, the git
 commit and `APP_ENV`, plus the commit the frontend was built from. They must match the last
 commit of the PR (`git rev-parse --short=12 HEAD`). A `-dirty` suffix means the code on your machine
 has local changes.
 
-Then follow the PR's "How to test (UAT)" steps.
+Then follow the PR's "How to test (UAT)" steps. Checklists so far:
+
+- [`00-bootstrap.md`](00-bootstrap.md): the skeleton (partly superseded).
+- [`01-platform.md`](01-platform.md): the platform mechanics (data packages, scenarios, runs,
+  results, comparison, users).
 
 ## 3. Looking inside the database
 
@@ -72,9 +90,10 @@ opens `psql` in the database container. Useful commands:
 
 | Command | Shows |
 | --- | --- |
-| `\dn` | schemas (`demo` holds the synthetic demo data) |
-| `\dt demo.*` | demo tables |
-| `SELECT * FROM demo.spatial_units;` | the 8 fictional spatial units |
+| `\dt` | tables |
+| `SELECT id, package_id, version, active FROM data_versions;` | imported data package versions |
+| `SELECT feature_id, properties->>'role' FROM data_features WHERE layer = 'spatial_units' AND data_version_id = 1;` | the 8 fictional spatial units |
+| `SELECT r.id, j.status, j.progress, j.error FROM runs r JOIN jobs j ON j.id = r.job_id;` | runs and their status |
 | `\q` | quit |
 
 The database is also reachable from desktop tools (for example QGIS or DBeaver) at
@@ -84,7 +103,7 @@ The database is also reachable from desktop tools (for example QGIS or DBeaver) 
 
 | Command | Use |
 | --- | --- |
-| `make ps` | are the containers running and `healthy`? |
+| `make ps` | are the containers (`db`, `backend`, `worker`, `frontend`) running and `healthy`? |
 | `make logs` | follow all logs (Ctrl+C to stop following) |
 | `make wait` | wait until the backend is ready |
 | `make check-config APP_ENV=production` | would the backend accept this configuration in production? |
@@ -96,7 +115,9 @@ The database is also reachable from desktop tools (for example QGIS or DBeaver) 
 | `make down` | stop everything; the database is kept |
 | `make stop SERVICE=backend` | stop one service, keep the others running |
 | `make up` | start again with the same database |
-| `make seed` | reload the demo dataset (safe to repeat) |
+| `make seed` | import demo package 1.0.0 and the demo accounts (safe to repeat) |
+| `make import-package PKG=…` | validate, preview and import a data package (directory or archive) |
+| `make stop SERVICE=worker` | stop the background worker (a running run fails with a clear message) |
 | `make reset` | **delete the database**, start, migrate and seed (asks for `yes`; `FORCE=1` skips the question) |
 | `make uat` | `reset`, then `up`, then print the addresses |
 

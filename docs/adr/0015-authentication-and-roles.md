@@ -1,7 +1,7 @@
 # 0015. Authentication and roles
 
-- Status: Proposed (stub, needs a human decision)
-- Date: 2026-11-24
+- Status: Accepted for v0.1, to be revisited
+- Date: 2026-11-24 (accepted for v0.1: 2026-11-25)
 - Related: Spec 00 §3 (Scenario owner and visibility, Deployment), OQ-21; ADR 0010, 0012
 
 ## Context
@@ -27,8 +27,24 @@ Analyst or researcher (scenarios, runs, results), facility staff (ticket entry o
 
 ## Decision
 
-Not decided.
+**Accepted for v0.1, to be revisited: option 1, built-in local accounts** behind an
+`IdentityProvider` interface (`backend/src/solidaritynode_backend/auth.py`), so OpenID Connect
+can replace it later without changing routers.
+
+- Passwords hashed with Argon2id (`argon2-cffi`, MIT); minimum 8 characters.
+- Opaque session token in an HttpOnly, SameSite=Strict cookie (`Secure` with
+  `SOLIDARITYNODE_SESSION_COOKIE_SECURE=true`); only its SHA-256 is stored; lifetime
+  `SOLIDARITYNODE_SESSION_HOURS`. Disabling a user or changing a password ends their sessions.
+- Roles for v0.1: `viewer` (shared scenarios and their results), `analyst` (also creates, edits,
+  runs and shares own scenarios), `admin` (also manages users and imports data packages). Every
+  endpoint that reads or writes scenarios, runs, results, users or packages checks them.
+- `make create-admin` creates the first administrator interactively. Two demo accounts are
+  seeded only when `APP_ENV=development` (`docs/uat/README.md`).
+
+**Why:** no extra container or identity component; enough for one installation on 127.0.0.1.
 
 ## Consequences
 
-To be written. Until decided, the stack must only listen on `127.0.0.1` and hold synthetic data.
+- Facility staff and hub operator roles are not implemented (ticket entry waits for ADR 0010).
+- No MFA, password policy beyond length, or audit log yet; revisit before any deployment beyond a
+  local machine.

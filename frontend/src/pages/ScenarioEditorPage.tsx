@@ -71,6 +71,7 @@ export function ScenarioEditorPage() {
   const [error, setError] = useState<unknown>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [seed, setSeed] = useState(1);
+  const [delay, setDelay] = useState("");
 
   const editable = scenario ? scenario.can_edit : canEdit(user);
 
@@ -206,7 +207,14 @@ export function ScenarioEditorPage() {
     setError(null);
     try {
       const created = await unwrap(
-        api.POST("/runs", { body: { scenario_id: scenario.id, seed, force: false } }),
+        api.POST("/runs", {
+          body: {
+            scenario_id: scenario.id,
+            seed,
+            force: false,
+            config: delay === "" ? {} : { step_delay_s: Number(delay) },
+          },
+        }),
       );
       void navigate(`/runs/${created.id}`);
     } catch (e) {
@@ -474,6 +482,20 @@ export function ScenarioEditorPage() {
                   value={seed}
                   onChange={(e) => {
                     setSeed(Number(e.target.value));
+                  }}
+                />
+              </label>
+              <label>
+                {t("editor.step_delay")}
+                <input
+                  type="number"
+                  min={0}
+                  max={60}
+                  step={0.5}
+                  placeholder={t("editor.step_delay_default")}
+                  value={delay}
+                  onChange={(e) => {
+                    setDelay(e.target.value);
                   }}
                 />
               </label>

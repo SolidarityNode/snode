@@ -1,7 +1,7 @@
 # 0008. Storage of large arrays (Parquet)
 
-- Status: Proposed (stub, needs a human decision)
-- Date: 2026-11-24
+- Status: Accepted for v0.1, to be revisited
+- Date: 2026-11-24 (accepted for v0.1: 2026-11-25)
 - Related: AGENTS.md "Large datasets live in files (Parquet)"; ADR 0003
 
 ## Context
@@ -23,8 +23,19 @@ Results are indexed by `unit × group × service × time` plus scenario and Mont
 
 ## Decision
 
-Not decided.
+**Accepted for v0.1, to be revisited: option 1, Parquet in long format via PyArrow**
+(Apache-2.0), written by the **backend** (`core` stays free of I/O).
+
+- Per-sample values: `<results_dir>/runs/<run_id>/samples.parquet`, columns `unit_id, group_id,
+  service_id, time_label, indicator, sample, value`; `results_dir` is the `results` volume
+  (`/data/results` in compose). The run row stores the path.
+- Summary values per `unit × group × service × time` (central value and interval) in table
+  `run_results`; model tables (`travel_times`, `unit_changes`) as JSON in `run_tables`.
+- Files are written to a temporary name and renamed, so a crash never leaves a partial file
+  referenced by a run.
 
 ## Consequences
 
-To be written with the decision.
+- No retention or partitioning yet; one file per run. Revisit with object storage or Zarr when
+  Monte Carlo sample counts grow.
+- Per-sample files of small units may raise OQ-21 questions once real operational data exist.

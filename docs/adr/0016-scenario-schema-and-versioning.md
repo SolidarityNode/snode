@@ -1,7 +1,7 @@
 # 0016. Scenario schema and versioning
 
-- Status: Proposed (stub, needs a human decision)
-- Date: 2026-11-24
+- Status: Accepted for v0.1, to be revisited
+- Date: 2026-11-24 (accepted for v0.1: 2026-11-25)
 - Related: Spec 00 §3 (Scenario), Paper 1 §13, Paper 3 §7–10, OQ-16, OQ-24; ADR 0003, 0013, 0017
 
 ## Context
@@ -26,8 +26,31 @@ The demo scenario `data/synthetic/demo/scenarios/C-DEMO-REF.json` uses a draft l
 
 ## Decision
 
-Not decided.
+**Accepted for v0.1, to be revisited: option 1, a Pydantic model with a published JSON Schema.**
+
+- `ScenarioBody` (`schema_version: "1.0"`): `capacity_changes` (facility, service, input
+  `places | staff | throughput`, `absolute | relative` percent, amount), `new_facilities` (id,
+  name, type, an existing network `node_id`, services with capacity inputs), `severities`
+  (`DS ∈ [0, 1]` per facility), `closed_edges` (`edge_ids` and `modes`), `rationing`
+  (`uniform | concentrated`, required for disruption scenarios, OQ-24) and `reference_level`
+  (the reference-scenario flag; construction of reference scenarios stays open, OQ-16). Unknown
+  fields are refused. It maps to `core.model.Scenario` (`NewFacility` gains `node_id`).
+- The JSON Schema is exported to `docs/schemas/scenario.schema.json` (`make schemas`); a test
+  keeps it current.
+- Scenarios refer to features by **stable ids** from the data package. Name, description and
+  visibility (`private | shared`) belong to the scenario; every edit creates a new **immutable
+  numbered version** (1, 2, …) that records the data version it was created against. Runs refer
+  to versions, so old versions stay readable.
+- When a newer package closes or lacks a referenced feature, the scenario is **reported** (list,
+  editor, import outcome) and cannot be run on that version until edited; nothing is dropped.
+- Delete is soft; a hard delete is refused when runs exist. Interventions and disruptions may be
+  combined (the spec does not forbid it).
+
+**Why:** one source of truth for validation in the backend; the published schema lets the hub and
+other tools check scenarios.
 
 ## Consequences
 
-To be written.
+- A schema 2.0 will need a migration of stored versions.
+- Severities are recorded and reported only: how DS changes capacity is Paper 3 and not
+  implemented.

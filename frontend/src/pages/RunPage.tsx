@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 import { api, exportUrl, getCatalog, getLayer, unwrap, type Schemas } from "../api/client";
-import { useSession } from "../app/session";
+import { canEdit, useSession } from "../app/session";
 import { DiagnosticBanner } from "../components/DiagnosticBanner";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { IntervalValue } from "../components/IntervalValue";
@@ -25,7 +25,7 @@ export function RunPage() {
   const { t, lang } = useT();
   const { runId = "" } = useParams();
   const navigate = useNavigate();
-  const { config, activeDataVersion: dv } = useSession();
+  const { config, activeDataVersion: dv, user } = useSession();
   const [run, setRun] = useState<Run | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [cancelling, setCancelling] = useState(false);
@@ -34,6 +34,7 @@ export function RunPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [changes, setChanges] = useState<Record<string, unknown>[]>([]);
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [siblings, setSiblings] = useState<Run[]>([]);
 
   const load = useCallback(() => {
     unwrap(api.GET("/runs/{run_id}", { params: { path: { run_id: runId } } }))
@@ -42,6 +43,15 @@ export function RunPage() {
   }, [runId]);
 
   useEffect(load, [load]);
+
+  const scenarioId = run?.scenario_id;
+  const status = run?.status;
+  useEffect(() => {
+    if (!scenarioId) return;
+    unwrap(api.GET("/runs", { params: { query: { scenario_id: scenarioId } } }))
+      .then(setSiblings)
+      .catch(setError);
+  }, [scenarioId, status]);
 
   // Follow progress until the run reaches a final state.
   useEffect(() => {
@@ -175,7 +185,7 @@ export function RunPage() {
       {dv && dv.id !== run.data_version_id && (
         <p className="banner banner--warning" role="note">
           {t("run.old_data", { run: run.package_version, active: dv.version })}{" "}
-          {!run.is_baseline && (
+          {!run.is_baseline && canEdit(user) && (
             <button type="button" onClick={() => void rerun()}>
               {t("run.rerun_on", { version: dv.version })}
             </button>
@@ -304,6 +314,30 @@ export function RunPage() {
         </>
       )}
 
+      {siblings.length > 1 && (
+        <>
+          <h3>{t("run.siblings")}</h3>
+          <ul data-testid="sibling-runs">
+            {siblings
+              .filter((s) => s.id !== run.id)
+              .map((s) => (
+                <li key={s.id}>
+                  <Link to={`/runs/${s.id}`}>
+                    {t("run.sibling", {
+                      version: s.scenario_version,
+                      data: s.package_version,
+                      status: label(t, "status", s.status),
+                      created: s.created_at,
+                    })}
+                  </Link>{" "}
+                  {succeeded && s.status === "succeeded" && (
+                    <Link to={`/runs/${run.id}/compare?with=${s.id}`}>{t("run.compare_with")}</Link>
+                  )}
+                </li>
+              ))}
+          </ul>
+        </>
+      )}
       <h3>{t("run.reproducibility")}</h3>
       <dl className="repro">
         {(

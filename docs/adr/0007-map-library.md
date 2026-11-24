@@ -1,7 +1,7 @@
 # 0007. Frontend map library
 
-- Status: Proposed (stub, needs a human decision)
-- Date: 2026-11-24
+- Status: Accepted for v0.1, to be revisited
+- Date: 2026-11-24 (accepted for v0.1: 2026-11-25)
 - Related: README "Planned capabilities"; `frontend/`
 
 ## Context
@@ -24,8 +24,26 @@ The frontend will show indicators per spatial unit, group and service, with unce
 
 ## Decision
 
-Not decided.
+**Accepted for v0.1, to be revisited: option 2, Leaflet** (BSD-2-Clause), used directly with a
+small React wrapper (`frontend/src/map/MapView.tsx`). `react-leaflet` is **not** used: its
+licence (Hippocratic-2.1) is not compatible with AGPL-3.0.
+
+- Basemap configurable with `SOLIDARITYNODE_BASEMAP`: `osm` (OpenStreetMap standard tiles with
+  the required attribution, light interactive use within the OSMF tile usage policy) or `blank`
+  (no tiles, for offline use and tests).
+- The backend reprojects layers to EPSG:4326 with PostGIS; the frontend only displays.
+- Styling: core units solid, buffer units grey and dashed; quality shown with SVG patterns
+  (hatching = estimated, dots = open data); edge-effect units with an orange outline; results in
+  viridis (sequential) and PuOr (diverging), both readable with common colour-vision deficiencies.
+- Accessibility: the map container is keyboard-focusable (arrows pan, +/- zoom), every map has a
+  text list of its features and a legend in words.
+
+**Why:** the demo and first municipalities have few polygons, so raster-first Leaflet is enough;
+it is small, well known and simple to wrap without a React binding.
 
 ## Consequences
 
-To be written with the decision.
+- Large layers (all Local Communities of a region) may need vector tiles: revisit with
+  MapLibre GL JS (BSD-3-Clause) when layers grow.
+- Production installations should use their own tile server or a provider whose terms allow
+  their traffic; OSM's public tiles are not for heavy use.

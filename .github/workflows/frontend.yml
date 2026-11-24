@@ -3,9 +3,9 @@ name: frontend
 on:
   push:
     branches: [main]
-    paths: ["frontend/**", "Makefile", ".github/workflows/frontend.yml"]
+    paths: ["frontend/**", "docs/schemas/openapi.json", "Makefile", ".github/workflows/frontend.yml"]
   pull_request:
-    paths: ["frontend/**", "Makefile", ".github/workflows/frontend.yml"]
+    paths: ["frontend/**", "docs/schemas/openapi.json", "Makefile", ".github/workflows/frontend.yml"]
 
 permissions:
   contents: read
@@ -28,6 +28,8 @@ jobs:
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: make setup-frontend
+      - name: Generated API types match docs/schemas/openapi.json
+        run: pnpm --dir frontend run gen:api && git diff --exit-code frontend/src/api/schema.d.ts
       - run: make lint-frontend
       - run: make test-frontend
       - run: pnpm --dir frontend run build

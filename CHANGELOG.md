@@ -6,6 +6,14 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ### Added
 
+- Platform mechanics (no scientific method): data packages (ADR 0013) with validation, checksums, preview of changes and transactional import of versioned data; demo packages 1.0.0 and 1.1.0 (DP-002); edge-effect warnings for core units next to buffer municipalities without facility data (OQ-28, warning only).
+- `DEPLOYMENT_MODE` (`municipality` | `hub`; ADR 0012). Only the municipal installation is complete.
+- Local accounts with Argon2id, sessions, roles admin, analyst and viewer (ADR 0015); `make create-admin`; demo users in development.
+- Versioned scenario overlays with a JSON Schema (`docs/schemas/scenario.schema.json`, ADR 0016); create, list, get, new version, duplicate, soft delete, validate, revalidate.
+- Runs with input hash and cached reuse, a PostgreSQL job queue and a `worker` service with progress, cancel and restart recovery (ADR 0006, 0017); results in PostGIS, samples in Parquet (ADR 0008); comparison with the baseline; CSV and GeoPackage export with reproducibility metadata.
+- Core: model registry, scenario overlay and the diagnostic model `diagnostic-v0` (labelled "Diagnostic model: not a research result").
+- Frontend: login, study area, scenarios, scenario editor, run, compare and admin screens with Leaflet (ADR 0007), English and Greek, generated API types; Playwright end-to-end test.
+- Tickets record `facility_id` (OQ-29); nothing is stored yet (ADR 0010).
 - Monorepo skeleton: `core/`, `backend/`, `frontend/`, `docs/`, `data/synthetic/`, `.github/`, Makefile.
 - `core`: typed domain model (OQ-1 notation, entities, anonymous `Ticket`, recording coverage, recovery trajectories, `IndexedValues` container, uncertain values, Low/Medium/High states, service-unit quantities, variable catalogue) and typed interfaces for every module. No scientific method implemented.
 - `backend`: FastAPI app with `/health`, `/health/ready`, `/version`; settings; SQLAlchemy and Alembic wired to PostGIS; placeholder routers; anonymous ticket schema; background job interface.
@@ -25,6 +33,7 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ### Changed
 
+- The temporary `demo` schema is dropped (migration 0003); `make seed` imports demo package 1.0.0. The job interface takes a kind and JSON payload and supports cancel; the in-process runner is removed.
 - CI: the DCO check exempts Dependabot commits; Dependabot no longer proposes TypeScript major updates until typescript-eslint supports TypeScript 7.
 - Agent instructions moved to the open `AGENTS.md` convention: root `AGENTS.md` (former `CLAUDE.md` content) plus area files for `core/`, `backend/`, `frontend/` and `data-processing/`, human-readable versions in `docs/conventions/`, `CLAUDE.md` files reduced to import bridges, and a Claude Code `/add-rule` command.
 - `SOLIDARITYNODE_ENVIRONMENT` replaced by `APP_ENV`; `.env.example` placeholders are plain `change-me`, with a comment per setting.

@@ -1,7 +1,7 @@
 # 0017. Run reproducibility and result storage
 
-- Status: Proposed (stub, needs a human decision)
-- Date: 2026-11-24
+- Status: Accepted for v0.1, to be revisited
+- Date: 2026-11-24 (accepted for v0.1: 2026-11-25)
 - Related: Spec 00 §3 (Run, Result), AGENTS.md invariant 6 (uncertainty); ADR 0006, 0008, 0013, 0016
 
 ## Context
@@ -24,8 +24,28 @@ Spec 00 §3: a **run** is one **immutable** execution of a scenario and records 
 
 ## Decision
 
-Not decided.
+**Accepted for v0.1, to be revisited: option 1, run record in PostgreSQL plus Parquet files.**
+
+- A run is immutable and records: scenario id and version, data package id and version (and the
+  data version row), code version (`GIT_COMMIT` of the build), model id and version (from the core
+  model registry), random seed and configuration. Lifecycle, progress and error live in its job
+  (ADR 0006).
+- **Input hash**: SHA-256 of the canonical JSON of scenario id, version and body, package id,
+  version and manifest checksum, code version, model id and version, seed and configuration (no
+  timestamps). Starting a run whose hash matches a **succeeded** run returns that run unless the
+  user forces a rerun; failed or cancelled runs are never reused.
+- A worker built from a different commit refuses a run recorded for another code version (the run
+  fails with a clear message), so results always come from the recorded code.
+- Results: see ADR 0008. Comparison is allowed between runs on the same data version (default:
+  the baseline run created on import) or between two runs of the same scenario on different data
+  versions (labelled); otherwise it is refused. Export: CSV or GeoPackage zipped with
+  `metadata.json` holding every reproducibility field.
+- The only registered model is `diagnostic-v0`, which is labelled everywhere as "Diagnostic
+  model: not a research result".
+
+**Why:** run metadata stays queryable next to scenarios and data versions; files hold the bulk.
 
 ## Consequences
 
-To be written.
+- A dirty working tree gives a `-dirty` commit; such runs are reproducible only on that machine.
+- Parameter versions (CPTs, priors) will join the hash when models have them (ADR 0004, OQ-27).
