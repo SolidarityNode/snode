@@ -53,7 +53,15 @@ All configuration comes from `.env` (git-ignored), created by `make setup` from 
 | `SOLIDARITYNODE_LOG_LEVEL` | backend | `info` | `debug`, `info`, `warning` or `error` |
 | `SOLIDARITYNODE_DATABASE_URL` | backend on the host | built from `POSTGRES_*` in compose | SQLAlchemy URL (secret) |
 | `SOLIDARITYNODE_CORS_ORIGINS` | backend | `["http://localhost:5173"]` | Origins allowed to call the API directly |
-| `SOLIDARITYNODE_DEMO_DATA_DIR` | `make seed` | `data/synthetic/demo` | Synthetic demo dataset directory |
+| `DEPLOYMENT_MODE` | backend | `municipality` | `municipality` or `hub` (ADR 0012); only the municipal installation is complete in v0.1 |
+| `SOLIDARITYNODE_BASEMAP` | backend → frontend | `osm` | Map background: `osm` (OpenStreetMap tiles, attributed, needs internet) or `blank` (offline) |
+| `SOLIDARITYNODE_DIAGNOSTIC_STEP_DELAY_S` | runs | `0.5` | Pause after each progress step so progress and cancel can be followed; recorded in the run configuration |
+| `SOLIDARITYNODE_SESSION_HOURS` | backend | `12` | Login session lifetime |
+| `SOLIDARITYNODE_SESSION_COOKIE_SECURE` | backend | `false` | Session cookie only over HTTPS (set `true` behind TLS) |
+| `SOLIDARITYNODE_RESULTS_DIR` | backend, worker on the host | `var/results` (`/data/results` volume in compose) | Per-sample Parquet results and package uploads |
+| `SOLIDARITYNODE_PACKAGES_DIR` | backend | `data/synthetic/packages` | Data packages offered for import on the Admin screen |
+| `SOLIDARITYNODE_WORKER_NAME` | worker | `worker` | Worker name; on start it fails the runs it was running when it stopped |
+| `SOLIDARITYNODE_TEST_DATABASE_URL` | backend tests | compose `db` on 127.0.0.1:5432 | PostGIS server on which the tests create a throw-away database |
 | `GIT_COMMIT` | image builds | set by `make up` | Build identity shown by `/version` and the footer |
 | `CONTAINER_ENGINE`, `COMPOSE` | Makefile | `podman`, `podman compose` | Container engine and compose command |
 

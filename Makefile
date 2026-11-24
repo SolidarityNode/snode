@@ -38,7 +38,8 @@ BACKEND_URL := http://127.0.0.1:$(BACKEND_HOST_PORT)
 .PHONY: help check-tools check-engine env check-config setup setup-core setup-backend setup-frontend \
         lint lint-core lint-backend lint-frontend \
         test test-core test-backend test-frontend \
-        fmt stop up down logs ps wait db-shell seed reset uat images licenses labels clean distclean
+        fmt stop up down logs ps wait db-shell seed reset uat images licenses labels clean distclean \
+        test-db test-e2e e2e-setup import-package create-admin schemas
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -94,16 +95,35 @@ lint-frontend:
 
 # --- Tests ---------------------------------------------------------------------------------
 
-test: test-core test-backend test-frontend ## Run all tests
+test: test-core test-backend test-frontend test-e2e ## Run all tests (unit, backend on PostGIS, end-to-end)
 
 test-core:
 	cd core && $(UV_RUN) pytest
 
-test-backend:
+# Backend tests need PostGIS: they create and drop a throw-away database. Locally the compose
+# `db` service is started; set SOLIDARITYNODE_TEST_DATABASE_URL to use another server (CI).
+test-db: ## Start the database used by the backend tests (skipped if SOLIDARITYNODE_TEST_DATABASE_URL is set)
+	@if [ -z "$${SOLIDARITYNODE_TEST_DATABASE_URL:-}" ]; then \
+	  $(MAKE) --no-print-directory check-engine && $(COMPOSE) up -d db && \
+	  for i in $$(seq 1 60); do \
+	    $(COMPOSE) exec -T db sh -c 'pg_isready -q -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"' && exit 0; sleep 1; \
+	  done; echo "Database not ready." >&2; exit 1; \
+	fi
+
+test-backend: test-db
 	cd backend && $(UV_RUN) pytest
 
 test-frontend:
 	cd frontend && $(PNPM) run test
+
+e2e-setup: ## Install the Playwright browser for the end-to-end test (once)
+	cd frontend && $(PNPM) exec playwright install chromium
+
+test-e2e: ## End-to-end test (Playwright) against the stack; starts and seeds it first
+	$(MAKE) --no-print-directory up
+	$(MAKE) --no-print-directory wait
+	$(MAKE) --no-print-directory seed
+	cd frontend && E2E_BASE_URL=$(FRONTEND_URL) $(PNPM) run test:e2e
 
 # --- Formatting ----------------------------------------------------------------------------
 
@@ -114,8 +134,8 @@ fmt: ## Auto-format and auto-fix (ruff, prettier, eslint)
 
 # --- Containers ----------------------------------------------------------------------------
 
-stop: ## Stop one service, keep the others (SERVICE=backend|frontend|db)
-	@[ -n "$(SERVICE)" ] || { echo "Usage: make stop SERVICE=backend|frontend|db" >&2; exit 1; }
+stop: ## Stop one service, keep the others (SERVICE=backend|worker|frontend|db)
+	@[ -n "$(SERVICE)" ] || { echo "Usage: make stop SERVICE=backend|worker|frontend|db" >&2; exit 1; }
 	$(COMPOSE) stop $(SERVICE)
 
 up: check-engine ## Build, validate the configuration (check-config), then start the stack
@@ -147,12 +167,34 @@ wait: ## Wait until the backend reports ready (database reachable)
 db-shell: ## Open psql in the database container (credentials from .env; also reads SQL from stdin)
 	$(COMPOSE) exec $$([ -t 0 ] || echo -T) db sh -c 'exec psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
 
-seed: ## Load the synthetic demo dataset into schema 'demo' (idempotent)
-	$(COMPOSE) exec -T backend python -m solidaritynode_backend.demo_seed
+seed: ## Import demo package 1.0.0 (no-op if present), demo users (development), wait for runs
+	$(COMPOSE) exec -T backend python -m solidaritynode_backend.cli import-package /app/data/synthetic/packages/demo-1.0.0 --yes
+	@if [ "$(APP_ENV)" = "development" ]; then \
+	  $(COMPOSE) exec -T backend python -m solidaritynode_backend.cli seed-demo-users; \
+	else echo "APP_ENV=$(APP_ENV): demo users not created."; fi
+	$(COMPOSE) exec -T backend python -m solidaritynode_backend.cli wait-runs --timeout 180
 
-reset: check-engine ## DELETE the database volume, restart, migrate and seed (asks unless FORCE=1)
+import-package: check-engine ## Validate, preview and import a data package (PKG=dir or archive; YES=1 skips the question)
+	@[ -n "$(PKG)" ] || { echo "Usage: make import-package PKG=<directory or .zip/.tar.gz>" >&2; exit 1; }
+	@[ -e "$(PKG)" ] || { echo "make import-package: $(PKG) not found" >&2; exit 1; }
+	@pack() { if [ -d "$(PKG)" ]; then tar -C "$(PKG)" -cf - .; else cat "$(PKG)"; fi; }; \
+	pack | $(COMPOSE) exec -T backend python -m solidaritynode_backend.cli import-package - --preview-only || exit 1; \
+	if [ "$(YES)" != "1" ]; then \
+	  read -r -p "Import this package? Type 'yes' to confirm: " answer || answer=""; \
+	  [ "$$answer" = "yes" ] || { echo "Aborted; nothing imported."; exit 1; }; \
+	fi; \
+	pack | $(COMPOSE) exec -T backend python -m solidaritynode_backend.cli import-package - --yes
+
+create-admin: check-engine ## Create the first administrator interactively
+	$(COMPOSE) exec backend python -m solidaritynode_backend.cli create-admin
+
+schemas: ## Export the scenario JSON Schema and OpenAPI to docs/schemas; regenerate frontend API types
+	cd backend && $(UV_RUN) python -m solidaritynode_backend.cli export-schemas ../docs/schemas
+	cd frontend && $(PNPM) run gen:api
+
+reset: check-engine ## DELETE the database and results volumes, restart, migrate and seed (asks unless FORCE=1)
 	@if [ "$(FORCE)" != "1" ]; then \
-	  echo "This stops the stack and DELETES the database volume (all local data)."; \
+	  echo "This stops the stack and DELETES the database and results volumes (all local data)."; \
 	  read -r -p "Type 'yes' to continue: " answer || answer=""; \
 	  [ "$$answer" = "yes" ] || { echo "Aborted."; exit 1; }; \
 	fi
@@ -167,13 +209,16 @@ uat: ## Fresh state for manual testing: reset, up, then print the URLs to open
 	$(MAKE) --no-print-directory up
 	$(MAKE) --no-print-directory wait
 	@echo ""
-	@echo "UAT environment ready (build $(GIT_COMMIT)). Open:"
-	@echo "  Frontend:       $(FRONTEND_URL)"
+	@echo "UAT environment ready (build $(GIT_COMMIT)). Demo package 1.0.0 imported, baseline run done."
+	@echo "Open:"
+	@echo "  Application:    $(FRONTEND_URL)"
 	@echo "  Health page:    $(FRONTEND_URL)/health"
 	@echo "  Backend docs:   $(BACKEND_URL)/docs"
-	@echo "  Backend health: $(BACKEND_URL)/health"
 	@echo "  Version:        $(BACKEND_URL)/version"
-	@echo "Checklist: docs/uat/00-bootstrap.md. Database: make db-shell. Logs: make logs."
+	@echo "Demo accounts (development only):"
+	@echo "  demo-admin   / demo-admin-pass    (admin: users and data packages)"
+	@echo "  demo-analyst / demo-analyst-pass  (analyst: scenarios and runs)"
+	@echo "Checklist: docs/uat/01-platform.md. Database: make db-shell. Logs: make logs."
 
 images: ## Build the container images with $(CONTAINER_ENGINE)
 	$(CONTAINER_ENGINE) build -f backend/Containerfile -t localhost/solidaritynode-backend:dev .
