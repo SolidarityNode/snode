@@ -16,10 +16,17 @@ SHELL := /bin/bash
 UV_RUN := $(UV) run --frozen
 
 # Host ports and other values from .env (if present), with the same defaults as compose.yaml.
+# APP_ENV from the shell wins over .env, as it does for compose, so check-config validates
+# what compose will actually start.
+SHELL_APP_ENV := $(APP_ENV)
 -include .env
+ifneq ($(SHELL_APP_ENV),)
+APP_ENV := $(SHELL_APP_ENV)
+endif
 BACKEND_HOST_PORT ?= 8000
 FRONTEND_HOST_PORT ?= 8080
 APP_ENV ?= development
+export APP_ENV
 
 # Build identity shown by /version and the frontend footer.
 GIT_COMMIT ?= $(shell git rev-parse --short=12 HEAD 2>/dev/null || echo unknown)$(shell git diff --quiet HEAD 2>/dev/null || echo -dirty)
@@ -111,8 +118,11 @@ stop: ## Stop one service, keep the others (SERVICE=backend|frontend|db)
 	@[ -n "$(SERVICE)" ] || { echo "Usage: make stop SERVICE=backend|frontend|db" >&2; exit 1; }
 	$(COMPOSE) stop $(SERVICE)
 
-up: check-engine ## Build and start db, backend and frontend with $(COMPOSE)
-	$(COMPOSE) up -d --build
+up: check-engine ## Build, validate the configuration (check-config), then start the stack
+	$(COMPOSE) build
+	@$(MAKE) --no-print-directory check-config || { \
+	  echo "make up: invalid configuration (see the message above); nothing was started." >&2; exit 1; }
+	$(COMPOSE) up -d
 	@echo "Build $(GIT_COMMIT). Frontend: $(FRONTEND_URL)  Backend: $(BACKEND_URL)/health"
 
 down: ## Stop the stack (keeps the database volume)
