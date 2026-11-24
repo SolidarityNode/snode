@@ -28,6 +28,7 @@ We need (a) immutable typed entities and (b) one container for indexed values th
 - Uncertain scalars are `PointValue | Samples | DiscreteDistribution`; arrays carry uncertainty in a `sample` or `state` dimension.
 - `ServiceQuantity` carries service, service unit and reference period; adding quantities that differ in any of them raises `UnitMismatchError` (OQ-24, OQ-25).
 - Geometry is typed as any object with `__geo_interface__`, so `core` needs no geometry library yet (GeoPandas/Shapely arrive with the accessibility module).
+- Scenarios are overlays on the baseline (Spec 00 §3). Besides disruption severities, network disruption, rationing case and reference level, `Scenario.interventions` holds typed what-if placeholders (`CapacityChange`, absolute or relative; `NewFacility`; Paper 1 §13) with **no behaviour**. The JSON schema and versioning of stored scenarios are ADR 0016.
 - A variable catalogue (`model/catalogue.py`) mirrors Spec 00 §4 and records each variable's kind (BN node, computed, parameter, output…) and dimensions, so tests can keep these categories distinct.
 
 ## Consequences
@@ -36,3 +37,7 @@ We need (a) immutable typed entities and (b) one container for indexed values th
 - The wrapper hides most of xarray's API on purpose; modules that need more can use `to_dataarray()` internally and wrap the result again.
 - Storage of large arrays (Parquet vs Zarr/NetCDF) is a separate decision (ADR 0008).
 - If performance or typing becomes an issue, the wrapper keeps the public API stable while the backend changes.
+
+## Demo data in the database (temporary)
+
+The synthetic demo dataset (`data/synthetic/demo/`, DP-001) is loaded by `make seed` into a separate PostgreSQL schema **`demo`** (Alembic migration `0002`), never into `public`. Its tables mirror the demo files, not this data model, and exist only so tests and UAT can inspect realistic-looking data. **The `demo` schema is temporary and will be replaced by data-package import in the platform PR** (ADR 0013). The loader copies data and computes nothing.

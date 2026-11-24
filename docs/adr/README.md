@@ -17,3 +17,9 @@ Methodological decisions (formulas, model structure) are recorded in [`docs/spec
 | [0009](0009-geospatial-data-sources.md) | Geospatial data sources | Proposed (stub) | OQ-22 |
 | [0010](0010-ticket-privacy.md) | Privacy rules for request tickets | Proposed (stub) | OQ-21, OQ-6, OQ-8 |
 | [0011](0011-container-engine.md) | Container engine (Podman default, Docker supported) | Proposed (stub) | |
+| [0012](0012-deployment-model.md) | Deployment model: municipal installations and a hub | Proposed (stub) | OQ-21, OQ-28 |
+| [0013](0013-data-packages.md) | Data packages: format, versioning, checksums and buffer | Proposed (stub) | OQ-28 |
+| [0014](0014-upward-data-flow.md) | Upward data flow from municipalities to the hub | Proposed (stub) | OQ-21, OQ-8, OQ-16, OQ-27 |
+| [0015](0015-authentication-and-roles.md) | Authentication and roles | Proposed (stub) | OQ-21 |
+| [0016](0016-scenario-schema-and-versioning.md) | Scenario schema and versioning | Proposed (stub) | OQ-16, OQ-24 |
+| [0017](0017-run-reproducibility-and-result-storage.md) | Run reproducibility and result storage | Proposed (stub) | |
