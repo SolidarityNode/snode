@@ -112,12 +112,13 @@ Social service data can be sensitive.
 Requirements: `git`, `make`, [`uv`](https://docs.astral.sh/uv/), Node.js 26 with `pnpm` 12, and Podman (default) or Docker.
 
 ```bash
-make setup        # install dependencies
+make setup        # check tools, create .env, install dependencies
 make lint test    # lint, type check and test everything
 make up           # start database, backend and frontend (Podman by default)
+make uat          # or: clean database + synthetic demo data, then print the URLs
 ```
 
-Then open http://localhost:8080. With Docker: `CONTAINER_ENGINE=docker COMPOSE="docker compose" make up`. See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/architecture.md](docs/architecture.md).
+Then open http://127.0.0.1:8080 (services listen on `127.0.0.1` only). Manual testing: [docs/uat/](docs/uat/README.md). With Docker: `CONTAINER_ENGINE=docker COMPOSE="docker compose" make up`. See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/architecture.md](docs/architecture.md).
 
 ## Roadmap
 

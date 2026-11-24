@@ -132,3 +132,35 @@ Long-running simulations (Monte Carlo, scenario sweeps, DBN runs) never run insi
 - Ports (non-privileged, bound to 127.0.0.1): frontend 8080, backend 8000, database 5432; configurable in `.env`.
 - The backend container runs `alembic upgrade head` before starting the API.
 - Database data lives in the named volume `db-data`; there are no bind mounts, so the stack behaves the same under WSL2.
+- `make up` passes `GIT_COMMIT` to both image builds; `/version` and the frontend footer show it with `APP_ENV`, so a tester knows which build is running. Outside `development` and `test`, the backend refuses `change-me` secrets.
+- `make uat` resets the database, starts the stack, migrates and seeds the synthetic demo dataset into the temporary schema `demo` (migration `0002`); see [`docs/uat/`](uat/README.md).
+
+## 7. Deployment and data packages (planned)
+
+Spec 00 §3 describes one codebase running in two roles. Nothing below is implemented yet; the decisions are open in ADRs 0012–0017.
+
+```mermaid
+flowchart LR
+    subgraph HUB["hub (ADR 0012)"]
+        RAW[("national raw sources<br/>boundaries, network,<br/>population, DEM")]
+        ONB["onboarding<br/>clip + buffer, clean, checks<br/>DP-NNN notes"]
+        PKG[("data packages<br/>versioned, checksummed<br/>study area + buffer (ADR 0013, OQ-28)")]
+        AGG[("aggregated indicators<br/>(optional)")]
+        RAW --> ONB --> PKG
+    end
+    subgraph MUN["municipal installation (one per study area)"]
+        IMP["package import<br/>preview of changes"]
+        APP["scenarios (ADR 0016), runs (ADR 0017),<br/>results, users (ADR 0015)"]
+        TIX[("anonymous tickets<br/>never leave the installation")]
+        IMP --> APP
+        TIX --> APP
+    end
+    PKG -->|"download / import"| IMP
+    APP -.->|"opt-in, aggregated,<br/>anonymised only (ADR 0014, OQ-21)"| AGG
+```
+
+- The same images run as `municipality` or `hub`; how the role is chosen is ADR 0012.
+- Data packages carry a `manifest.json` listing files with checksums, layer coverage, changelog and the `DP-NNN` processing notes behind the data (draft format in ADR 0013, used by `data/synthetic/demo/manifest.json`).
+- Until package import exists, `make seed` loads the demo dataset into the `demo` schema; that schema is replaced by package import in the platform PR.
+- Runs record scenario version, package version, git commit, model and parameter version, seed and configuration (ADR 0017).
+
