@@ -10,9 +10,11 @@ from pydantic import AliasChoices, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import make_url
 
-__all__ = ["PLACEHOLDER_PREFIX", "AppEnv", "Settings", "get_settings"]
+__all__ = ["PLACEHOLDER_PREFIX", "AppEnv", "Basemap", "DeploymentMode", "Settings", "get_settings"]
 
 AppEnv = Literal["development", "test", "production"]
+DeploymentMode = Literal["municipality", "hub"]
+Basemap = Literal["osm", "blank"]
 
 PLACEHOLDER_PREFIX = "change-me"
 """Secrets starting with this prefix are placeholders from ``.env.example``."""
@@ -23,8 +25,8 @@ _ENVS_ALLOWING_PLACEHOLDERS: frozenset[str] = frozenset({"development", "test"})
 class Settings(BaseSettings):
     """Backend settings, read from the environment or ``.env``.
 
-    ``APP_ENV`` and ``GIT_COMMIT`` are read without prefix; every other value uses the
-    ``SOLIDARITYNODE_`` prefix.
+    ``APP_ENV``, ``GIT_COMMIT`` and ``DEPLOYMENT_MODE`` are read without prefix; every other
+    value uses the ``SOLIDARITYNODE_`` prefix.
 
     Attributes:
         app_env: ``development``, ``test`` (the test suite) or ``production``. Outside
@@ -34,8 +36,20 @@ class Settings(BaseSettings):
         log_level: Uvicorn/application log level.
         database_url: SQLAlchemy URL for PostgreSQL/PostGIS. Kept secret in logs and reprs.
         cors_origins: Origins allowed to call the API from a browser.
-        demo_data_dir: Synthetic demo dataset loaded by ``make seed`` (relative to the working
-            directory; ``/app`` in the container).
+        deployment_mode: ``municipality`` (one study area, ADR 0012) or ``hub``. Only the
+            municipal installation is implemented in v0.1; ``hub`` starts but offers no hub
+            features yet.
+        packages_dir: Directory of data packages offered for import on the Admin screen.
+        results_dir: Directory for per-sample results (Parquet) and package staging; a mounted
+            volume in compose.
+        basemap: ``osm`` (OpenStreetMap tiles, needs internet) or ``blank`` (offline).
+        auth_backend: Authentication backend (ADR 0015); only ``local`` accounts in v0.1.
+        session_hours: Lifetime of a login session.
+        session_cookie_secure: Send the session cookie only over HTTPS (set in production).
+        diagnostic_step_delay_s: Pause after each progress step of a run, so progress and
+            cancellation can be followed by hand. Part of the run configuration (and its hash).
+        worker_name: Name of this worker process; on start it fails its own interrupted runs.
+        worker_poll_s: Seconds between queue polls when idle.
     """
 
     model_config = SettingsConfigDict(
@@ -54,7 +68,18 @@ class Settings(BaseSettings):
         "postgresql+psycopg://solidaritynode@localhost:5432/solidaritynode"
     )
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
-    demo_data_dir: Path = Path("data/synthetic/demo")
+    deployment_mode: DeploymentMode = Field(
+        default="municipality", validation_alias=AliasChoices("DEPLOYMENT_MODE")
+    )
+    packages_dir: Path = Path("data/synthetic/packages")
+    results_dir: Path = Path("var/results")
+    basemap: Basemap = "osm"
+    auth_backend: Literal["local"] = "local"
+    session_hours: float = Field(default=12.0, gt=0)
+    session_cookie_secure: bool = False
+    diagnostic_step_delay_s: float = Field(default=0.5, ge=0, le=60)
+    worker_name: str = "worker"
+    worker_poll_s: float = Field(default=1.0, gt=0)
 
     def placeholder_secrets(self) -> list[str]:
         """Return the names of secrets whose value starts with ``change-me``."""
