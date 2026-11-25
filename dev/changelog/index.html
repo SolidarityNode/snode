@@ -20,7 +20,7 @@
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../assets/brand/favicon.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
@@ -90,8 +90,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="SolidarityNode" class="md-header__button md-logo" aria-label="SolidarityNode" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../assets/brand/favicon.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -427,8 +426,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="SolidarityNode" class="md-nav__button md-logo" aria-label="SolidarityNode" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../assets/brand/favicon.svg" alt="logo">
 
     </a>
     SolidarityNode
@@ -2343,7 +2341,7 @@
 </ul>
 <h3 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Documentation site (MkDocs with the Material theme, versioned with mike, published to GitHub Pages): user guide with one page per screen, roles and FAQ; architecture pages per component with Mermaid diagrams of the run lifecycle, run statuses, data update flow, data model and scenario application order; roadmap; release process (<code>make docs</code>, <code>make docs-build</code>).</li>
+<li>Documentation site (MkDocs with the Material theme, versioned with mike, published to GitHub Pages): user guide with one page per screen, roles and FAQ; architecture pages per component with Mermaid diagrams of the run lifecycle, run statuses, data update flow, data model and scenario application order; roadmap; release process (<code>make docs</code>, <code>make docs-build</code>). The README and the docs home show the SN Kintsugi logo with the platform version from <code>VERSION</code>; the logo is also the site icon and favicon, and the logo with "SN Kintsugi" replaces the name in the header of the web application, which uses it as favicon too.</li>
 <li>Generated and CI-checked: the ADR index, the specifications index, the open-question counts (<code>make docs-generate</code>) and the dependency and licence report <code>docs/architecture/dependencies.md</code> (<code>make deps-report</code>); link checking of the README and docs.</li>
 <li>The platform version has one source, the file <code>VERSION</code> (<code>make version</code>, <code>make version-sync</code>, checked by <code>make lint</code>), and the run reproducibility record names it (<code>environment.solidaritynode</code>, not in the input hash).</li>
 <li>README as a short landing page; <code>CITATION.cff</code>; milestones per roadmap step and labels <code>paper:1</code> … <code>paper:4</code>.</li>
