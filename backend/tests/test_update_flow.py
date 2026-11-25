@@ -36,7 +36,7 @@ def test_package_update_flow(as_admin, as_analyst, worker) -> None:  # type: ign
     worker.run_until_idle()
     close = as_analyst.post("/scenarios", json=CLOSE_E02).json()
     with_f3 = as_analyst.post("/scenarios", json=WITH_F3).json()
-    old_run = as_analyst.post("/runs", json={"scenario_id": close["id"]}).json()
+    old_run = as_analyst.post("/runs", json={"scenario_id": close["id"], "seed": 1}).json()
     worker.run_until_idle()
     before = _walk(as_analyst, old_run["id"], "A3")
     assert (before["median"], before["edge_effect_warning"]) == (66, True)
@@ -71,6 +71,7 @@ def test_package_update_flow(as_admin, as_analyst, worker) -> None:  # type: ign
         json={
             "scenario_id": close["id"],
             "data_version_id": old_run["data_version_id"],
+            "seed": 1,
             "force": True,
         },
     ).json()

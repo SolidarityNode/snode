@@ -33,7 +33,8 @@ class Settings(BaseSettings):
         app_env: ``development``, ``test`` (the test suite) or ``production``. Outside
             ``development`` and ``test`` the backend refuses to start while any secret still
             starts with ``change-me``.
-        git_commit: Git commit the running build was made from (set at image build time).
+        git_commit: Git commit the running build was made from (set at image build time). With
+            ``APP_ENV=production`` it must be known and not end in ``-dirty``.
         log_level: Uvicorn/application log level.
         database_url: SQLAlchemy URL for PostgreSQL/PostGIS. Kept secret in logs and reprs.
         cors_origins: Origins allowed to call the API from a browser.
@@ -144,6 +145,18 @@ class Settings(BaseSettings):
         if password is not None and str(password).startswith(PLACEHOLDER_PREFIX):
             found.append("database_url (password)")
         return found
+
+    @model_validator(mode="after")
+    def _known_clean_code_in_production(self) -> Self:
+        if self.app_env == "production" and (
+            self.git_commit in ("", "unknown") or self.git_commit.endswith("-dirty")
+        ):
+            raise ValueError(
+                f"APP_ENV=production needs a known, clean code version, got GIT_COMMIT="
+                f"{self.git_commit!r}: build the images from a committed tree (make up sets "
+                "GIT_COMMIT) so every run records reproducible code (ADR 0017)"
+            )
+        return self
 
     @model_validator(mode="after")
     def _secure_cookie_in_production(self) -> Self:

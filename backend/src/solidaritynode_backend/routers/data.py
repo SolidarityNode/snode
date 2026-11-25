@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -26,6 +27,7 @@ from solidaritynode_backend.schemas.api import (
     PreviewIn,
     PreviewOut,
     RevalidationOut,
+    StorageOut,
 )
 from solidaritynode_backend.services.packages import (
     FEATURE_LAYERS,
@@ -184,6 +186,27 @@ def layer_geojson(data_version_id: int, layer: str, _: CurrentUser, db: Db) -> d
             {"type": "Feature", "id": fid, "properties": props, "geometry": json.loads(geometry)}
         )
     return {"type": "FeatureCollection", "features": features}
+
+
+@router.get("/storage", response_model=StorageOut)
+def storage(_: Admin, db: Db, settings: Config) -> StorageOut:
+    """Disk usage of the results volume: samples files and free space (ADR 0017).
+
+    Nothing is deleted automatically in v0.1; this lets an administrator watch the volume.
+    """
+    runs_dir = settings.results_dir / "runs"
+    files = [p for p in runs_dir.rglob("*.parquet") if p.is_file()] if runs_dir.exists() else []
+    usage = shutil.disk_usage(settings.results_dir) if settings.results_dir.exists() else None
+    return StorageOut(
+        results_dir=str(settings.results_dir),
+        runs_with_samples=int(
+            db.scalar(text("SELECT count(*) FROM runs WHERE samples_path IS NOT NULL")) or 0
+        ),
+        samples_files=len(files),
+        samples_bytes=sum(p.stat().st_size for p in files),
+        total_bytes=usage.total if usage else None,
+        free_bytes=usage.free if usage else None,
+    )
 
 
 @router.get("/packages/available", response_model=list[AvailablePackage])

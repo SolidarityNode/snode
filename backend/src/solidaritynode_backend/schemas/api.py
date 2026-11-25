@@ -346,7 +346,12 @@ class RunIn(_In):
     scenario_id: uuid.UUID
     scenario_version: int | None = None
     data_version_id: int | None = None
-    seed: int = Field(default=1, ge=0, le=2**31 - 1)
+    seed: int | None = Field(
+        default=None,
+        ge=0,
+        le=2**31 - 1,
+        description="Random seed; when omitted one is drawn and recorded (seed_source: drawn)",
+    )
     config: RunConfigIn = Field(default_factory=RunConfigIn)
     force: bool = False
 
@@ -406,6 +411,22 @@ class RunOut(BaseModel):
     samples_limit_bytes: int | None = Field(
         default=None, description="Warning limit for the samples file in force at creation"
     )
+    seed_source: Literal["given", "drawn"] = Field(
+        default="given", description="Whether the seed was given or drawn because none was"
+    )
+    code_version_dirty: bool = Field(
+        default=False,
+        description="The code version has uncommitted changes (-dirty) or is unknown: the run is "
+        "reproducible only on the machine that made it",
+    )
+    environment: dict[str, str] | None = Field(
+        default=None, description="Python, NumPy and platform of the worker (not in the hash)"
+    )
+    reuse_refused: str | None = Field(
+        default=None,
+        description="Why a matching earlier run was not reused (its results file failed the "
+        "integrity check)",
+    )
 
 
 class ResultRow(BaseModel):
@@ -448,7 +469,9 @@ class CompareRow(BaseModel):
     indicator: str
     a: IntervalOut
     b: IntervalOut
-    difference: float | None = Field(description="Difference of the medians, A − B")
+    difference_of_medians: float | None = Field(
+        description="Difference of the medians, A − B (not a difference of draws; ADR 0017)"
+    )
     edge_effect_warning: bool
 
 
@@ -469,3 +492,14 @@ class RoleFeatureOut(BaseModel):
     feature: str
     implemented: bool
     note: str
+
+
+class StorageOut(BaseModel):
+    """Disk usage of the results volume (admin; ADR 0017)."""
+
+    results_dir: str
+    runs_with_samples: int
+    samples_files: int
+    samples_bytes: int
+    total_bytes: int | None
+    free_bytes: int | None

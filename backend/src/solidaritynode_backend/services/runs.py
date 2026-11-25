@@ -22,6 +22,8 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import platform
+import secrets
 import time
 import uuid
 from collections.abc import Mapping
@@ -39,8 +41,10 @@ from solidaritynode_backend.jobs import JobContext, PostgresJobRunner
 from solidaritynode_backend.orm import DataVersion, Job, Run, Scenario, ScenarioVersion
 from solidaritynode_backend.schemas.scenario import ScenarioBody
 from solidaritynode_backend.services.samples import (
+    SamplesIntegrityError,
     as_stored,
     estimate_samples_bytes,
+    verify_samples,
     write_samples,
 )
 from solidaritynode_backend.services.study_area import load_study_area
@@ -96,6 +100,22 @@ class CreatedRun:
     reused: bool
 
 
+def draw_seed() -> int:
+    """Draw a random seed in ``[0, 2^31)`` for a run that was given none (it is recorded)."""
+    return secrets.randbelow(2**31)
+
+
+def execution_environment() -> dict[str, str]:
+    """Return the versions that executed a run (metadata only, not in the input hash)."""
+    import numpy
+
+    return {
+        "python": platform.python_version(),
+        "numpy": numpy.__version__,
+        "platform": platform.platform(terse=True),
+    }
+
+
 def create_run(
     db: Session,
     settings: Settings,
@@ -103,17 +123,25 @@ def create_run(
     version: ScenarioVersion,
     data_version: DataVersion,
     *,
-    seed: int = DEFAULT_SEED,
+    seed: int | None = DEFAULT_SEED,
     config: Mapping[str, Any] | None = None,
     created_by: int | None = None,
     force: bool = False,
 ) -> CreatedRun:
     """Queue a run, or return the succeeded run with the same input hash (caller commits).
 
+    ``seed=None`` draws a seed and records it (``seed_source = "drawn"``); the number of draws is
+    recorded in the configuration (``n_samples``). A matching succeeded run is reused only if its
+    samples file is present and passes its SHA-256 check; otherwise the new run records why it
+    was not reused (``reuse_refused``) and runs again.
+
     Raises:
         RunInputError: If the scenario references closed or missing features of the data
             version (reported, never silently dropped).
     """
+    seed_source = "given"
+    if seed is None:
+        seed, seed_source = draw_seed(), "drawn"
     body = ScenarioBody.model_validate(version.body)
     if problems := reference_problems(db, body, data_version.id):
         raise RunInputError(problems)
@@ -138,16 +166,32 @@ def create_run(
         "config": full_config,
     }
     digest = input_hash(fields)
+    reuse_refused = None
     if not force:
-        existing = db.scalar(
+        # Newest first: a run that replaced a damaged one is found before it.
+        matches = db.scalars(
             select(Run)
             .join(Job, Job.id == Run.job_id)
             .where(Run.input_hash == digest, Job.status == "succeeded")
-            .order_by(Run.created_at)
-            .limit(1)
-        )
-        if existing is not None:
+            .order_by(Run.created_at.desc())
+        ).all()
+        refused: list[str] = []
+        for existing in matches:
+            if existing.samples_path is None:
+                return CreatedRun(existing, reused=True)
+            try:
+                verify_samples(existing.samples_path, existing.samples_sha256, str(existing.id))
+            except SamplesIntegrityError as exc:
+                refused.append(f"run {existing.id}: {exc}")
+                continue
             return CreatedRun(existing, reused=True)
+        if refused:
+            reuse_refused = (
+                "An earlier run with the same inputs was not reused because its results file "
+                f"failed the integrity check ({'; '.join(refused)}). This run computes the "
+                "results again."
+            )
+            log.warning("%s", reuse_refused)
     run_id = uuid.uuid4()
     # Estimate the samples file before the run starts; a run above the limit is still queued, and
     # the run page warns (ADR 0008).
@@ -179,6 +223,8 @@ def create_run(
         is_baseline=scenario.is_baseline,
         job_id=uuid.UUID(job_id),
         created_by=created_by,
+        seed_source=seed_source,
+        reuse_refused=reuse_refused,
         samples_estimate_bytes=estimate,
         samples_limit_bytes=limit,
     )
@@ -219,12 +265,16 @@ def execute_run(
         code_version, model_version = run.code_version, run.model_version
     if code_version != settings.git_commit:
         raise RuntimeError(
-            f"this worker runs code {settings.git_commit}, the run was recorded for "
-            f"{code_version}; rebuild the worker or start a new run"
+            f"This run was queued for code {code_version}, but the platform now runs code "
+            f"{settings.git_commit} (it was upgraded or rebuilt before the run started). The run "
+            "cannot be reproduced as recorded. Start the run again."
         )
     model = get_registry().get(model_id)
     if model.version != model_version:
-        raise RuntimeError(f"model {model_id} is {model.version}, run needs {model_version}")
+        raise RuntimeError(
+            f"This run was queued for model {model_id} {model_version}, but the platform now "
+            f"has {model.version}. Start the run again."
+        )
     delay = float(config.get("step_delay_s", 0))
 
     def progress(fraction: float) -> None:
@@ -308,4 +358,5 @@ def execute_run(
         ]
         stored.diagnostics = {**result.diagnostics, "diagnostic_model": model.diagnostic}
         stored.samples_path = str(samples_path) if result.samples else None
+        stored.environment = execution_environment()
         stored.samples_sha256 = samples_sha256

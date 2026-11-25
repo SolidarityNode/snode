@@ -41,6 +41,7 @@ def test_placeholders_allowed_in_development_and_test(
 @pytest.mark.parametrize("url", [PLACEHOLDER_URL, OTHER_PLACEHOLDER_URL])
 def test_production_refuses_placeholder_secrets(monkeypatch: pytest.MonkeyPatch, url: str) -> None:
     monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("GIT_COMMIT", "0123456789ab")
     monkeypatch.setenv("SOLIDARITYNODE_SESSION_COOKIE_SECURE", "true")
     monkeypatch.setenv("SOLIDARITYNODE_DATABASE_URL", url)
     with pytest.raises(ValidationError, match="placeholder secrets"):
@@ -49,6 +50,7 @@ def test_production_refuses_placeholder_secrets(monkeypatch: pytest.MonkeyPatch,
 
 def test_validation_errors_do_not_echo_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("GIT_COMMIT", "0123456789ab")
     monkeypatch.setenv("SOLIDARITYNODE_LOG_LEVEL", "loud")
     monkeypatch.setenv("SOLIDARITYNODE_DATABASE_URL", REAL_URL)
     with pytest.raises(ValidationError) as excinfo:
@@ -58,6 +60,7 @@ def test_validation_errors_do_not_echo_secrets(monkeypatch: pytest.MonkeyPatch) 
 
 def test_production_accepts_real_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("GIT_COMMIT", "0123456789ab")
     monkeypatch.setenv("SOLIDARITYNODE_SESSION_COOKIE_SECURE", "true")
     monkeypatch.setenv("SOLIDARITYNODE_DATABASE_URL", REAL_URL)
     settings = Settings()
@@ -68,9 +71,25 @@ def test_production_accepts_real_secrets(monkeypatch: pytest.MonkeyPatch) -> Non
 def test_production_requires_a_secure_session_cookie(monkeypatch: pytest.MonkeyPatch) -> None:
     """ADR 0015: in production the cookie is always Secure; check-config fails otherwise."""
     monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("GIT_COMMIT", "0123456789ab")
     monkeypatch.setenv("SOLIDARITYNODE_DATABASE_URL", REAL_URL)
     monkeypatch.setenv("SOLIDARITYNODE_SESSION_COOKIE_SECURE", "false")
     with pytest.raises(ValidationError, match="SESSION_COOKIE_SECURE=true"):
         Settings()
     monkeypatch.setenv("APP_ENV", "development")
     assert Settings().session_cookie_secure is False  # allowed outside production
+
+
+@pytest.mark.parametrize("commit", ["unknown", "", "0123456789ab-dirty"])
+def test_production_refuses_unknown_or_dirty_code(
+    monkeypatch: pytest.MonkeyPatch, commit: str
+) -> None:
+    """ADR 0017: backend and worker refuse to start in production without clean code."""
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("SOLIDARITYNODE_DATABASE_URL", REAL_URL)
+    monkeypatch.setenv("SOLIDARITYNODE_SESSION_COOKIE_SECURE", "true")
+    monkeypatch.setenv("GIT_COMMIT", commit)
+    with pytest.raises(ValidationError, match="known, clean code version"):
+        Settings()
+    monkeypatch.setenv("APP_ENV", "development")
+    assert Settings().git_commit == commit  # allowed in development (runs carry a warning)

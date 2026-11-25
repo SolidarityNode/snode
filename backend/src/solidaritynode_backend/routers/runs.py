@@ -98,6 +98,11 @@ def run_out(db: Session, run: Run, user: Principal, *, reused: bool = False) -> 
         samples_sha256=run.samples_sha256,
         samples_estimate_bytes=run.samples_estimate_bytes,
         samples_limit_bytes=run.samples_limit_bytes,
+        seed_source=run.seed_source,
+        code_version_dirty=run.code_version in ("", "unknown")
+        or run.code_version.endswith("-dirty"),
+        environment=run.environment,
+        reuse_refused=run.reuse_refused,
     )
 
 
@@ -343,7 +348,7 @@ def compare_runs(
                     low=o.low if o else None,
                     high=o.high if o else None,
                 ),
-                difference=diff,
+                difference_of_medians=diff,
                 edge_effect_warning=r.edge_effect_warning or bool(o and o.edge_effect_warning),
             )
         )

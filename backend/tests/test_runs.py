@@ -68,13 +68,13 @@ def test_run_lifecycle_and_results(as_admin, as_analyst, worker, settings) -> No
 def test_cached_rerun_and_forced_rerun(as_admin, as_analyst, worker) -> None:  # type: ignore[no-untyped-def]
     _ready(as_admin, worker)
     sid = as_analyst.post("/scenarios", json=CLOSE_E02).json()["id"]
-    first = as_analyst.post("/runs", json={"scenario_id": sid}).json()
+    first = as_analyst.post("/runs", json={"scenario_id": sid, "seed": 1}).json()
     worker.run_until_idle()
-    again = as_analyst.post("/runs", json={"scenario_id": sid})
+    again = as_analyst.post("/runs", json={"scenario_id": sid, "seed": 1})
     assert again.status_code == 200
     assert again.json()["reused"] is True
     assert again.json()["id"] == first["id"]
-    forced = as_analyst.post("/runs", json={"scenario_id": sid, "force": True})
+    forced = as_analyst.post("/runs", json={"scenario_id": sid, "seed": 1, "force": True})
     assert forced.status_code == 201
     assert forced.json()["id"] != first["id"]
     assert forced.json()["input_hash"] == first["input_hash"]
@@ -133,7 +133,8 @@ def test_worker_refuses_other_code_version(as_admin, worker, engine, settings) -
     other.run_until_idle()
     run = as_admin.get("/runs").json()[0]
     assert run["status"] == "failed"
-    assert "rebuild the worker" in run["error"]
+    assert "queued for code test-commit, but the platform now runs code other" in run["error"]
+    assert run["error"].endswith("Start the run again.")
 
 
 def test_compare_with_baseline_and_refusal_across_data_versions(
@@ -152,7 +153,7 @@ def test_compare_with_baseline_and_refusal_across_data_versions(
         if (r["unit_id"], r["group_id"], r["service_id"], r["indicator"])
         == ("A3", "G-OLD", "S-HC", "travel_time_walk_min")
     )
-    assert (row["a"]["median"], row["b"]["median"], row["difference"]) == (66, 30, 36)
+    assert (row["a"]["median"], row["b"]["median"], row["difference_of_medians"]) == (66, 30, 36)
     import_version(as_admin, "1.1.0")
     worker.run_until_idle()
     baseline_110 = next(

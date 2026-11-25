@@ -219,7 +219,7 @@
           "b": {
             "$ref": "#/components/schemas/IntervalOut"
           },
-          "difference": {
+          "difference_of_medians": {
             "anyOf": [
               {
                 "type": "number"
@@ -228,8 +228,8 @@
                 "type": "null"
               }
             ],
-            "description": "Difference of the medians, A \u2212 B",
-            "title": "Difference"
+            "description": "Difference of the medians, A \u2212 B (not a difference of draws; ADR 0017)",
+            "title": "Difference Of Medians"
           },
           "edge_effect_warning": {
             "title": "Edge Effect Warning",
@@ -264,7 +264,7 @@
           "indicator",
           "a",
           "b",
-          "difference",
+          "difference_of_medians",
           "edge_effect_warning"
         ],
         "title": "CompareRow",
@@ -1438,11 +1438,18 @@
             "title": "Scenario Version"
           },
           "seed": {
-            "default": 1,
-            "maximum": 2147483647.0,
-            "minimum": 0.0,
-            "title": "Seed",
-            "type": "integer"
+            "anyOf": [
+              {
+                "maximum": 2147483647.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed; when omitted one is drawn and recorded (seed_source: drawn)",
+            "title": "Seed"
           }
         },
         "required": [
@@ -1461,6 +1468,12 @@
           "code_version": {
             "title": "Code Version",
             "type": "string"
+          },
+          "code_version_dirty": {
+            "default": false,
+            "description": "The code version has uncommitted changes (-dirty) or is unknown: the run is reproducible only on the machine that made it",
+            "title": "Code Version Dirty",
+            "type": "boolean"
           },
           "config": {
             "additionalProperties": true,
@@ -1509,6 +1522,21 @@
             },
             "title": "Edge Effect Units",
             "type": "array"
+          },
+          "environment": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Python, NumPy and platform of the worker (not in the hash)",
+            "title": "Environment"
           },
           "error": {
             "anyOf": [
@@ -1588,6 +1616,18 @@
             "title": "Progress",
             "type": "number"
           },
+          "reuse_refused": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Why a matching earlier run was not reused (its results file failed the integrity check)",
+            "title": "Reuse Refused"
+          },
           "reused": {
             "default": false,
             "title": "Reused",
@@ -1645,6 +1685,16 @@
           "seed": {
             "title": "Seed",
             "type": "integer"
+          },
+          "seed_source": {
+            "default": "given",
+            "description": "Whether the seed was given or drawn because none was",
+            "enum": [
+              "given",
+              "drawn"
+            ],
+            "title": "Seed Source",
+            "type": "string"
           },
           "started_at": {
             "anyOf": [
@@ -2260,6 +2310,59 @@
           "severity"
         ],
         "title": "SeverityIn",
+        "type": "object"
+      },
+      "StorageOut": {
+        "description": "Disk usage of the results volume (admin; ADR 0017).",
+        "properties": {
+          "free_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Free Bytes"
+          },
+          "results_dir": {
+            "title": "Results Dir",
+            "type": "string"
+          },
+          "runs_with_samples": {
+            "title": "Runs With Samples",
+            "type": "integer"
+          },
+          "samples_bytes": {
+            "title": "Samples Bytes",
+            "type": "integer"
+          },
+          "samples_files": {
+            "title": "Samples Files",
+            "type": "integer"
+          },
+          "total_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Bytes"
+          }
+        },
+        "required": [
+          "results_dir",
+          "runs_with_samples",
+          "samples_files",
+          "samples_bytes",
+          "total_bytes",
+          "free_bytes"
+        ],
+        "title": "StorageOut",
         "type": "object"
       },
       "UserIn": {
@@ -4024,6 +4127,28 @@
         "summary": "Get Version",
         "tags": [
           "scenarios"
+        ]
+      }
+    },
+    "/storage": {
+      "get": {
+        "description": "Disk usage of the results volume: samples files and free space (ADR 0017).\n\nNothing is deleted automatically in v0.1; this lets an administrator watch the volume.",
+        "operationId": "storage_storage_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Storage",
+        "tags": [
+          "data"
         ]
       }
     },

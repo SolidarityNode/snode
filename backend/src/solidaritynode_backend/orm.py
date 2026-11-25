@@ -160,5 +160,8 @@ class Run(Base):
     diagnostics: Mapped[dict[str, Any] | None] = mapped_column(_JSON)
     samples_path: Mapped[str | None] = mapped_column(Text)
     samples_sha256: Mapped[str | None] = mapped_column(Text)
+    seed_source: Mapped[str] = mapped_column(Text, default="given")
+    environment: Mapped[dict[str, Any] | None] = mapped_column(_JSON)
+    reuse_refused: Mapped[str | None] = mapped_column(Text)
     samples_estimate_bytes: Mapped[int | None] = mapped_column(BigInteger)
     samples_limit_bytes: Mapped[int | None] = mapped_column(BigInteger)
