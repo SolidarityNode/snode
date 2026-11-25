@@ -307,6 +307,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/requests/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Requests Status
+     * @description Whether tickets are stored: not yet, until OQ-21 rules are decided (ADR 0010).
+     */
+    get: operations["requests_status_requests_status_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/runs": {
     parameters: {
       query?: never;
@@ -1106,6 +1126,23 @@ export interface components {
       problems: string[];
       /** Scenario Id */
       scenario_id: string;
+    };
+    /**
+     * RoleFeatureOut
+     * @description State of a role-specific feature (ADR 0012).
+     */
+    RoleFeatureOut: {
+      /** Feature */
+      feature: string;
+      /** Implemented */
+      implemented: boolean;
+      /** Note */
+      note: string;
+      /**
+       * Role
+       * @enum {string}
+       */
+      role: "municipality" | "hub";
     };
     /**
      * RunConfigIn
@@ -1965,6 +2002,26 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PreviewOut"];
+        };
+      };
+    };
+  };
+  requests_status_requests_status_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RoleFeatureOut"];
         };
       };
     };

@@ -37,7 +37,8 @@ class Settings(BaseSettings):
         log_level: Uvicorn/application log level.
         database_url: SQLAlchemy URL for PostgreSQL/PostGIS. Kept secret in logs and reprs.
         cors_origins: Origins allowed to call the API from a browser.
-        deployment_mode: ``municipality`` (one study area, ADR 0012) or ``hub``. Only the
+        deployment_mode: ``municipality`` (one study area of one or more core municipalities,
+            ADR 0012) or ``hub``; locked in the database at first initialisation. Only the
             municipal installation is implemented in v0.1; ``hub`` starts but offers no hub
             features yet.
         packages_dir: Directory of data packages offered for import on the Admin screen.

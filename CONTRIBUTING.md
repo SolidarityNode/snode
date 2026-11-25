@@ -55,7 +55,7 @@ All configuration comes from `.env` (git-ignored), created by `make setup` from 
 | `SOLIDARITYNODE_LOG_LEVEL` | backend | `info` | `debug`, `info`, `warning` or `error` |
 | `SOLIDARITYNODE_DATABASE_URL` | backend on the host | built from `POSTGRES_*` in compose | SQLAlchemy URL (secret) |
 | `SOLIDARITYNODE_CORS_ORIGINS` | backend | `["http://localhost:5173"]` | Origins allowed to call the API directly |
-| `DEPLOYMENT_MODE` | backend | `municipality` | `municipality` or `hub` (ADR 0012); only the municipal installation is complete in v0.1 |
+| `DEPLOYMENT_MODE` | backend, worker, CLI | `municipality` | `municipality` or `hub` (ADR 0012). Stored in the database at first initialisation; the backend refuses to start if it later differs. Only the municipal installation is complete in v0.1 |
 | `SOLIDARITYNODE_BASEMAP` | backend → frontend | `osm` | Map background: `osm` (OpenStreetMap tiles, attributed, needs internet) or `blank` (offline) |
 | `SOLIDARITYNODE_DIAGNOSTIC_STEP_DELAY_S` | runs | `0.5` | Pause after each progress step so progress and cancel can be followed; recorded in the run configuration |
 | `SOLIDARITYNODE_SESSION_HOURS` | backend | `12` | Login session lifetime |

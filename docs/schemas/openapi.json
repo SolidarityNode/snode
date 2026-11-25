@@ -1124,6 +1124,39 @@
         "title": "RevalidationOut",
         "type": "object"
       },
+      "RoleFeatureOut": {
+        "description": "State of a role-specific feature (ADR 0012).",
+        "properties": {
+          "feature": {
+            "title": "Feature",
+            "type": "string"
+          },
+          "implemented": {
+            "title": "Implemented",
+            "type": "boolean"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "municipality",
+              "hub"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "feature",
+          "implemented",
+          "note"
+        ],
+        "title": "RoleFeatureOut",
+        "type": "object"
+      },
       "RunConfigIn": {
         "additionalProperties": false,
         "description": "Run configuration (recorded on the run and part of its input hash).",
@@ -2748,6 +2781,28 @@
         "summary": "Preview Upload",
         "tags": [
           "data"
+        ]
+      }
+    },
+    "/requests/status": {
+      "get": {
+        "description": "Whether tickets are stored: not yet, until OQ-21 rules are decided (ADR 0010).",
+        "operationId": "requests_status_requests_status_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleFeatureOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Requests Status",
+        "tags": [
+          "requests"
         ]
       }
     },

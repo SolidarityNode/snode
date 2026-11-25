@@ -449,3 +449,12 @@ class CompareOut(BaseModel):
     cross_data_version: bool
     label: str
     rows: list[CompareRow]
+
+
+class RoleFeatureOut(BaseModel):
+    """State of a role-specific feature (ADR 0012)."""
+
+    role: Literal["municipality", "hub"]
+    feature: str
+    implemented: bool
+    note: str

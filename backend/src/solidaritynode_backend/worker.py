@@ -34,6 +34,7 @@ from sqlalchemy import Engine, create_engine, text
 
 from solidaritynode_backend.config import Settings, get_settings
 from solidaritynode_backend.jobs import JobCancelledError, JobContext, JobStatus, JobTimedOutError
+from solidaritynode_backend.services.installation import RoleMismatchError, check_role
 from solidaritynode_backend.services.runs import RUN_JOB_KIND, execute_run
 
 __all__ = ["Handler", "Worker", "WorkerStoppedError", "main"]
@@ -296,6 +297,11 @@ def main() -> int:
         level=settings.log_level.upper(), format="%(asctime)s %(levelname)s %(name)s %(message)s"
     )
     worker = build_worker(settings)
+    try:
+        check_role(worker.engine, settings.deployment_mode)
+    except RoleMismatchError as exc:
+        log.error("%s", exc)
+        return 2
     stop = Event()
 
     def on_signal(signum: int, _frame: FrameType | None) -> None:

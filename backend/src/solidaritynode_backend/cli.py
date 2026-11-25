@@ -28,6 +28,7 @@ from sqlalchemy.orm import Session
 from solidaritynode_backend.auth import create_user
 from solidaritynode_backend.config import Settings, get_settings
 from solidaritynode_backend.orm import Job, User
+from solidaritynode_backend.services.installation import RoleMismatchError, check_role
 from solidaritynode_backend.services.packages import (
     PackageError,
     import_package,
@@ -202,6 +203,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     exp.add_argument("directory", type=Path)
     args = parser.parse_args(argv)
     settings = get_settings()
+    if args.command != "export-schemas":
+        try:
+            check_role(
+                create_engine(settings.database_url.get_secret_value()), settings.deployment_mode
+            )
+        except RoleMismatchError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
     if args.command == "import-package":
         return import_command(settings, args.path, args.yes, args.preview_only)
     if args.command == "create-admin":
