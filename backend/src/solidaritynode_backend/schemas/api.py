@@ -91,6 +91,10 @@ class AppConfigOut(BaseModel):
     version: str
     git_commit: str
     diagnostic_label: str
+    docs_url: str = Field(
+        description="User guide matching the running version (SOLIDARITYNODE_DOCS_BASE_URL + "
+        "major.minor, or dev in development)"
+    )
 
 
 # --- data versions and packages ---

@@ -28,6 +28,11 @@
             "title": "Diagnostic Label",
             "type": "string"
           },
+          "docs_url": {
+            "description": "User guide matching the running version (SOLIDARITYNODE_DOCS_BASE_URL + major.minor, or dev in development)",
+            "title": "Docs Url",
+            "type": "string"
+          },
           "git_commit": {
             "title": "Git Commit",
             "type": "string"
@@ -43,7 +48,8 @@
           "app_env",
           "version",
           "git_commit",
-          "diagnostic_label"
+          "diagnostic_label",
+          "docs_url"
         ],
         "title": "AppConfigOut",
         "type": "object"
@@ -2737,7 +2743,7 @@
     },
     "/config": {
       "get": {
-        "description": "Public configuration: deployment mode, basemap and build identity.",
+        "description": "Public configuration: deployment mode, basemap, build identity and user-guide address.",
         "operationId": "app_config_config_get",
         "responses": {
           "200": {

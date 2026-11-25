@@ -1203,6 +1203,8 @@ def _changeset_row(db: Session, changeset_id: int, lock: bool = False) -> RowMap
 def changeset_detail(db: Session, changeset_id: int) -> dict[str, Any]:
     """Return a changeset with its report and items (the preview)."""
     row = dict(_changeset_row(db, changeset_id))
+    row["summary"] = row["report"].get("summary")
+    row["errors"] = row["report"].get("errors")
     row["items"] = [
         dict(i)
         for i in db.execute(

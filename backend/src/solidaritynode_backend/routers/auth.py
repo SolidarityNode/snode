@@ -34,8 +34,9 @@ Config = Annotated[Settings, Depends(get_settings)]
 
 @router.get("/config", response_model=AppConfigOut)
 def app_config(settings: Config) -> AppConfigOut:
-    """Public configuration: deployment mode, basemap and build identity."""
+    """Public configuration: deployment mode, basemap, build identity and user-guide address."""
     return AppConfigOut(
+        docs_url=settings.docs_url(solidaritynode_backend.__version__),
         deployment_mode=settings.deployment_mode,
         basemap=settings.basemap,
         app_env=settings.app_env,

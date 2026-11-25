@@ -117,7 +117,7 @@ def test_the_other_roles_routes_do_not_exist(mode: str, settings: Any, users: An
     own = client.get(ROLE_PATHS[mode])
     assert own.status_code == 200
     assert own.json()["role"] == mode
-    assert own.json()["implemented"] is False
+    assert own.json()["implemented"] is (mode == "hub")  # tickets wait for ADR 0010
     assert client.get(ROLE_PATHS[other]).status_code == 404
     paths = set(app.openapi()["paths"])
     prefix = ROLE_PATHS[other].rsplit("/", 1)[0]
