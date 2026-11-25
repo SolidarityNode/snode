@@ -109,3 +109,61 @@ describe("ScenarioEditorPage", () => {
     );
   });
 });
+
+describe("ScenarioEditorPage placeholders", () => {
+  it("keeps network and population changes it cannot edit yet, and says they are recorded only", async () => {
+    const network = {
+      edge_changes: [
+        { edge_id: "E01", mode: "walk", quantity: "travel_time", change: "relative", amount: -20 },
+      ],
+      new_edges: [],
+    };
+    const population = [{ unit_id: "A1", group_id: "G-OLD", change: "absolute", amount: 10 }];
+    const { calls } = stubApi({
+      "GET /scenarios/s1": () => ({
+        id: "s1",
+        can_edit: true,
+        visibility: "private",
+        is_baseline: false,
+        latest_version: 1,
+        problems: [],
+        name: "Placeholders",
+        description: "",
+        owner: "analyst",
+        owner_id: 1,
+        created_at: "2026-11-25T00:00:00Z",
+        latest_run: null,
+        data_version: { id: 1, package_id: "demo-study-area-a", version: "1.0.0" },
+        current: {
+          version: 1,
+          name: "Placeholders",
+          description: "",
+          created_at: "2026-11-25T00:00:00Z",
+          created_by: "analyst",
+          data_version: { id: 1, package_id: "demo-study-area-a", version: "1.0.0" },
+          body: { schema_version: "1.0", network_changes: network, population_changes: population },
+        },
+      }),
+      "GET /data-versions/1/layers/network_edges": () => EDGES,
+      "GET /data-versions/1/layers/.*": () => EMPTY,
+      "GET /data-versions/1/catalog": () => ({ groups: [], services: [] }),
+      "POST /scenarios/validate": () => ({ valid: true, errors: [], problems: [] }),
+    });
+    renderWithSession(<ScenarioEditorPage />, {
+      path: "/scenarios/s1",
+      route: "/scenarios/:scenarioId",
+      session: { activeDataVersion: DV },
+    });
+    expect(await screen.findByTestId("recorded-only")).toHaveTextContent(
+      "2 network or population change(s): recorded only",
+    );
+    await userEvent.type(screen.getByRole("textbox", { name: "Name" }), " v2");
+    await waitFor(() => {
+      const sent = calls.filter((c) => c.path === "/scenarios/validate").at(-1)?.body as {
+        body: { network_changes: unknown; population_changes: unknown };
+      };
+      expect(sent.body.network_changes).toEqual(network);
+      expect(sent.body.population_changes).toEqual(population);
+    });
+  });
+});

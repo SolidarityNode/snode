@@ -31,6 +31,8 @@ const EMPTY: Draft = {
     schema_version: "1.0",
     capacity_changes: [],
     new_facilities: [],
+    network_changes: { edge_changes: [], new_edges: [] },
+    population_changes: [],
     severities: [],
     closed_edges: null,
     rationing: null,
@@ -43,6 +45,9 @@ function normalise(body: Body): Required<Body> {
     schema_version: "1.0",
     capacity_changes: body.capacity_changes ?? [],
     new_facilities: body.new_facilities ?? [],
+    // Placeholders without an editor yet (ADR 0016): kept as they are, so saving never drops them.
+    network_changes: body.network_changes ?? { edge_changes: [], new_edges: [] },
+    population_changes: body.population_changes ?? [],
     severities: body.severities ?? [],
     closed_edges: body.closed_edges ?? null,
     rationing: body.rationing ?? null,
@@ -705,10 +710,15 @@ function ChangeList({
 }) {
   const { t } = useT();
   const b = draft.body;
+  const placeholders =
+    (b.network_changes.edge_changes?.length ?? 0) +
+    (b.network_changes.new_edges?.length ?? 0) +
+    b.population_changes.length;
   const nothing =
     b.severities.length === 0 &&
     b.capacity_changes.length === 0 &&
     b.new_facilities.length === 0 &&
+    placeholders === 0 &&
     !b.closed_edges;
   if (nothing) return <p>{t("editor.no_changes")}</p>;
   const modes = b.closed_edges?.modes ?? [];
@@ -764,6 +774,11 @@ function ChangeList({
           )}
         </li>
       ))}
+      {placeholders > 0 && (
+        <li data-testid="recorded-only">
+          {t("editor.change_recorded_only", { count: placeholders })}
+        </li>
+      )}
       {b.closed_edges && (
         <li>
           {t("editor.change_edges", { ids: b.closed_edges.edge_ids.join(", ") })}{" "}

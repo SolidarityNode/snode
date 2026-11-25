@@ -920,6 +920,37 @@ export interface components {
       version: string;
     };
     /**
+     * EdgeChangeIn
+     * @description Change the travel time or speed of one edge for one mode (Paper 1 §13, §15.7).
+     *
+     *     A placeholder: checked and recorded, not applied yet.
+     */
+    EdgeChangeIn: {
+      /**
+       * Amount
+       * @description Signed change
+       */
+      amount: number;
+      /**
+       * Change
+       * @description absolute: minutes (travel time) or km/h (speed); relative: percent
+       * @enum {string}
+       */
+      change: "absolute" | "relative";
+      /** Edge Id */
+      edge_id: string;
+      /**
+       * Mode
+       * @enum {string}
+       */
+      mode: "walk" | "car" | "public_transport";
+      /**
+       * Quantity
+       * @enum {string}
+       */
+      quantity: "travel_time" | "speed";
+    };
+    /**
      * FieldChange
      * @description A feature whose attributes or geometry changed.
      */
@@ -1052,6 +1083,16 @@ export interface components {
       username: string;
     };
     /**
+     * NetworkChangesIn
+     * @description Network interventions: edge changes and new edges (placeholders, recorded only).
+     */
+    NetworkChangesIn: {
+      /** Edge Changes */
+      edge_changes?: components["schemas"]["EdgeChangeIn"][];
+      /** New Edges */
+      new_edges?: components["schemas"]["NewEdgeIn"][];
+    };
+    /**
      * NetworkClosureIn
      * @description Network edges closed for the given modes (Paper 3 §9).
      */
@@ -1060,6 +1101,31 @@ export interface components {
       edge_ids: string[];
       /** Modes */
       modes: ("walk" | "car" | "public_transport")[];
+    };
+    /**
+     * NewEdgeIn
+     * @description A new network edge between two existing nodes (Paper 1 §13, §15.7; placeholder).
+     */
+    NewEdgeIn: {
+      /**
+       * Closable
+       * @description Whether disruptions may close it
+       * @default true
+       */
+      closable: boolean;
+      /** Edge Id */
+      edge_id: string;
+      /** From Node Id */
+      from_node_id: string;
+      /** To Node Id */
+      to_node_id: string;
+      /**
+       * Travel Time Min
+       * @description Minutes to traverse the edge per mode (>= 0)
+       */
+      travel_time_min: {
+        [key: string]: number;
+      };
     };
     /**
      * NewFacilityIn
@@ -1076,6 +1142,27 @@ export interface components {
       node_id: string;
       /** Services */
       services: components["schemas"]["ServiceCapacityIn"][];
+    };
+    /**
+     * PopulationChangeIn
+     * @description Change the population of one group in one unit (Paper 1 §13, §15.7; placeholder).
+     */
+    PopulationChangeIn: {
+      /**
+       * Amount
+       * @description Signed change
+       */
+      amount: number;
+      /**
+       * Change
+       * @description absolute: persons; relative: percent of the baseline count
+       * @enum {string}
+       */
+      change: "absolute" | "relative";
+      /** Group Id */
+      group_id: string;
+      /** Unit Id */
+      unit_id: string;
     };
     /**
      * PreviewIn
@@ -1357,14 +1444,19 @@ export interface components {
      *     ``reference_level`` is the reference-scenario flag: ``null`` for an ordinary scenario, or
      *     the standardised level it stands for (OQ-16; how reference scenarios are constructed is
      *     open). Disruption scenarios (any severity or closed edge) must state a ``rationing`` case
-     *     (OQ-24).
+     *     (OQ-24). ``network_changes`` and ``population_changes`` are placeholders: validated against
+     *     the data and recorded on runs, without behaviour yet. Order of application: interventions,
+     *     then disruptions (ADR 0016; OQ-30, proposed).
      */
     ScenarioBody: {
       /** Capacity Changes */
       capacity_changes?: components["schemas"]["CapacityChangeIn"][];
       closed_edges?: components["schemas"]["NetworkClosureIn"] | null;
+      network_changes?: components["schemas"]["NetworkChangesIn"];
       /** New Facilities */
       new_facilities?: components["schemas"]["NewFacilityIn"][];
+      /** Population Changes */
+      population_changes?: components["schemas"]["PopulationChangeIn"][];
       /** Rationing */
       rationing?: ("uniform" | "concentrated") | null;
       /** Reference Level */

@@ -106,6 +106,7 @@
   "editor.change_capacity_rel": "Facility {id}, {service}: {input} {amount} %",
   "editor.change_edges": "Closed edges: {ids}",
   "editor.change_new": "New facility {id} at node {node}",
+  "editor.change_recorded_only": "{count} network or population change(s): recorded only, no effect yet (ADR 0016); kept when you save.",
   "editor.change_severity": "Facility {id}: severity {value}",
   "editor.changes": "Changes relative to the baseline",
   "editor.close_edge": "Close edge {id}",

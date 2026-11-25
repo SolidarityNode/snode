@@ -106,6 +106,7 @@
   "editor.change_capacity_rel": "Δομή {id}, {service}: {input} {amount} %",
   "editor.change_edges": "Κλειστά τμήματα: {ids}",
   "editor.change_new": "Νέα δομή {id} στον κόμβο {node}",
+  "editor.change_recorded_only": "{count} αλλαγή(ές) δικτύου ή πληθυσμού: καταγράφονται μόνο, χωρίς επίδραση ακόμα (ADR 0016)· διατηρούνται όταν αποθηκεύετε.",
   "editor.change_severity": "Δομή {id}: σοβαρότητα {value}",
   "editor.changes": "Αλλαγές σε σχέση με τη βάση",
   "editor.close_edge": "Κλείσιμο τμήματος {id}",
