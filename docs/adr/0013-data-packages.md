@@ -113,3 +113,16 @@ needs no new library to read or write.
   download from the hub is added (ADR 0014); until then packages are imported by hand from a
   trusted source.
 - Large arrays in packages (Parquet) are not needed yet.
+
+### Open for later (from UAT, no code now)
+
+- **How real data corrections reach the hub.** Analysts never upload data: hypothetical changes
+  are scenarios (`docs/concepts.md`), and real corrections or new facilities go to the hub and
+  arrive in the next package version. How an analyst or a municipality submits such a
+  correction (form, file, ticket, with which evidence and quality level) is part of the hub
+  onboarding work (ADR 0012, 0014), not decided here.
+- **Choice of spatial unit for large municipalities.** For a municipality such as Athens, the
+  7 municipal communities are too coarse to show differences in access within it. Which
+  spatial unit to use (census tracts, building blocks, a grid) is a method choice for the
+  Paper 1 spec (Spec 01), not a package format question; the package format already carries
+  whatever unit the spec chooses.

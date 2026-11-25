@@ -118,7 +118,7 @@ make up           # start database, backend and frontend (Podman by default)
 make uat          # or: clean database + synthetic demo data, then print the URLs
 ```
 
-Then open http://127.0.0.1:8080 (services listen on `127.0.0.1` only). Manual testing: [docs/uat/](docs/uat/README.md). With Docker: `CONTAINER_ENGINE=docker COMPOSE="docker compose" make up`. See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/architecture.md](docs/architecture.md).
+Then open http://127.0.0.1:8080 (services listen on `127.0.0.1` only). Manual testing: [docs/uat/](docs/uat/README.md). With Docker: `CONTAINER_ENGINE=docker COMPOSE="docker compose" make up`. See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/architecture.md](docs/architecture.md). For municipal users: [what a data package, scenario and run are](docs/concepts.md).
 
 ## Roadmap
 

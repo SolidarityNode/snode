@@ -47,8 +47,28 @@ can replace it later without changing routers.
   checked and the answer is a generic 429 with `Retry-After`; wrong passwords and unknown users
   get the same 401 "wrong username or password", so neither reveals which accounts exist.
   Usernames and addresses are stored only as SHA-256 hashes. A successful sign-in clears both.
-  The client address comes from nginx, which overwrites `X-Forwarded-For`; uvicorn trusts it
-  only from `FORWARDED_ALLOW_IPS` (the compose network by default).
+  A refused (429) attempt is not counted and never extends a delay or lock, so a lock ends at the
+  stated time.
+- **Client address** (`services/throttle.py`, `client_address`): the TCP peer, unless the peer
+  is a trusted proxy listed in `SOLIDARITYNODE_TRUSTED_PROXIES` (addresses or CIDR networks;
+  default loopback and the private networks of the compose network). From a trusted proxy the
+  backend takes `X-Real-IP`, or the nearest `X-Forwarded-For` entry that is not itself a proxy;
+  headers from any other peer are ignored, so a client cannot choose its address. The bundled
+  nginx overwrites both headers with the address it sees (uvicorn runs with
+  `--no-proxy-headers`, so this is the only place headers are read). In production list only the
+  reverse proxy and never publish the API port.
+- **When the proxy cannot see the client.** Behind rootless Podman's port forwarder every
+  browser reaches nginx from nginx's own address (found in UAT: all sign-ins came from
+  `10.89.0.6`, so the per-address limit counted every user together and one person's mistakes
+  locked out everyone). When the address a proxy reports is itself a trusted proxy address, the
+  client address is **unknown**: only the per-username limit applies, and the backend logs a
+  warning once. Failed tries for one username therefore never block another username there.
+  Where client addresses are visible (Docker, rootful Podman, a production reverse proxy), the
+  per-address limit applies as described above; on a shared office address it can still delay
+  colleagues once that address reaches half its limit (10 failures).
+- **Clearing locks.** An administrator clears sign-in delays and locks with
+  `make clear-login-locks USERNAME=<name>` (one username) or `make clear-login-locks` (all
+  usernames and addresses); see `docs/uat/README.md`.
 - Opaque session token in an HttpOnly, SameSite=Strict cookie (`Secure` with
   `SOLIDARITYNODE_SESSION_COOKIE_SECURE=true`, **always** with `APP_ENV=production`: the
   settings, and so `make check-config` and every start, refuse production without it); only its SHA-256 is stored; lifetime
@@ -56,6 +76,15 @@ can replace it later without changing routers.
 - Roles for v0.1: `viewer` (shared scenarios and their results), `analyst` (also creates, edits,
   runs and shares own scenarios), `admin` (also manages users and imports data packages). Every
   endpoint that reads or writes scenarios, runs, results, users or packages checks them.
+- **What "private" means.** A private scenario, with its runs and results, is hidden from
+  other analysts and from viewers, **not from administrators**: admins see, open, edit and run
+  every scenario. This is deliberate. Admins operate the installation and have database access
+  anyway, so hiding scenarios from them in the UI would only suggest a protection that does not
+  exist. The UI says so: next to the visibility choice the analyst reads "Private: visible to
+  you and to administrators", and an admin's Scenarios page lists other users' private
+  scenarios in their own table, each labelled "private (owner X)". Tests:
+  `test_private_means_hidden_from_other_analysts_and_viewers_not_admins` and
+  `test_opening_runs_per_role` (backend).
 - **At least one active admin.** Admins cannot demote or disable themselves, and the last active
   admin can never be demoted or disabled; the check locks the admin rows, so two admins demoting
   each other at the same moment cannot leave none.

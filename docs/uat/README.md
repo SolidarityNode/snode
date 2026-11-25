@@ -8,6 +8,9 @@ how to get a clean, repeatable test environment. Each PR has its own checklist: 
 Everything runs on your own machine and listens on `127.0.0.1` only. The database contains
 **synthetic data only** ([`data/synthetic/packages/`](../../data/synthetic/packages/README.md)).
 
+New to the platform? [`docs/concepts.md`](../concepts.md) explains in plain language what a
+data package, a scenario, a run and a data version are, and who does what.
+
 ## 1. One-time setup on a fresh machine (Windows with WSL2 and Podman)
 
 1. Install WSL2 with Ubuntu (PowerShell as administrator: `wsl --install -d Ubuntu`), restart,
@@ -110,7 +113,19 @@ The database is also reachable from desktop tools (for example QGIS or DBeaver) 
 | `make ps` | are the containers (`db`, `backend`, `worker`, `frontend`) running and `healthy`? |
 | `make logs` | follow all logs (Ctrl+C to stop following) |
 | `make wait` | wait until the backend is ready |
-| `make check-config APP_ENV=production` | would the backend accept this configuration in production? |
+| `make check-config APP_ENV=production` | would the backend accept this configuration in production? Lists every problem at once (exit code 1), never secret values |
+
+### Sign-in locks
+
+After repeated failed sign-ins a username is delayed, then locked for 15 minutes (ADR 0015).
+Behind rootless Podman the platform cannot see browser addresses, so only usernames are
+counted: one person's wrong username or password never locks out another username. To clear
+locks before they expire:
+
+| Command | Effect |
+| --- | --- |
+| `make clear-login-locks USERNAME=demo-analyst` | clear the delay or lock of one username |
+| `make clear-login-locks` | clear every username and address |
 
 ## 5. Starting again
 

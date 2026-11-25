@@ -22,6 +22,7 @@ administrator or viewer, so both stay logged in.
 | --- | --- | --- | --- |
 | 1 | In the terminal: `make setup`, then `make uat` and type `yes` | After a few minutes it prints "UAT environment ready", the address `http://127.0.0.1:8080` and two demo accounts: `demo-admin / demo-admin-pass` and `demo-analyst / demo-analyst-pass`. | ☐ |
 | 2 | `make ps` | Four containers are `Up`: `db`, `backend`, `worker`, `frontend` (db, backend and frontend say `healthy`). | ☐ |
+| 2a | `make check-config APP_ENV=production` | No Python traceback. The first line is "configuration INVALID (APP_ENV=production): N problem(s)", then one line per problem, at least: the session cookie (`SOLIDARITYNODE_SESSION_COOKIE_SECURE=true`) and the placeholder secret ("database_url (password)"), plus the code version if your checkout has local changes. No password or other secret value is printed. The last line is make's "make: *** [Makefile:…: check-config] Error 1" (the check exited with code 1; make itself then exits with 2). `make check-config` without `APP_ENV` says "configuration OK (APP_ENV=development)". | ☐ |
 
 ## B. Log in
 
@@ -29,7 +30,9 @@ administrator or viewer, so both stay logged in.
 | --- | --- | --- | --- |
 | 3 | Open http://127.0.0.1:8080 | The **Log in** page opens. The footer shows `no data imported` or the data version, then `backend 0.0.1 (<commit>, development) · frontend <commit>`. The commit matches `git rev-parse --short=12 HEAD`. | ☐ |
 | 4 | Log in as `demo-analyst` with the password `wrong-password` | Red message "Wrong username or password." | ☐ |
-| 4a | Log in as `uat-nobody` (a user that does not exist) with any password, six times in a row, waiting a few seconds between tries | The first tries say "Wrong username or password." (the same message as for a real user). If you try again at once, or from the sixth try on, the message is "Too many failed sign-in attempts. Wait a few minutes and try again." Nothing says whether the user exists. Logging in as `demo-analyst` right after still works (one wrong name does not delay others at the same address). | ☐ |
+| 4a | Log in as `uat-nobody` (a user that does not exist) with any password, six times in a row, waiting a few seconds between tries | The first tries say "Wrong username or password." (the same message as for a real user). If you try again at once, or from the sixth try on, the message is "Too many failed sign-in attempts. Wait a few minutes and try again." Nothing says whether the user exists. Logging in as `demo-analyst` right after still works: failed tries for one username never block another. (Behind rootless Podman the platform cannot see browser addresses, so only usernames are counted; `make logs` shows the warning "client addresses are not visible … only per-username limits apply" once.) | ☐ |
+| 4b | In the terminal: `curl -s -o /dev/null -w '%{http_code}\n' -H 'Content-Type: application/json' -d '{"username":"demo-analyst","password":"demo-analyst-pass"}' http://127.0.0.1:8080/api/auth/login` | `200`: the same sign-in through the frontend proxy works. | ☐ |
+| 4c | Try `uat-nobody` again: it is refused with "Too many failed sign-in attempts …". In the terminal: `make clear-login-locks USERNAME=uat-nobody` | It prints "Cleared 1 sign-in delay/lock record(s) for username 'uat-nobody'." The next try as `uat-nobody` says "Wrong username or password." again (without it the lock ends by itself 15 minutes after the fifth failure; refused tries do not extend it). | ☐ |
 | 5 | Log in as `demo-analyst` / `demo-analyst-pass` | The **Study area** page opens. The header says "Signed in as demo-analyst (analyst)". There is no **Admin** link. The footer shows `data demo-study-area-a 1.0.0`. | ☐ |
 
 ## C. Study area
@@ -44,20 +47,20 @@ administrator or viewer, so both stay logged in.
 | 11 | Look at **Data coverage per municipality and layer** | M-A: facilities `verified`, transit `missing`. M-B: population `estimated`, facilities **`missing`** (in red), transit `missing`. | ☐ |
 | 12 | Press **Tab** until the map has a blue focus frame, then press the arrow keys and `+` / `-` | The map pans and zooms with the keyboard. | ☐ |
 | 12a | In the terminal: `curl -sI http://127.0.0.1:8080/ \| grep -i referrer` | `Referrer-Policy: strict-origin-when-cross-origin` (map tiles keep a Referer, as the OSMF tile usage policy requires; ADR 0007). | ☐ |
-| 13 | Switch **Language** to Ελληνικά, then back to English | All texts change to Greek (menu, titles, legend, table headings) and back. | ☐ |
+| 13 | Switch **Language** to Ελληνικά, then back to English | All texts change to Greek (menu, titles, legend, table headings) and back, with the terms of `docs/i18n/glossary.md`: "φαινόμενο ορίου" for the edge effect, "ανοιχτά δεδομένα" (not ανοικτά). | ☐ |
 
 ## D. Scenarios list
 
 | # | Do | Expected result | ✓ |
 | --- | --- | --- | --- |
-| 14 | Click **Scenarios** | "My scenarios: You have no scenarios yet." Under **Shared scenarios**: "Baseline (no changes)", owner "system", latest run **succeeded** (1.0.0). | ☐ |
+| 14 | Click **Scenarios** | "My scenarios: You have no scenarios yet." Under **Shared scenarios**: "Baseline (no changes)", owner "system", latest run **succeeded** (1.0.0), a link to that run. | ☐ |
 
 ## E. Scenario editor
 
 | # | Do | Expected result | ✓ |
 | --- | --- | --- | --- |
 | 15 | Click **New scenario** | The editor opens with a map. Under **Validation** an error about the name; **Save** is greyed out. | ☐ |
-| 16 | Type the name `UAT close E02` and choose **Visibility: shared** | Within a second **Validation** says "The scenario is valid for the active data." and **Save** becomes active. | ☐ |
+| 16 | In **Name** type only `UAT close E02`. Then, in the **Visibility** list, choose **shared** | Below the list: "Shared: visible to every user of this installation, including viewers." (with **private**: "Private: visible to you and to administrators."). Within a second **Validation** says "The scenario is valid for the active data." and **Save** becomes active. | ☐ |
 | 17 | Click the line **E02** on the map (or open **Facilities and edges (text list)** and click **Close edge E02**) | E02 turns orange and dashed. **Changes relative to the baseline** shows "Closed edges: E02" with **walking** and **car** ticked. Validation now shows an error "a disruption scenario must state its rationing case (OQ-24)"; **Save** is greyed out. | ☐ |
 | 18 | In the text list, try **Close edge E01** | The button is greyed out and says "(cannot be closed)". | ☐ |
 | 19 | Set **Rationing case (OQ-24)** to **uniform** | Validation is valid again. | ☐ |
@@ -79,8 +82,8 @@ administrator or viewer, so both stay logged in.
 | 28b | Point at unit **A3** on the map | The tooltip names the statistic: "Unit A3, median (90 % interval): 0.05 (-1.6–1.7)", plus "⚠ edge effect (OQ-28)". The legend title ends with ", median (1)". | ☐ |
 | 28c | Tick **Uncertainty** | A second map "Uncertainty (width of the 90 % interval)" appears next to the first, in **blues** (not the value colours, not hatching or dots), with its own legend "Uncertainty of … : width of the 90 % interval". Its tooltips add "interval width …". Switch **Indicator** to the walking time: every unit has the lightest blue and the note says "This indicator is deterministic: its interval has no width." Untick **Uncertainty**: the second map disappears. | ☐ |
 | 28d | Tick **Data quality** | Dots (open data) and hatching (estimated) appear on the map, and the legend adds "Quality: estimated (hatched)" and "Quality: open data (dotted)". The note about hidden quality disappears. Untick it again. Open **Study area**: the quality patterns are always shown there. | ☐ |
-| 29 | Look below the table | "Hand-check of baseline travel times: 48 of 48 match. With the scenario: 48 of 48 match." **What changed per unit** lists A2 ("F1: S-HC staff 4 -> 4.8; F1: DS = 0.5 (recorded only); edge E02 closed") and A3 ("edge E02 closed"). The severity is recorded only: no method turns it into lost capacity yet. | ☐ |
-| 30 | Look at **Reproducibility** | Scenario and version (`UAT close E02 (v2)`), data package `demo-study-area-a 1.0.0`, code version (the commit), model `diagnostic-v0 0.2.0`, seed `1`, configuration (with `n_samples`), input hash, samples file (SHA-256), environment (python, numpy, platform; not in the hash), created and finished times. If the code version ends in `-dirty` (the repository had uncommitted changes when you ran `make up`), an orange note says the run can be reproduced only on this machine; with a clean checkout there is no note. | ☐ |
+| 29 | Look below the table | "Hand-check of baseline travel times: 48 of 48 match. With the scenario: 48 of 48 match (walking, car)." **What changed per unit** lists A2 ("F1: S-HC staff 4 -> 4.8; F1: DS = 0.5 (recorded only); edge E02 closed") and A3 ("edge E02 closed"). The severity is recorded only: no method turns it into lost capacity yet. | ☐ |
+| 30 | Look at **Reproducibility** | Scenario and version (`UAT close E02 (v2)`), data package `demo-study-area-a 1.0.0`, code version (the commit), model `diagnostic-v0 0.2.1`, seed `1`, configuration (with `n_samples`), input hash, samples file (SHA-256), environment (python, numpy, platform; not in the hash), created and finished times. If the code version ends in `-dirty` (the repository had uncommitted changes when you ran `make up`), an orange note says the run can be reproduced only on this machine; with a clean checkout there is no note. | ☐ |
 | 31 | Click **Export CSV** and **Export GeoPackage** | Two zip files download. The CSV zip contains `results.csv` (columns include `median`, `low`, `high`, `mean`), `travel_times.csv`, `unit_changes.csv` and `metadata.json` (with all reproducibility fields, `interval_quantiles` `[0.05, 0.95]`, a `statistics` section saying what each column is, `samples_sha256`, and the diagnostic notice). The GeoPackage opens in QGIS with a `results` layer of unit polygons in EPSG:2100. | ☐ |
 | 32 | Go to **Scenarios** | **UAT close E02** shows its latest run **succeeded** (1.0.0). | ☐ |
 | 33 | Click **Run** on the row of **UAT close E02** | The **same** run opens again at once (same reproducibility fields and times): identical inputs reuse the existing result. | ☐ |
@@ -88,7 +91,7 @@ administrator or viewer, so both stay logged in.
 | 33b | In the browser, **Scenarios** → open **UAT placeholders** | **Changes relative to the baseline** says "3 network or population change(s): recorded only, no effect yet (ADR 0016); kept when you save." and "Closed edges: E-NEW" with **walking** ticked. Validation is green. | ☐ |
 | 33c | Change the **Description** to `edited in the editor` and click **Save as new version** | "Saved as version 2." | ☐ |
 | 33d | Reload the page | The description is `edited in the editor` and the line "3 network or population change(s): recorded only, no effect yet …" is still there: saving from the editor kept them. | ☐ |
-| 33e | Click **Run this version** and wait for **succeeded** | A section **Recorded, no effect yet (ADR 0016)** lists four lines: the E01 travel-time change, the new edge E-NEW, the population change in A1 ("(recorded only)"), and "new edge E-NEW is closed by the same scenario: added, then closed, so no net effect (OQ-30)". With Home care and walking, every unit shows **Changed: no** (nothing was applied). | ☐ |
+| 33e | Click **Run this version** and wait for **succeeded** | A section **Recorded, no effect yet (ADR 0016)** lists four lines: the E01 travel-time change, the new edge E-NEW, the population change in A1 ("(recorded only)"), and "new edge E-NEW is closed by the same scenario: added, then closed, so no net effect (OQ-30)". With Home care and walking, every unit shows **Changed: no** (nothing was applied). The hand-check says "With the scenario: 24 of 24 match (car). Not checked with the scenario: walking. …": the scenario closes E-NEW for walking, and the package has hand-checked times only for no closure and for E02 closed. **What changed per unit** says "No changes: …". In Ελληνικά the four lines are in Greek (for example "τμήμα E01, πεζή: χρόνος διαδρομής -20 % (καταγράφεται μόνο)"). | ☐ |
 
 ## G. Cancel
 
@@ -132,7 +135,7 @@ administrator or viewer, so both stay logged in.
 
 | # | Do | Expected result | ✓ |
 | --- | --- | --- | --- |
-| 47 | Open **Scenarios** | **UAT F3 staff** shows "Needs attention with the current data: facility F3: closed or missing …" and has no **Run** button. **UAT close E02** still lists its latest run on 1.0.0. The footer shows data 1.1.0. | ☐ |
+| 47 | Open **Scenarios** | **UAT F3 staff** shows "Needs attention with the current data: facility F3: closed or missing …" and has no **Run** button. **UAT close E02** shows "Latest run on data 1.0.0: succeeded", a link to that run (it has no run on 1.1.0 yet). The footer shows data 1.1.0. Opening **UAT close E02** shows "Created against data 1.0.0; active data is 1.1.0. A run uses the active data." next to **Run this version**. | ☐ |
 | 48 | Open **Study area** | No edge-effect banner; A3 and A6 have no orange outline. A fourth dot **F4** appears in B. **F3** is white with a grey dashed ring; clicking it shows "Valid to (closed) 2026-12-01" and "Closed true". Coverage: M-B facilities **verified by the municipality**. Below the changelog, **Licences and attribution per layer** lists the five layers, each AGPL-3.0-or-later with its attribution. | ☐ |
 | 49 | Open the run of step 26 | An orange note: "This run used data 1.0.0; the active data is 1.1.0." with **Rerun on data 1.1.0**. Its results are unchanged (A3 still 66). | ☐ |
 | 50 | Click **Rerun on data 1.1.0** and wait for **succeeded**; choose Home care and walking | A3 now shows `18 min` (F4 across the border) without an edge-effect warning; A1 shows `30 min` (F3 closed, so A1 goes to F1). | ☐ |
@@ -146,8 +149,10 @@ administrator or viewer, so both stay logged in.
 
 | # | Do | Expected result | ✓ |
 | --- | --- | --- | --- |
-| 53 | In the private window log out, log in as `uat-viewer` / `uat-viewer-pass` | No **Admin** link, no **New scenario** button. **Shared scenarios** lists Baseline and **UAT close E02**, but **not** UAT F3 staff if it is private (it is private by default). | ☐ |
-| 54 | Open a run of **UAT close E02** | Results, map, table and exports are visible; there is no **Cancel**, **Run** or **Rerun** button. | ☐ |
+| 53 | In the private window log out, log in as `uat-viewer` / `uat-viewer-pass` | No **Admin** link, no **New scenario** button. **Shared scenarios** lists Baseline and **UAT close E02** (its visibility column says **shared**), but **not** UAT F3 staff or UAT placeholders (private). If **UAT close E02** is missing here, it was saved as private in step 16: check its **Visibility** in the analyst window. A shared scenario that was never run says "Not run yet. Ask an analyst to run it." and has no link. | ☐ |
+| 54 | Click the latest-run link of **UAT close E02** | The run opens: results, map, table and exports are visible; there is no **Cancel**, **Run** or **Rerun** button. The table title names the group and service ("… Older people, Home care"), not their codes. | ☐ |
+| 54a | Change the address to `/runs/00000000-0000-0000-0000-000000000000`, then switch to Ελληνικά | A page "Run not found" ("Η εκτέλεση δεν βρέθηκε") explains that the run does not exist or belongs to a private scenario of another user, with a button **Back to Scenarios**. No English text in the Greek page. | ☐ |
+| 54b | In the **admin** window open **Scenarios** | Below **Shared scenarios**, a table "Private scenarios of other users (visible to you as an administrator)" lists **UAT F3 staff** and **UAT placeholders**, each with "private (owner demo-analyst)". | ☐ |
 | 55 | Open http://127.0.0.1:8080/admin | "This page is for administrators." | ☐ |
 
 ## M. Clean up

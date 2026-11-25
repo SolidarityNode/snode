@@ -111,3 +111,21 @@ Spec 00 §3: a **run** is one **immutable** execution of a scenario and records 
   come from **draw-by-draw differences** when both runs share data version, seed and number of
   draws (common random numbers), as `summarise_total` does for totals; otherwise the screens
   show the two medians and both intervals, labelled, and no interval for the difference.
+
+### Open for later (from UAT, no code now)
+
+- **Hash the scenario's content, not its identity.** The input hash includes the scenario id
+  and version, so a duplicated scenario, or a new version that only changes the name or
+  description, runs again although its changes are identical. With slow research models,
+  consider hashing only the scenario's changes (the overlay body): identical changes would then
+  reuse an earlier result, while each run still records which scenario and version asked for
+  it (one result, several requesting runs). To decide with the first research model.
+- **Retention rule for large installations.** v0.1 deletes nothing automatically. A later rule
+  could delete the per-sample Parquet files of old runs while keeping their summary values
+  (mean, median, interval) in the database. The ADR must then say what is lost: such runs can
+  no longer be exported with samples, re-summarised with other quantiles, compared draw by draw,
+  or verified against their SHA-256. They are reproducible only by running them again with the
+  recorded code, data, model and seed, not from storage alone.
+- **A "New run" button.** Today a new run of unchanged inputs needs a different seed (or the
+  API's `force`). A UI button that forces a new run with the same seed would make repeat runs
+  explicit, without suggesting that the seed is a setting to tune.
