@@ -87,6 +87,7 @@ The sign-off certifies the [Developer Certificate of Origin](https://developerce
 - Fill in every section of the PR template, including the acceptance-criteria checklist, the dependency/licence table and the data/privacy checklist.
 - New dependencies must have an AGPL-compatible licence (MIT, BSD, Apache-2.0, ISC, MPL-2.0, LGPL, GPL-3.0, AGPL-3.0). The `licenses` CI check fails otherwise. State each new dependency's licence in the PR.
 - CI runs only the workflows affected by your change (`core`, `backend`, `frontend`, `containers`, `licenses`, plus `dco`).
+- When an agent opens a PR at a maintainer's request, it assigns that maintainer (`gh pr create --assignee <login>`, or `@me` when `gh` runs as their account; step 5 of "Workflow for tickets" in [`AGENTS.md`](AGENTS.md)). Why: the PR then appears in their assigned list, ready for review and UAT. A bot account must name the maintainer's login, not `@me`.
 
 ## Changing the rules
 
