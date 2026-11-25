@@ -34,7 +34,8 @@ SPECS_DIR = ROOT / "docs" / "specs"
 OPEN_QUESTIONS = SPECS_DIR / "open-questions.md"
 
 _BLOCK = re.compile(
-    r"(<!-- BEGIN GENERATED: (?P<name>[a-z-]+)[^>]*-->\n)(?P<body>.*?)(<!-- END GENERATED: (?P=name) -->)",
+    r"(?P<indent>[ \t]*)(?P<begin><!-- BEGIN GENERATED: (?P<name>[a-z-]+)[^>]*-->\n)"
+    r"(?P<body>.*?)(?P<end>[ \t]*<!-- END GENERATED: (?P=name) -->)",
     re.DOTALL,
 )
 
@@ -133,7 +134,11 @@ def render(text: str) -> str:
         name = match.group("name")
         if name not in GENERATORS:
             raise SystemExit(f"unknown generated block {name!r}")
-        return match.group(1) + GENERATORS[name]() + match.group(4)
+        indent = match.group("indent")
+        body = "".join(
+            indent + line if line.strip() else line for line in GENERATORS[name]().splitlines(True)
+        )
+        return indent + match.group("begin") + body + indent + match.group("end").lstrip()
 
     return _BLOCK.sub(replace, text)
 

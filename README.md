@@ -43,9 +43,9 @@ Then follow the [UAT guide](docs/uat/README.md) (setup on Windows with WSL2, Doc
 **Understand the method**
 - [Domain model](docs/specs/00-domain-model.md) and the [specifications index](docs/specs/README.md)
 - [Open questions](docs/specs/open-questions.md):
-<!-- BEGIN GENERATED: oq-counts (scripts/docs_indexes.py) -->
-30 questions: **10 decided**, 2 partly decided, 1 proposed, **17 open**.
-<!-- END GENERATED: oq-counts -->
+  <!-- BEGIN GENERATED: oq-counts (scripts/docs_indexes.py) -->
+  30 questions: **10 decided**, 2 partly decided, 1 proposed, **17 open**.
+  <!-- END GENERATED: oq-counts -->
 - [Paper revisions](docs/specs/paper-revisions.md): what the decisions change in the papers
 
 **Develop**

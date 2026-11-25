@@ -18,7 +18,7 @@ sequenceDiagram
 
     U->>FE: Run this version (seed optional)
     FE->>API: POST /runs {scenario, version, seed, config}
-    API->>API: draw a seed if none; input hash of scenario version,<br/>data version, code, model, seed, configuration
+    API->>API: draw a seed if none, input hash of scenario version,<br/>data version, code, model, seed, configuration
     alt a succeeded run has the same hash and its samples file passes SHA-256
         API-->>FE: existing run (reused, nothing computed)
     else no reusable run
@@ -28,10 +28,10 @@ sequenceDiagram
         W->>C: model(study area, scenario overlay, config, seed, progress)
         loop every progress step
             C-->>W: progress
-            W->>DB: progress, heartbeat; read cancel flag
+            W->>DB: progress, heartbeat, read cancel flag
         end
         W->>R: samples.parquet (+ SHA-256)
-        W->>DB: result summaries (mean, median, interval), tables,<br/>environment; job succeeded
+        W->>DB: result summaries (mean, median, interval), tables,<br/>environment, job succeeded
     end
     loop until finished
         FE->>API: GET /runs/{id}
@@ -69,12 +69,12 @@ sequenceDiagram
     API->>API: verify checksums, validate schema 2.0,<br/>compare with the active version
     API-->>A: status (new, update, already imported), changes per layer,<br/>coverage changes, changelog, problems
     A->>API: confirm import
-    API->>DB: one transaction: new data version with features, records,<br/>coverage and warnings; it becomes active, earlier ones are kept
+    API->>DB: one transaction: new data version with features, records,<br/>coverage and warnings, it becomes active, earlier ones are kept
     API->>DB: queue a baseline run on the new version
     API->>DB: revalidate every scenario against the new version
-    API-->>A: imported; scenarios that need attention
+    API-->>A: imported, scenarios that need attention
     W->>DB: run the baseline (run lifecycle above)
-    Note over A,API: Rollback: "Make 1.0.0 active again" (or make activate-version)<br/>does the same three steps for an earlier version; nothing is deleted
+    Note over A,API: Rollback: "Make 1.0.0 active again" (or make activate-version)<br/>does the same three steps for an earlier version, nothing is deleted
 ```
 
 ## Data version states
