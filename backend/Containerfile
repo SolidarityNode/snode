@@ -23,8 +23,11 @@ COPY --chown=10001:10001 backend/alembic.ini /app/alembic.ini
 COPY --chown=10001:10001 backend/migrations /app/migrations
 # Synthetic demo data packages offered for import (ADR 0013, DP-002).
 COPY --chown=10001:10001 data/synthetic/packages /app/data/synthetic/packages
-# Mount point of the results volume (Parquet samples, package uploads), owned by the app user.
-RUN mkdir -p /data/results && chown 10001:10001 /data/results
+# Synthetic hub sources and demo facility files (DP-005), registered by `make uat-hub`.
+COPY --chown=10001:10001 data/synthetic/demo/hub /app/data/synthetic/demo/hub
+# Mount points of the results volume (Parquet samples, package uploads) and of the hub storage
+# (raw sources, published packages), owned by the app user.
+RUN mkdir -p /data/results /data/hub && chown 10001:10001 /data/results /data/hub
 ENV PATH="/opt/venv/bin:$PATH" \
     GIT_COMMIT=${GIT_COMMIT} \
     PYTHONUNBUFFERED=1 \

@@ -2,7 +2,8 @@
 # Start with `make up`; engine and compose command come from the Makefile variables
 # CONTAINER_ENGINE and COMPOSE. All values can be overridden in .env (see .env.example).
 # Ports are non-privileged and bound to 127.0.0.1. No bind mounts: data lives in named volumes
-# (db-data for PostgreSQL, results for per-sample Parquet files and package uploads).
+# (db-data for PostgreSQL, results for per-sample Parquet files and package uploads, hub for the
+# raw sources and published packages of a hub).
 # GIT_COMMIT is passed as a build argument by `make up` so /version and the frontend footer
 # show which build is under test.
 name: solidaritynode
@@ -30,6 +31,16 @@ x-backend-env: &backend-env
   SOLIDARITYNODE_JOB_HEARTBEAT_SECONDS: ${SOLIDARITYNODE_JOB_HEARTBEAT_SECONDS:-10}
   SOLIDARITYNODE_JOB_STALE_SECONDS: ${SOLIDARITYNODE_JOB_STALE_SECONDS:-120}
   SOLIDARITYNODE_JOB_MAX_RUNTIME_SECONDS: ${SOLIDARITYNODE_JOB_MAX_RUNTIME_SECONDS:-}
+  SOLIDARITYNODE_DOCS_BASE_URL: ${SOLIDARITYNODE_DOCS_BASE_URL:-https://solidaritynode.github.io/snode/}
+  # Hub only (DEPLOYMENT_MODE=hub): storage of raw sources and packages, and onboarding settings.
+  SOLIDARITYNODE_HUB_STORAGE_DIR: /data/hub
+  SOLIDARITYNODE_HUB_CRS: ${SOLIDARITYNODE_HUB_CRS:-EPSG:2100}
+  SOLIDARITYNODE_HUB_BUFFER_RULE: ${SOLIDARITYNODE_HUB_BUFFER_RULE:-whole_neighbouring_municipalities}
+  SOLIDARITYNODE_HUB_BUFFER_DISTANCE_M: ${SOLIDARITYNODE_HUB_BUFFER_DISTANCE_M:-1000}
+  SOLIDARITYNODE_HUB_DUPLICATE_DISTANCE_M: ${SOLIDARITYNODE_HUB_DUPLICATE_DISTANCE_M:-25}
+  SOLIDARITYNODE_HUB_MAX_SOURCE_MB: ${SOLIDARITYNODE_HUB_MAX_SOURCE_MB:-4096}
+  SOLIDARITYNODE_HUB_MAX_FACILITY_FILE_MB: ${SOLIDARITYNODE_HUB_MAX_FACILITY_FILE_MB:-5}
+  SOLIDARITYNODE_HUB_MAX_FACILITY_ROWS: ${SOLIDARITYNODE_HUB_MAX_FACILITY_ROWS:-5000}
 
 services:
   db:
@@ -62,6 +73,7 @@ services:
       <<: *backend-env
     volumes:
       - results:/data/results
+      - hub:/data/hub
     depends_on:
       db:
         condition: service_healthy
@@ -91,6 +103,7 @@ services:
       SOLIDARITYNODE_WORKER_NAME: worker
     volumes:
       - results:/data/results
+      - hub:/data/hub
     depends_on:
       backend:
         condition: service_healthy
@@ -105,6 +118,8 @@ services:
     image: localhost/solidaritynode-frontend:dev
     environment:
       BACKEND_UPSTREAM: http://backend:8000
+      # Largest request body through the /api proxy (package uploads, hub source registration).
+      NGINX_CLIENT_MAX_BODY_SIZE: ${NGINX_CLIENT_MAX_BODY_SIZE:-4096m}
     depends_on:
       backend:
         condition: service_healthy
@@ -120,3 +135,4 @@ services:
 volumes:
   db-data:
   results:
+  hub:

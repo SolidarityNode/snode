@@ -55,7 +55,7 @@ All configuration comes from `.env` (git-ignored), created by `make setup` from 
 | `SOLIDARITYNODE_LOG_LEVEL` | backend | `info` | `debug`, `info`, `warning` or `error` |
 | `SOLIDARITYNODE_DATABASE_URL` | backend on the host | built from `POSTGRES_*` in compose | SQLAlchemy URL (secret) |
 | `SOLIDARITYNODE_CORS_ORIGINS` | backend | `["http://localhost:5173"]` | Origins allowed to call the API directly |
-| `DEPLOYMENT_MODE` | backend, worker, CLI | `municipality` | `municipality` or `hub` (ADR 0012). Stored in the database at first initialisation; the backend refuses to start if it later differs. Only the municipal installation is complete in v0.1 |
+| `DEPLOYMENT_MODE` | backend, worker, CLI | `municipality` | `municipality` or `hub` (ADR 0012). Stored in the database at first initialisation; the backend refuses to start if it later differs. The hub (raw sources, onboarding, facility imports, packages) is described in the user guide, "Hub" |
 | `SOLIDARITYNODE_BASEMAP` | backend → frontend | `osm` | Map background: `osm` (OpenStreetMap tiles, attributed, needs internet) or `blank` (offline) |
 | `SOLIDARITYNODE_DIAGNOSTIC_STEP_DELAY_S` | runs | `0.5` | Pause after each progress step so progress and cancel can be followed; recorded in the run configuration |
 | `SOLIDARITYNODE_SESSION_HOURS` | backend | `12` | Login session lifetime |
@@ -73,6 +73,15 @@ All configuration comes from `.env` (git-ignored), created by `make setup` from 
 | `SOLIDARITYNODE_RESULT_INTERVAL_QUANTILES` | backend, worker | `0.05,0.95` | Quantile levels of the interval stored with every result (with the mean and the median); recorded in the run configuration and its input hash (ADR 0017) |
 | `SOLIDARITYNODE_SAMPLES_WARN_MB` | backend | `500` | Warn when a run's samples file is estimated, before the run starts, above this many megabytes (ADR 0008); the run is still queued |
 | `SOLIDARITYNODE_JOB_MAX_RUNTIME_SECONDS` | worker | empty (no limit) | Optional maximum runtime per job kind, as `kind=seconds` pairs (for example `run=3600`); a job over it is stopped at its next progress step and marked failed |
+| `SOLIDARITYNODE_DOCS_BASE_URL` | backend → frontend | `https://solidaritynode.github.io/snode/` | Documentation site; the footer's **User guide** opens `<base><major.minor>/` of the running version, or `<base>dev/` in development. Point it to a local mirror for offline installations |
+| `SOLIDARITYNODE_HUB_STORAGE_DIR` | hub backend, worker | `var/hub` (`/data/hub` volume in compose) | Registered raw sources, uploaded facility files and published packages |
+| `SOLIDARITYNODE_HUB_CRS` | hub | `EPSG:2100` | Projected CRS of curated features and packages; sources in another CRS are reprojected (and the report says so) |
+| `SOLIDARITYNODE_HUB_BUFFER_RULE` | hub | `whole_neighbouring_municipalities` | Default buffer of onboarding and new study areas: `whole_neighbouring_municipalities` or `distance` (OQ-28 is open; a placeholder, not a method) |
+| `SOLIDARITYNODE_HUB_BUFFER_DISTANCE_M` | hub | `1000` | Distance of the `distance` buffer rule, in metres |
+| `SOLIDARITYNODE_HUB_DUPLICATE_DISTANCE_M` | hub | `25` | Facilities closer than this (or with the same name in the municipality) are reported as likely duplicates |
+| `SOLIDARITYNODE_HUB_MAX_SOURCE_MB` | hub | `4096` | Largest raw source file accepted by upload (streamed to disk, never loaded whole) |
+| `SOLIDARITYNODE_HUB_MAX_FACILITY_FILE_MB`, `SOLIDARITYNODE_HUB_MAX_FACILITY_ROWS` | hub | `5`, `5000` | Largest facility import file and most rows in one file |
+| `NGINX_CLIENT_MAX_BODY_SIZE` | frontend (nginx) | `4096m` | Largest request body the `/api` proxy passes on (package uploads, hub sources); the backend applies its own limits |
 | `SOLIDARITYNODE_TEST_DATABASE_URL` | backend tests | compose `db` on 127.0.0.1:5432 | PostGIS server on which the tests create a throw-away database |
 | `GIT_COMMIT` | image builds | set by `make up` | Build identity shown by `/version` and the footer, recorded on every run; with `APP_ENV=production` it must be known and not end in `-dirty` (backend and worker refuse to start otherwise) |
 | `CONTAINER_ENGINE`, `COMPOSE` | Makefile | `podman`, `podman compose` | Container engine and compose command |
