@@ -21,12 +21,15 @@ import csv
 import hashlib
 import heapq
 import json
-import sqlite3
 import struct
+import sys
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 
 OUT = Path(__file__).resolve().parent.parent / "data" / "synthetic" / "demo"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "backend" / "src"))
+
+from solidaritynode_backend.gpkg import Srs, write_geopackage  # noqa: E402  (standard library only)
 GENERATED = "2026-11-24"
 PACKAGE_VERSION = "0.1.0"
 
@@ -189,107 +192,35 @@ def _point(x_km: float, y_km: float) -> tuple[bytes, tuple[float, ...]]:
 # --- GeoPackage writer -----------------------------------------------------------------------
 
 
-def _init_gpkg(db: sqlite3.Connection) -> None:
-    db.execute("PRAGMA application_id = 1196444487")  # 'GPKG'
-    db.execute("PRAGMA user_version = 10400")  # GeoPackage 1.4
-    db.executescript(
-        """
-        CREATE TABLE gpkg_spatial_ref_sys (
-          srs_name TEXT NOT NULL, srs_id INTEGER PRIMARY KEY, organization TEXT NOT NULL,
-          organization_coordsys_id INTEGER NOT NULL, definition TEXT NOT NULL, description TEXT);
-        CREATE TABLE gpkg_contents (
-          table_name TEXT NOT NULL PRIMARY KEY, data_type TEXT NOT NULL,
-          identifier TEXT UNIQUE, description TEXT DEFAULT '',
-          last_change DATETIME NOT NULL, min_x DOUBLE, min_y DOUBLE, max_x DOUBLE, max_y DOUBLE,
-          srs_id INTEGER, CONSTRAINT fk_gc_r_srs_id FOREIGN KEY (srs_id)
-          REFERENCES gpkg_spatial_ref_sys(srs_id));
-        CREATE TABLE gpkg_geometry_columns (
-          table_name TEXT NOT NULL, column_name TEXT NOT NULL, geometry_type_name TEXT NOT NULL,
-          srs_id INTEGER NOT NULL, z TINYINT NOT NULL, m TINYINT NOT NULL,
-          CONSTRAINT pk_geom_cols PRIMARY KEY (table_name, column_name),
-          CONSTRAINT fk_gc_tn FOREIGN KEY (table_name) REFERENCES gpkg_contents(table_name),
-          CONSTRAINT fk_gc_srs FOREIGN KEY (srs_id) REFERENCES gpkg_spatial_ref_sys (srs_id));
-        """
-    )
-    db.executemany(
-        "INSERT INTO gpkg_spatial_ref_sys VALUES (?, ?, ?, ?, ?, ?)",
-        [
-            ("Undefined cartesian SRS", -1, "NONE", -1, "undefined", None),
-            ("Undefined geographic SRS", 0, "NONE", 0, "undefined", None),
-            (
-                "WGS 84 geodetic",
-                4326,
-                "EPSG",
-                4326,
-                'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,'
-                'AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,'
-                'AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,'
-                'AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]',
-                None,
-            ),
-            ("GGRS87 / Greek Grid", SRID, "EPSG", SRID, SRS_WKT, None),
-        ],
-    )
-
-
-def _add_layer(
-    db: sqlite3.Connection,
-    name: str,
-    geometry_type: str,
-    description: str,
-    columns: Sequence[tuple[str, str]],
-    rows: Iterable[tuple[tuple[bytes, tuple[float, ...]], Sequence[object]]],
-) -> None:
-    cols_sql = ", ".join(f"{c} {t}" for c, t in columns)
-    db.execute(
-        f"CREATE TABLE {name} (fid INTEGER PRIMARY KEY AUTOINCREMENT, "
-        f"geom {geometry_type}, {cols_sql})"
-    )
-    envs = []
-    placeholders = ", ".join("?" for _ in range(len(columns) + 1))
-    names = ", ".join(["geom", *(c for c, _ in columns)])
-    for (blob, env), values in rows:
-        envs.append(env)
-        db.execute(f"INSERT INTO {name} ({names}) VALUES ({placeholders})", (blob, *values))
-    db.execute(
-        "INSERT INTO gpkg_contents VALUES (?, 'features', ?, ?, ?, ?, ?, ?, ?, ?)",
-        (
-            name,
-            name,
-            description,
-            f"{GENERATED}T00:00:00.000Z",
-            min(e[0] for e in envs),
-            min(e[2] for e in envs),
-            max(e[1] for e in envs),
-            max(e[3] for e in envs),
-            SRID,
-        ),
-    )
-    db.execute(
-        "INSERT INTO gpkg_geometry_columns VALUES (?, 'geom', ?, ?, 0, 0)",
-        (name, geometry_type, SRID),
-    )
+WGS84 = Srs(
+    "WGS 84 geodetic",
+    4326,
+    "EPSG",
+    4326,
+    'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,'
+    'AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,'
+    'AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,'
+    'AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]',
+)
+GREEK_GRID = Srs("GGRS87 / Greek Grid", SRID, "EPSG", SRID, SRS_WKT)
 
 
 def write_gpkg(path: Path) -> None:
     """Write the spatial layers to a GeoPackage at ``path``."""
-    path.unlink(missing_ok=True)
-    db = sqlite3.connect(path)
-    try:
-        _init_gpkg(db)
-        lifecycle = [("quality", "TEXT"), ("valid_from", "DATE"), ("valid_to", "DATE")]
-        _add_layer(
-            db,
+    lifecycle = [("quality", "TEXT"), ("valid_from", "DATE"), ("valid_to", "DATE")]
+    layers = [
+        (
             "municipalities",
             "POLYGON",
+            SRID,
             "Fictional municipalities: M-A study (core), M-B neighbour (buffer)",
             [("municipality_id", "TEXT NOT NULL UNIQUE"), ("name", "TEXT"), ("role", "TEXT")],
             ((_square(box), (mid, name, role)) for mid, name, role, box in MUNICIPALITIES),
-        )
-        _add_layer(
-            db,
+        ),
+        (
             "spatial_units",
             "POLYGON",
+            SRID,
             "Fictional spatial units i (6 core in M-A, 2 buffer in M-B)",
             [
                 ("unit_id", "TEXT NOT NULL UNIQUE"),
@@ -302,22 +233,22 @@ def write_gpkg(path: Path) -> None:
                 (_square(box), (uid, f"Unit {uid} (fictional)", mid, role, "synthetic", VALID_FROM, None))
                 for uid, mid, role, box in UNITS
             ),
-        )
-        _add_layer(
-            db,
+        ),
+        (
             "unit_centroids",
             "POINT",
+            SRID,
             "Population centroid of each spatial unit and its network node",
             [("unit_id", "TEXT NOT NULL UNIQUE"), ("node_id", "TEXT")],
             (
                 (_point((b[0] + b[2]) / 2, (b[1] + b[3]) / 2), (uid, f"N-{uid}"))
                 for uid, _, _, b in UNITS
             ),
-        )
-        _add_layer(
-            db,
+        ),
+        (
             "facilities",
             "POINT",
+            SRID,
             "Fictional facilities f (F4 lies in the buffer municipality near the boundary)",
             [
                 ("facility_id", "TEXT NOT NULL UNIQUE"),
@@ -332,11 +263,9 @@ def write_gpkg(path: Path) -> None:
                 (_point(*xy), (fid, name, ftype, mid, role, node, "synthetic", VALID_FROM, None))
                 for fid, name, ftype, mid, role, node, xy in FACILITIES
             ),
-        )
-        db.commit()
-        db.execute("VACUUM")
-    finally:
-        db.close()
+        ),
+    ]
+    write_geopackage(path, [WGS84, GREEK_GRID], layers, f"{GENERATED}T00:00:00.000Z")
 
 
 # --- Network and hand-check table ----------------------------------------------------------
