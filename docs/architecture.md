@@ -1,41 +1,61 @@
 # Architecture
 
-> Status: v0.1 platform mechanics (no scientific method yet: the only model is the diagnostic model `diagnostic-v0`). It will grow with each module. The science is specified in [`docs/specs/`](specs/README.md); decisions are recorded in [`docs/adr/`](adr/README.md).
+> Status: platform 0.1.0, platform mechanics (no scientific method yet: the only model is the diagnostic model `diagnostic-v0`). It will grow with each module. The science is specified in [`docs/specs/`](specs/README.md); decisions are recorded in [`docs/adr/`](adr/README.md).
 
-## 1. Components
+## 1. Overview and trust boundaries
 
 ```mermaid
 flowchart LR
-    subgraph Browser
-        FE["frontend<br/>React + TypeScript (Vite)"]
+    subgraph USER["User's device (untrusted)"]
+        BR["Browser<br/>React app"]
     end
-    subgraph Containers["compose.yaml (Podman default, Docker supported)"]
-        NGX["frontend container<br/>nginx-unprivileged :8080"]
+    OSM[("OpenStreetMap tile server<br/>third party, optional<br/>SOLIDARITYNODE_BASEMAP=osm")]
+    subgraph INST["Municipal installation (trusted: one host, compose.yaml)"]
+        FE["frontend<br/>nginx-unprivileged :8080<br/>static app + /api proxy"]
         BE["backend<br/>FastAPI :8000"]
-        JOBS["worker service<br/>PostgreSQL job queue (ADR 0006)"]
-        DB[("PostgreSQL + PostGIS<br/>data versions, scenarios, runs,<br/>result summaries")]
+        W["worker<br/>same image as backend"]
+        DB[("db<br/>PostgreSQL + PostGIS<br/>users, data versions, scenarios,<br/>runs, jobs, result summaries")]
+        RES[("results volume<br/>Parquet samples,<br/>package uploads")]
+        CORE["core library<br/>(imported in-process)"]
     end
-    FILES[("results volume<br/>Parquet samples (ADR 0008)")]
-    CORE["core<br/>solidaritynode_core<br/>(pure Python library)"]
+    subgraph HUB["Hub (future, v0.2; ADR 0012)"]
+        PKG[("data packages<br/>versioned, checksummed")]
+    end
 
-    FE -->|"/api/*"| NGX -->|proxy| BE
+    BR -->|"HTTPS in production<br/>session cookie, scenario JSON"| FE
+    FE -->|"/api/* proxy"| BE
+    BR -.->|"map tiles only<br/>no user data"| OSM
     BE --> DB
-    BE -->|"queue job"| DB
-    DB -->|"claim job"| JOBS
-    JOBS --> DB
-    JOBS --> CORE
+    W --> DB
+    BE --> RES
+    W --> RES
     BE --> CORE
-    JOBS --> FILES
+    W --> CORE
+    PKG -->|"manual import or pull<br/>(outbound only), checksums"| BE
+    BE -.->|"nothing in v0.1<br/>(ADR 0014 open)"| HUB
 ```
 
-| Component | Path | Responsibility | Depends on |
+| Boundary | What crosses it | Protection |
+| --- | --- | --- |
+| Browser → frontend | sign-in, session cookie, scenario JSON, aggregated results, exports. No personal data exists in the platform | sessions and roles (ADR 0015); cookie `Secure` in production; HTTPS terminated by a reverse proxy in front of `frontend` (deployment responsibility) |
+| Browser → OpenStreetMap tiles | tile requests with a referrer, when `SOLIDARITYNODE_BASEMAP=osm` | no application data is sent; `blank` keeps the browser offline (ADR 0007) |
+| frontend → backend, backend/worker → db and results | API calls, SQL, files | internal compose network; ports bound to `127.0.0.1`; secrets from `.env`, `change-me` refused in production |
+| Hub → installation | data packages | checksums, validation and a preview before import (ADR 0013); the installation opens every connection (ADR 0012) |
+| Installation → hub | nothing in v0.1; later optional aggregated indicators only | ADR 0014 (open), OQ-21 |
+| Request tickets (future) | never leave the installation; none stored until ADR 0010 is accepted | OQ-21, OQ-29 |
+
+| Component | Path | Responsibility | Details |
 | --- | --- | --- | --- |
-| `core` | `core/` | Domain model and modelling methods (accessibility, need, vulnerability, dynamics, resilience). No web framework, no database driver. | NumPy, xarray |
-| `backend` | `backend/` | HTTP API: data package import, users and roles, scenarios, runs, results, comparison, export; the worker process; persistence. | `core`, FastAPI, SQLAlchemy, Alembic, argon2-cffi, PyArrow |
-| `worker` | `backend/` (same image) | Runs queued jobs (model runs) outside the request cycle. | `core`, PostgreSQL |
-| `frontend` | `frontend/` | Web UI: study area, scenarios, runs, comparison, admin; maps with Leaflet (ADR 0007). | backend API over HTTP |
-| database | `compose.yaml` | Data versions, scenarios, runs and result summaries in PostgreSQL/PostGIS. | — |
-| files | `results` volume | Per-sample results in Parquet, package uploads. | — |
+| `core` | `core/` | Domain model and modelling methods. No web framework, no database driver. | [components](architecture/components.md#core) |
+| `backend` | `backend/` | HTTP API: data packages, users and roles, scenarios, runs, results, comparison, export; persistence. | [components](architecture/components.md#backend) |
+| `worker` | `backend/` (same image) | Runs queued jobs (model runs) outside the request cycle. | [components](architecture/components.md#worker) |
+| `frontend` | `frontend/` | Web UI; maps with Leaflet (ADR 0007). | [components](architecture/components.md#frontend) |
+| `db` | `compose.yaml` | PostgreSQL/PostGIS. | [components](architecture/components.md#db) |
+| results storage | `results` volume | Per-sample results in Parquet, package uploads. | [components](architecture/components.md#results-storage) |
+| data packages | `data/synthetic/packages/` | Versioned input data. | [components](architecture/components.md#data-packages) |
+| hub | (future) | Onboarding and package publication. | [components](architecture/components.md#hub-future) |
+
+Lifecycles (runs, data updates, statuses), the data model and the scenario application order are in [Lifecycles and data model](architecture/lifecycles.md); third-party dependencies in [Dependencies](architecture/dependencies.md).
 
 ## 2. Dependency direction
 
@@ -123,24 +143,7 @@ sequenceDiagram
 
 ## 5. Background jobs and runs
 
-Model runs never execute inside a request handler.
-
-```mermaid
-sequenceDiagram
-    participant UI as frontend
-    participant API as backend
-    participant DB as PostgreSQL
-    participant W as worker
-    participant C as core (model registry)
-    UI->>API: POST /runs (scenario, version, seed, config)
-    API->>DB: input hash; reuse a succeeded run, or insert run + queued job
-    W->>DB: claim job (FOR UPDATE SKIP LOCKED)
-    W->>C: diagnostic-v0(study area, scenario, config, seed, progress)
-    C-->>W: progress callbacks (cancel checked here)
-    W->>DB: run_results, run_tables; job succeeded
-    W->>W: samples.parquet in the results volume
-    UI->>API: GET /runs/{id} (poll status and progress)
-```
+Model runs never execute inside a request handler. The run lifecycle (sequence diagram) and the run statuses (state diagram) are in [Lifecycles and data model](architecture/lifecycles.md#run-lifecycle).
 
 - Interface: `JobRunner` (`submit(kind, payload)`, `info`, `cancel`) in `backend/.../jobs/`;
   implementation `PostgresJobRunner`; worker `python -m solidaritynode_backend.worker` (ADR 0006).
