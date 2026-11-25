@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 196" role="img" aria-labelledby="t">
+  <title id="t">SN Kintsugi: a teal bowl repaired with gold seams</title>
+  <defs>
+    <radialGradient id="body" cx="0.45" cy="0.25" r="0.75">
+      <stop offset="0" stop-color="#21797f"/>
+      <stop offset="0.6" stop-color="#145a60"/>
+      <stop offset="1" stop-color="#0a3b40"/>
+    </radialGradient>
+    <linearGradient id="inside" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#062226"/>
+      <stop offset="1" stop-color="#0e4449"/>
+    </linearGradient>
+    <linearGradient id="foot" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6e5a44"/>
+      <stop offset="0.5" stop-color="#8f775b"/>
+      <stop offset="1" stop-color="#5e4c39"/>
+    </linearGradient>
+    <clipPath id="bowl"><path d="M10 45 A160 30 0 0 1 330 45 A160 120 0 0 1 10 45 Z"/></clipPath>
+  </defs>
+  <path d="M128 150 H212 L206 182 H134 Z" fill="url(#foot)"/>
+  <ellipse cx="170" cy="182" rx="37" ry="6" fill="#4a3b2c"/>
+  <path d="M10 45 A160 120 0 0 0 330 45 Z" fill="url(#body)"/>
+  <path d="M58 88 Q72 128 112 156" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="12" stroke-linecap="round"/>
+  <ellipse cx="170" cy="45" rx="158" ry="29" fill="url(#inside)" stroke="#2b8d95" stroke-width="3"/>
+  <g clip-path="url(#bowl)" fill="none" stroke="#c49a3c" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M33 63 L40 72 L38 76 L55 82 L75 78 L108 89 L132 70 L172 72 L205 90 L235 90 L255 75 L295 68 L298 90 L272 117"/>
+    <path d="M55 82 L68 102 L80 122"/>
+    <path d="M108 89 L125 110 L142 132 L175 133 L204 133 L235 90"/>
+    <path d="M162 52 L168 58 L160 62 L172 72 L178 95 L170 115 L175 133 L168 150 L172 168"/>
+    <path d="M270 50 L292 50 L315 56 L295 68"/>
+  </g>
+  <g fill="#c49a3c">
+    <circle cx="55" cy="82" r="5"/><circle cx="108" cy="89" r="5"/><circle cx="172" cy="72" r="5"/>
+    <circle cx="235" cy="90" r="5"/><circle cx="295" cy="68" r="5"/><circle cx="142" cy="132" r="5"/>
+    <circle cx="204" cy="133" r="5"/><circle cx="175" cy="133" r="5"/>
+  </g>
+</svg>

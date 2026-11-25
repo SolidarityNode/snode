@@ -13,9 +13,12 @@ Generated blocks sit between ``<!-- BEGIN GENERATED: <name> ... -->`` and
 | ``adr-index`` | ``docs/adr/README.md`` | the header lines of every ``docs/adr/NNNN-*.md`` |
 | ``specs-index`` | ``docs/specs/README.md`` | the title and ``Status:`` line of each spec file |
 | ``oq-counts`` | ``README.md``, ``docs/index.md``, ``docs/specs/README.md`` | the summary table of ``docs/specs/open-questions.md`` |
+| ``platform-version`` | ``README.md`` (under the logo) | ``VERSION`` |
 
 ``--check`` also enforces the diagram rule (AGENTS.md "Documentation rules"): no diagram files
 (``.svg``, ``.drawio``, ``.puml``, ...) and no non-Mermaid diagram code blocks in the docs.
+The logo in ``docs/assets/brand/`` is not a diagram and is exempt; ``--check`` also fails when its
+copy in ``frontend/public/brand/`` (the frontend image builds from ``frontend/`` only) differs.
 
 Standard library only.
 """
@@ -32,6 +35,9 @@ ROOT = Path(__file__).resolve().parent.parent
 ADR_DIR = ROOT / "docs" / "adr"
 SPECS_DIR = ROOT / "docs" / "specs"
 OPEN_QUESTIONS = SPECS_DIR / "open-questions.md"
+VERSION_FILE = ROOT / "VERSION"
+BRAND_DIR = ROOT / "docs" / "assets" / "brand"  # logo files, not diagrams
+FRONTEND_BRAND_DIR = ROOT / "frontend" / "public" / "brand"  # copy: the image builds from frontend/
 
 _BLOCK = re.compile(
     r"(?P<indent>[ \t]*)(?P<begin><!-- BEGIN GENERATED: (?P<name>[a-z-]+)[^>]*-->\n)"
@@ -114,10 +120,17 @@ def oq_counts() -> str:
     )
 
 
+def platform_version() -> str:
+    """Return the product name and the platform version from VERSION (HTML: it sits in a <p>)."""
+    version = VERSION_FILE.read_text(encoding="utf-8").strip()
+    return f"<strong>SN Kintsugi</strong> · version {version}\n"
+
+
 GENERATORS: dict[str, Callable[[], str]] = {
     "adr-index": adr_index,
     "specs-index": specs_index,
     "oq-counts": oq_counts,
+    "platform-version": platform_version,
 }
 TARGETS = [
     ROOT / "README.md",
@@ -154,12 +167,23 @@ def diagram_problems() -> list[str]:
     problems = [
         f"{p.relative_to(ROOT)}: diagram file; write diagrams as Mermaid code blocks"
         for p in sorted((ROOT / "docs").rglob("*"))
-        if p.suffix.lower() in DIAGRAM_FILES
+        if p.suffix.lower() in DIAGRAM_FILES and BRAND_DIR not in p.parents
     ]
     for path in [ROOT / "README.md", *sorted((ROOT / "docs").rglob("*.md"))]:
         if _OTHER_DIAGRAM_FENCE.search(path.read_text(encoding="utf-8")):
             problems.append(f"{path.relative_to(ROOT)}: non-Mermaid diagram block; use Mermaid")
     return problems
+
+
+def brand_problems() -> list[str]:
+    """Return logo files whose frontend copy differs from docs/assets/brand/."""
+    return [
+        f"{(FRONTEND_BRAND_DIR / p.name).relative_to(ROOT)}: differs from {p.relative_to(ROOT)}; "
+        "copy it again"
+        for p in sorted(BRAND_DIR.glob("*.svg"))
+        if not (FRONTEND_BRAND_DIR / p.name).is_file()
+        or (FRONTEND_BRAND_DIR / p.name).read_bytes() != p.read_bytes()
+    ]
 
 
 def main(argv: list[str]) -> int:
@@ -173,7 +197,7 @@ def main(argv: list[str]) -> int:
             stale.append(path.relative_to(ROOT))
             if not check:
                 path.write_text(new, encoding="utf-8")
-    problems = diagram_problems() if check else []
+    problems = diagram_problems() + brand_problems() if check else []
     for problem in problems:
         print(problem)
     if check and (stale or problems):

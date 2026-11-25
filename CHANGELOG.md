@@ -37,7 +37,7 @@ First version: the **platform foundation** of a municipal installation, on synth
 
 ### Documentation
 
-- Documentation site (MkDocs with the Material theme, versioned with mike, published to GitHub Pages): user guide with one page per screen, roles and FAQ; architecture pages per component with Mermaid diagrams of the run lifecycle, run statuses, data update flow, data model and scenario application order; roadmap; release process (`make docs`, `make docs-build`).
+- Documentation site (MkDocs with the Material theme, versioned with mike, published to GitHub Pages): user guide with one page per screen, roles and FAQ; architecture pages per component with Mermaid diagrams of the run lifecycle, run statuses, data update flow, data model and scenario application order; roadmap; release process (`make docs`, `make docs-build`). The README and the docs home show the SN Kintsugi logo with the platform version from `VERSION`; the logo is also the site icon and favicon, and the logo with "SN Kintsugi" replaces the name in the header of the web application, which uses it as favicon too.
 - Generated and CI-checked: the ADR index, the specifications index, the open-question counts (`make docs-generate`) and the dependency and licence report `docs/architecture/dependencies.md` (`make deps-report`); link checking of the README and docs.
 - The platform version has one source, the file `VERSION` (`make version`, `make version-sync`, checked by `make lint`), and the run reproducibility record names it (`environment.solidaritynode`, not in the input hash).
 - README as a short landing page; `CITATION.cff`; milestones per roadmap step and labels `paper:1` … `paper:4`.
