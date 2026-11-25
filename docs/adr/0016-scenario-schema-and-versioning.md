@@ -35,6 +35,23 @@ The demo scenario `data/synthetic/demo/scenarios/C-DEMO-REF.json` uses a draft l
   (`uniform | concentrated`, required for disruption scenarios, OQ-24) and `reference_level`
   (the reference-scenario flag; construction of reference scenarios stays open, OQ-16). Unknown
   fields are refused. It maps to `core.model.Scenario` (`NewFacility` gains `node_id`).
+- **Intervention placeholders** (Paper 1 §13, §15.7), added without a schema version change
+  because no scenario has been stored outside development (`schema_version` stays `1.0`; the new
+  fields default to empty, so stored versions stay valid):
+  - `network_changes.edge_changes`: travel time or speed of one existing edge for one mode,
+    `absolute` (minutes or km/h) or `relative` (percent, above −100 %);
+  - `network_changes.new_edges`: a new edge between two existing nodes, with a travel time per
+    mode and a `closable` flag;
+  - `population_changes`: one unit and group, `absolute` (persons) or `relative` (percent).
+  They map to `core.model.EdgeChange`, `NewEdge` and `PopulationChange`, are validated (schema
+  rules, duplicates, references against the data version, no negative results where the
+  baseline is known) and **recorded only**: runs list them under `recorded_only`, nothing is
+  applied yet. The editor keeps them when saving and says they have no effect yet.
+- **Order of application** (OQ-30, *proposed default*, recorded in `core.scenarios.overlay` and
+  `core.model.Scenario`): interventions first (new facilities, capacity, network, population),
+  then disruptions (severities, closed edges), which may also hit the new facilities and new
+  edges of the same scenario. This touches the method and must be confirmed when the Paper 3
+  spec is written.
 - The JSON Schema is exported to `docs/schemas/scenario.schema.json` (`make schemas`); a test
   keeps it current.
 - Scenarios refer to features by **stable ids** from the data package. Name, description and
@@ -56,4 +73,12 @@ other tools check scenarios.
 
 - A schema 2.0 will need a migration of stored versions.
 - Severities are recorded and reported only: how DS changes capacity is Paper 3 and not
-  implemented.
+  implemented. The same holds for edge, new-edge and population changes (Paper 1 §5, §6).
+- **Open for later versions of the schema:**
+  - **uncertain scenario parameters**, for example DS as a range or distribution sampled in
+    the Monte Carlo runs instead of a single value;
+  - **time-varying disruptions** for Paper 4 (severities and closures that change over time),
+    likely schema 2.0;
+  - **per-service severity** (a facility disrupted for one service and not another);
+  - **scenario families** for sensitivity analysis and for the OQ-16 reference scenarios
+    (minor, moderate, severe), generated from one definition instead of edited one by one.
