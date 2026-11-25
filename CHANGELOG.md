@@ -10,6 +10,10 @@ Every pull request that changes behaviour adds a line under **Unreleased** (AGEN
 
 - **Documentation in Greek**: the home page, the whole user guide (including roles, data updates and the FAQ), concepts and the roadmap are on the documentation site in Greek, under `el/`, with a language switcher in the header that keeps the page and the version. Terms follow `docs/i18n/glossary.md` and button names are those of the Greek UI, with the English label the first time. Technical pages (architecture, ADRs, specs, open questions, paper revisions, data-processing notes, contributing, changelog) stay in English and are marked "(στα αγγλικά)" (ADR 0019).
 
+### Fixed
+
+- Greek UI: *owner* is «κάτοχος» everywhere (four texts said «ιδιοκτήτης»), as in the glossary.
+
 ### Added: technical
 
 - Documentation tooling: `mkdocs-static-i18n` 1.3.1 (MIT) in `tools/docs/`. `scripts/docs_i18n.py`, run by `make lint` and the docs workflow, warns about Greek pages whose English source changed (front matter `translated_from_sha256`) and fails if a user-guide page has no Greek version; `make docs-stamp PAGE=…` records an updated translation. New glossary terms are marked *proposed*.
