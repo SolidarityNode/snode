@@ -23,13 +23,18 @@ __all__ = [
     "CapacityChange",
     "CapacityChangeMode",
     "CapacityInputs",
+    "ChangeMode",
+    "EdgeChange",
+    "EdgeQuantity",
     "Facility",
     "FacilityFunctionalState",
     "GeoInterface",
     "GroupProfiles",
     "Intervention",
     "NetworkDisruption",
+    "NewEdge",
     "NewFacility",
+    "PopulationChange",
     "PopulationGroup",
     "Rationing",
     "ReferenceScenarioLevel",
@@ -374,8 +379,114 @@ class NewFacility:
     node_id: str | None = None
 
 
-type Intervention = CapacityChange | NewFacility
-"""A what-if intervention of a counterfactual scenario (Paper 1 §13; Spec 00 §3)."""
+ChangeMode = CapacityChangeMode
+"""Absolute (a signed change in the quantity's own unit) or relative (percent of the baseline)."""
+
+
+class EdgeQuantity(StrEnum):
+    """What an :class:`EdgeChange` changes (Paper 1 §13, §15.7).
+
+    Attributes:
+        TRAVEL_TIME: Minutes to traverse the edge.
+        SPEED: Speed on the edge (km/h when absolute).
+    """
+
+    TRAVEL_TIME = "travel_time"
+    SPEED = "speed"
+
+
+@dataclass(frozen=True, slots=True)
+class EdgeChange:
+    """What-if intervention: change the travel time or speed of one edge for one mode.
+
+    Paper 1 §13, §15.7 (accessibility interventions, for example −20 % travel time). A typed
+    placeholder only: it is checked against the study area and **recorded**, but not applied;
+    how it changes accessibility is a Paper 1 §5 method (OQ-3, OQ-5).
+
+    Attributes:
+        edge: Stable id of an existing edge (or of a :class:`NewEdge` of the same scenario).
+        mode: Transport mode the change applies to.
+        quantity: Travel time or speed.
+        change: Absolute (signed change in minutes, or km/h for speed) or relative (percent).
+        amount: Signed change.
+    """
+
+    edge: str
+    mode: TransportMode
+    quantity: EdgeQuantity
+    change: ChangeMode
+    amount: float
+
+    def __post_init__(self) -> None:
+        """Check that the amount is finite and a relative change keeps a positive value."""
+        if not math.isfinite(self.amount):
+            raise ValueError("edge change amount must be finite")
+        if self.change is ChangeMode.RELATIVE and self.amount <= -100:
+            raise ValueError(f"edge {self.edge}: a relative change must be above -100 %")
+
+
+@dataclass(frozen=True, slots=True)
+class NewEdge:
+    """What-if intervention: a new network edge between two existing nodes (Paper 1 §13, §15.7).
+
+    A typed placeholder only: checked and recorded, not added to the network yet.
+
+    Attributes:
+        id: New stable edge id; must not exist in the baseline.
+        from_node: Existing node.
+        to_node: Existing node, different from ``from_node``.
+        travel_time_min: Minutes to traverse it per mode (at least one mode).
+        closable: Whether disruptions of the same scenario may close it.
+    """
+
+    id: str
+    from_node: str
+    to_node: str
+    travel_time_min: Mapping[TransportMode, float]
+    closable: bool = True
+
+    def __post_init__(self) -> None:
+        """Validate the nodes and non-negative finite times; freeze the mapping."""
+        if self.from_node == self.to_node:
+            raise ValueError(f"new edge {self.id}: from and to node must differ")
+        if not self.travel_time_min:
+            raise ValueError(f"new edge {self.id}: needs a travel time for at least one mode")
+        for mode, minutes in self.travel_time_min.items():
+            if not math.isfinite(minutes) or minutes < 0:
+                raise ValueError(f"new edge {self.id}: travel time for {mode} must be >= 0")
+        object.__setattr__(self, "travel_time_min", _freeze(self.travel_time_min))
+
+
+@dataclass(frozen=True, slots=True)
+class PopulationChange:
+    """What-if intervention: change the population of one group in one unit (Paper 1 §13, §15.7).
+
+    A typed placeholder only: checked and recorded, not applied. Groups may overlap (OQ-6), so a
+    change to one group does not change any other.
+
+    Attributes:
+        unit: Spatial unit.
+        group: Population group.
+        change: Absolute (persons) or relative (percent of the baseline count).
+        amount: Signed change.
+    """
+
+    unit: UnitId
+    group: GroupId
+    change: ChangeMode
+    amount: float
+
+    def __post_init__(self) -> None:
+        """Check that the amount is finite."""
+        if not math.isfinite(self.amount):
+            raise ValueError("population change amount must be finite")
+
+
+type Intervention = CapacityChange | NewFacility | EdgeChange | NewEdge | PopulationChange
+"""A what-if intervention of a scenario (Paper 1 §13, §15.7; Spec 00 §3).
+
+Only capacity changes and new facilities have behaviour (:func:`~solidaritynode_core.scenarios.\
+apply_overlay`); edge changes, new edges and population changes are recorded placeholders."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -393,9 +504,13 @@ class Scenario:
         facility_severities: ``DS_{f,c}`` in ``[0, 1]`` per affected facility; facilities not
             listed are undisrupted.
         network_disruption: Optional network disruption.
-        interventions: What-if interventions relative to the baseline (Paper 1 §13). Typed
-            placeholders without behaviour. Whether disruption scenarios may also carry
-            interventions is not specified; no rule is enforced.
+        interventions: What-if interventions relative to the baseline (Paper 1 §13, §15.7).
+            Disruption scenarios may also carry them (ADR 0016).
+
+    **Order of application** (ADR 0016; OQ-30, proposed default, to be confirmed with the
+    Paper 3 spec): interventions first, in the order new facilities, capacity changes, network
+    changes (edge changes, new edges), population changes; then disruptions (severities, closed
+    edges), which may also hit new facilities and new edges.
         rationing: Rationing case (OQ-24); required for disruption scenarios.
         reference_level: Set when this is a standardised reference scenario (OQ-16).
         description: Free-text description.

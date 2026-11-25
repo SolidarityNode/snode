@@ -215,6 +215,10 @@ def run_diagnostic(
         "closed_edges": sorted(overlay.closed_edges),
         "closed_modes": sorted(m.value for m in overlay.closed_modes),
     }
+    if overlay.recorded:
+        # Placeholders without behaviour (ADR 0016): listed so the run shows they were not
+        # applied. Only present when the scenario has some, so other outputs are unchanged.
+        diagnostics["recorded_only"] = list(overlay.recorded)
     progress(0.6)
 
     travel_rows: list[dict[str, Any]] = []
@@ -238,6 +242,8 @@ def run_diagnostic(
     edges = {e.id: e for e in area.edges}
     closed_touching: dict[UnitId, list[str]] = {}
     for eid in sorted(overlay.closed_edges):
+        if eid not in edges:
+            continue  # a new edge of the scenario: recorded only, not in the network yet
         edge = edges[eid]
         for unit_id in {area.node_units[edge.from_node], area.node_units[edge.to_node]}:
             closed_touching.setdefault(unit_id, []).append(eid)
