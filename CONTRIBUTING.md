@@ -66,6 +66,7 @@ All configuration comes from `.env` (git-ignored), created by `make setup` from 
 | `SOLIDARITYNODE_JOB_HEARTBEAT_SECONDS` | worker | `10` | How often the worker renews the lease (`jobs.heartbeat_at`) of the running job |
 | `SOLIDARITYNODE_JOB_STALE_SECONDS` | worker | `120` | A running job without a heartbeat for this long is failed by any worker ("Interrupted … Start the run again."); at least twice the heartbeat |
 | `SOLIDARITYNODE_RESULT_INTERVAL_QUANTILES` | backend, worker | `0.05,0.95` | Quantile levels of the interval stored with every result (with the mean and the median); recorded in the run configuration and its input hash (ADR 0017) |
+| `SOLIDARITYNODE_SAMPLES_WARN_MB` | backend | `500` | Warn when a run's samples file is estimated, before the run starts, above this many megabytes (ADR 0008); the run is still queued |
 | `SOLIDARITYNODE_JOB_MAX_RUNTIME_SECONDS` | worker | empty (no limit) | Optional maximum runtime per job kind, as `kind=seconds` pairs (for example `run=3600`); a job over it is stopped at its next progress step and marked failed |
 | `SOLIDARITYNODE_TEST_DATABASE_URL` | backend tests | compose `db` on 127.0.0.1:5432 | PostGIS server on which the tests create a throw-away database |
 | `GIT_COMMIT` | image builds | set by `make up` | Build identity shown by `/version` and the footer |

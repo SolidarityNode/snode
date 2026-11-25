@@ -33,6 +33,7 @@ from solidaritynode_backend.schemas.api import (
 )
 from solidaritynode_backend.services.export import export_csv, export_gpkg
 from solidaritynode_backend.services.runs import RunInputError, create_run
+from solidaritynode_backend.services.samples import SamplesIntegrityError, verify_samples
 
 router = APIRouter(prefix="/runs", tags=["runs"])
 
@@ -94,6 +95,9 @@ def run_out(db: Session, run: Run, user: Principal, *, reused: bool = False) -> 
         can_cancel=not status_.finished
         and (user.is_admin or (user.can_edit and run.created_by == user.id)),
         interval_quantiles=(run.config or {}).get("interval_quantiles"),
+        samples_sha256=run.samples_sha256,
+        samples_estimate_bytes=run.samples_estimate_bytes,
+        samples_limit_bytes=run.samples_limit_bytes,
     )
 
 
@@ -360,7 +364,10 @@ def compare_runs(
 @router.get(
     "/{run_id}/export",
     response_class=Response,
-    responses={200: {"content": {"application/zip": {}}, "description": "Zip archive"}},
+    responses={
+        200: {"content": {"application/zip": {}}, "description": "Zip archive"},
+        409: {"description": "The run's samples file is missing or does not match its SHA-256"},
+    },
 )
 def export_run(
     run_id: uuid.UUID,
@@ -368,9 +375,17 @@ def export_run(
     db: Db,
     format: Annotated[Literal["csv", "gpkg"], Query()] = "csv",
 ) -> Response:
-    """Export results as CSV or GeoPackage in a zip, with ``metadata.json`` (reproducibility)."""
+    """Export results as CSV or GeoPackage in a zip, with ``metadata.json`` (reproducibility).
+
+    The run's samples file is verified against its recorded SHA-256 first (409 if it differs).
+    """
     run = get_visible_run(db, run_id, user)
     _require_succeeded(db, run)
+    if run.samples_path:
+        try:
+            verify_samples(run.samples_path, run.samples_sha256, str(run.id))
+        except SamplesIntegrityError as exc:
+            raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
     meta = run_out(db, run, user).model_dump(mode="json", exclude={"can_cancel", "reused"})
     rows = [r.model_dump() for r in _results(db, run)]
     data = export_csv(db, run, meta, rows) if format == "csv" else export_gpkg(db, run, meta, rows)

@@ -385,6 +385,16 @@ class RunOut(BaseModel):
         description="Quantile levels of every result's low and high bounds (for example "
         "[0.05, 0.95], a 90 % interval); null for runs recorded before they were stored.",
     )
+    samples_sha256: str | None = Field(
+        default=None, description="SHA-256 of the samples Parquet file (verified on export)"
+    )
+    samples_estimate_bytes: int | None = Field(
+        default=None,
+        description="Estimated samples file size before compression, computed before the run",
+    )
+    samples_limit_bytes: int | None = Field(
+        default=None, description="Warning limit for the samples file in force at creation"
+    )
 
 
 class ResultRow(BaseModel):

@@ -58,6 +58,8 @@ class Settings(BaseSettings):
         result_interval_quantiles: Quantile levels of the interval stored with every result
             value, as ``low,high`` (default ``0.05,0.95``, a 90 % interval; ``0 < low < 0.5 <
             high < 1``). Recorded in the run configuration and its input hash (ADR 0017).
+        samples_warn_mb: Warn when a run's samples file is estimated (before the run starts) to
+            exceed this many megabytes (ADR 0008). The run is still queued.
         job_max_runtime_seconds: Optional maximum runtime per job kind, as ``kind=seconds``
             pairs separated by commas (for example ``run=3600``). Empty (the default) means no
             limit for any kind, including the diagnostic model's ``run`` jobs. A job over its
@@ -96,6 +98,7 @@ class Settings(BaseSettings):
     job_stale_seconds: float = Field(default=120.0, gt=0)
     job_max_runtime_seconds: str = ""
     result_interval_quantiles: str = "0.05,0.95"
+    samples_warn_mb: float = Field(default=500.0, gt=0)
 
     def interval_quantiles(self) -> tuple[float, float]:
         """Return the interval quantile levels ``(low, high)`` of result values."""

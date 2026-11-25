@@ -21,16 +21,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import time
 import uuid
 from collections.abc import Mapping
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
-import pyarrow as pa
-import pyarrow.parquet as pq
-from solidaritynode_core.model import ModelResult, get_registry
+from solidaritynode_core.model import get_registry
 from solidaritynode_core.scenarios import check_references
 from solidaritynode_core.uncertainty import DEFAULT_INTERVAL, summarise_result
 from sqlalchemy import Engine, select, text
@@ -40,6 +38,11 @@ from solidaritynode_backend.config import Settings
 from solidaritynode_backend.jobs import JobContext, PostgresJobRunner
 from solidaritynode_backend.orm import DataVersion, Job, Run, Scenario, ScenarioVersion
 from solidaritynode_backend.schemas.scenario import ScenarioBody
+from solidaritynode_backend.services.samples import (
+    as_stored,
+    estimate_samples_bytes,
+    write_samples,
+)
 from solidaritynode_backend.services.study_area import load_study_area
 
 __all__ = [
@@ -57,6 +60,8 @@ __all__ = [
 DEFAULT_MODEL_ID = "diagnostic-v0"
 DEFAULT_SEED = 1
 RUN_JOB_KIND = "run"
+
+log = logging.getLogger("solidaritynode.runs")
 
 
 class RunInputError(ValueError):
@@ -144,6 +149,19 @@ def create_run(
         if existing is not None:
             return CreatedRun(existing, reused=True)
     run_id = uuid.uuid4()
+    # Estimate the samples file before the run starts; a run above the limit is still queued, and
+    # the run page warns (ADR 0008).
+    estimate = estimate_samples_bytes(
+        db, model, data_version.id, int(full_config.get("n_samples", 0))
+    )
+    limit = int(settings.samples_warn_mb * 1_000_000)
+    if estimate > limit:
+        log.warning(
+            "run %s: samples file estimated at %d bytes, above the limit of %d bytes",
+            run_id,
+            estimate,
+            limit,
+        )
     job_id = PostgresJobRunner(db).submit(RUN_JOB_KIND, {"run_id": str(run_id)})
     run = Run(
         id=run_id,
@@ -161,31 +179,12 @@ def create_run(
         is_baseline=scenario.is_baseline,
         job_id=uuid.UUID(job_id),
         created_by=created_by,
+        samples_estimate_bytes=estimate,
+        samples_limit_bytes=limit,
     )
     db.add(run)
     db.flush()
     return CreatedRun(run, reused=False)
-
-
-def _write_samples(result: ModelResult, path: Path) -> None:
-    rows: dict[str, list[Any]] = {
-        k: [] for k in ("unit_id", "group_id", "service_id", "time_label", "indicator")
-    }
-    sample: list[int] = []
-    value: list[float] = []
-    for cell in result.samples:
-        n = len(cell.values)
-        for key, v in zip(
-            rows, (cell.unit, cell.group, cell.service, cell.time, cell.indicator), strict=True
-        ):
-            rows[key].extend([v] * n)
-        sample.extend(range(n))
-        value.extend(float(x) for x in cell.values)
-    table = pa.table({**rows, "sample": pa.array(sample, pa.int32()), "value": value})
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(".tmp")
-    pq.write_table(table, tmp)
-    tmp.replace(path)
 
 
 def execute_run(
@@ -214,6 +213,8 @@ def execute_run(
             )
         }
         model_id, seed, config, name = run.model_id, run.seed, dict(run.config), version.name
+        package_id, package_version = run.package_id, run.package_version
+        data_version_id = run.data_version_id
         body = ScenarioBody.model_validate(version.body)
         code_version, model_version = run.code_version, run.model_version
     if code_version != settings.git_commit:
@@ -237,10 +238,25 @@ def execute_run(
     # Summary statistics come from the samples, at the run's recorded quantile levels (ADR 0017).
     # Runs recorded before ``interval_quantiles`` existed used the model's 5 % / 95 % bounds.
     interval = tuple(config.get("interval_quantiles", DEFAULT_INTERVAL))
-    summaries = summarise_result(result, interval)
+    # Statistics are computed from the samples at their stored precision (ADR 0008), so they can
+    # be reproduced exactly from the file.
+    summaries = summarise_result(as_stored(result, model.sample_dtype), interval)
     samples_path = settings.results_dir / "runs" / str(run_id) / "samples.parquet"
+    samples_sha256 = None
     if result.samples:
-        _write_samples(result, samples_path)
+        samples_sha256 = write_samples(
+            result,
+            samples_path,
+            {
+                "run_id": str(run_id),
+                "model_id": result.model_id,
+                "model_version": result.model_version,
+                "package_id": package_id,
+                "package_version": package_version,
+                "data_version_id": str(data_version_id),
+            },
+            model.sample_dtype,
+        )
     with Session(engine) as db, db.begin():
         rows = [
             {
@@ -292,3 +308,4 @@ def execute_run(
         ]
         stored.diagnostics = {**result.diagnostics, "diagnostic_model": model.diagnostic}
         stored.samples_path = str(samples_path) if result.samples else None
+        stored.samples_sha256 = samples_sha256

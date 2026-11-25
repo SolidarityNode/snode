@@ -270,7 +270,7 @@ def test_results_store_mean_median_and_configured_quantiles_from_samples(
             & (samples.group_id == row["group_id"])
             & (samples.service_id == row["service_id"])
             & (samples.indicator == "diagnostic_noise")
-        ]["value"].to_numpy()
+        ]["value"].to_numpy(dtype=np.float64)  # stored as float32 (ADR 0008)
         assert len(draws) == 200
         assert row["median"] == pytest.approx(float(np.median(draws)))
         assert row["mean"] == pytest.approx(float(draws.mean()))

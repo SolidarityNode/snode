@@ -1353,6 +1353,42 @@
             "title": "Reused",
             "type": "boolean"
           },
+          "samples_estimate_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Estimated samples file size before compression, computed before the run",
+            "title": "Samples Estimate Bytes"
+          },
+          "samples_limit_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Warning limit for the samples file in force at creation",
+            "title": "Samples Limit Bytes"
+          },
+          "samples_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "SHA-256 of the samples Parquet file (verified on export)",
+            "title": "Samples Sha256"
+          },
           "scenario_id": {
             "format": "uuid",
             "title": "Scenario Id",
@@ -2999,7 +3035,7 @@
     },
     "/runs/{run_id}/export": {
       "get": {
-        "description": "Export results as CSV or GeoPackage in a zip, with ``metadata.json`` (reproducibility).",
+        "description": "Export results as CSV or GeoPackage in a zip, with ``metadata.json`` (reproducibility).\n\nThe run's samples file is verified against its recorded SHA-256 first (409 if it differs).",
         "operationId": "export_run_runs__run_id__export_get",
         "parameters": [
           {
@@ -3033,6 +3069,9 @@
               "application/zip": {}
             },
             "description": "Zip archive"
+          },
+          "409": {
+            "description": "The run's samples file is missing or does not match its SHA-256"
           },
           "422": {
             "content": {
