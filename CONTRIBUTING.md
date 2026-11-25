@@ -94,7 +94,7 @@ The maintainer tests every PR by hand before merging. `make uat` gives a fresh, 
 
 ### Paper issues
 
-Every issue that belongs to a paper carries **both** the label `paper:N` and the field **Paper** of the [Kintsugi](https://github.com/orgs/SolidarityNode/projects/6) project with the **same value** (for example `paper:2` and Paper = 2), and the paper's milestone (`v0.3 Paper 1 Accessibility`, `v0.4 Paper 2 Hidden need`, `v0.5 Paper 3 Vulnerability`, `v0.6 Paper 4 Resilience`). Reason: labels make the issue search links in the README and the roadmap work; the field drives the project views. If they disagree, fix the one that is wrong.
+Every issue that belongs to a paper carries **both** the label `paper:N` and the field **Paper** of the [Kintsugi](https://github.com/orgs/SolidarityNode/projects/6) project with the **same value** (for example `paper:2` and Paper = P2 Hidden need), and the paper's milestone (`v0.3 Paper 1 Accessibility`, `v0.4 Paper 2 Hidden need`, `v0.5 Paper 3 Vulnerability`, `v0.6 Paper 4 Resilience`). Reason: labels make the issue search links in the README and the roadmap work; the field drives the project views. If they disagree, fix the one that is wrong.
 
 ### Commits and DCO sign-off
 
