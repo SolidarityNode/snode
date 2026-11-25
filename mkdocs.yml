@@ -35,6 +35,8 @@ validation:
 theme:
   name: material
   language: en
+  logo: assets/brand/favicon.svg
+  favicon: assets/brand/favicon.svg
   features:
     - navigation.tabs
     - navigation.sections

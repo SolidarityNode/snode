@@ -1,3 +1,11 @@
+<div align="center" markdown>
+
+![SN Kintsugi logo: a teal bowl repaired with gold seams](assets/brand/logo.svg){ width="280" }
+
+**SN Kintsugi** · version {{ platform_version }}
+
+</div>
+
 # SolidarityNode
 
 **Open-source spatial probabilistic framework for social service accessibility, hidden need (κρυφή ανάγκη), vulnerability (τρωτότητα) and resilience (ανθεκτικότητα).**
