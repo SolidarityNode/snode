@@ -13,6 +13,7 @@ Generated blocks sit between ``<!-- BEGIN GENERATED: <name> ... -->`` and
 | ``adr-index`` | ``docs/adr/README.md`` | the header lines of every ``docs/adr/NNNN-*.md`` |
 | ``specs-index`` | ``docs/specs/README.md`` | the title and ``Status:`` line of each spec file |
 | ``oq-counts`` | ``README.md``, ``docs/index.md``, ``docs/specs/README.md`` | the summary table of ``docs/specs/open-questions.md`` |
+| ``oq-counts-el`` | ``docs/index.el.md`` (Greek home page) | the same table, in Greek |
 | ``platform-version`` | ``README.md`` (under the logo) | ``VERSION`` |
 
 ``--check`` also enforces the diagram rule (AGENTS.md "Documentation rules"): no diagram files
@@ -120,6 +121,23 @@ def oq_counts() -> str:
     )
 
 
+def _el(count: int, singular: str, plural: str) -> str:
+    return f"{count} {singular if count == 1 else plural}"
+
+
+def oq_counts_el() -> str:
+    """Return the open-question counts in Greek (terms: docs/i18n/glossary.md)."""
+    c = oq_status_counts()
+    total = sum(c.values())
+    return (
+        f"{_el(total, 'ζήτημα', 'ζητήματα')}: "
+        f"**{_el(c['decided'], 'αποφασισμένο', 'αποφασισμένα')}**, "
+        f"{_el(c['partly decided'], 'εν μέρει αποφασισμένο', 'εν μέρει αποφασισμένα')}, "
+        f"{_el(c['proposed'], 'προτεινόμενο', 'προτεινόμενα')}, "
+        f"**{_el(c['open'], 'ανοιχτό', 'ανοιχτά')}**.\n"
+    )
+
+
 def platform_version() -> str:
     """Return the product name and the platform version from VERSION (HTML: it sits in a <p>)."""
     version = VERSION_FILE.read_text(encoding="utf-8").strip()
@@ -130,11 +148,13 @@ GENERATORS: dict[str, Callable[[], str]] = {
     "adr-index": adr_index,
     "specs-index": specs_index,
     "oq-counts": oq_counts,
+    "oq-counts-el": oq_counts_el,
     "platform-version": platform_version,
 }
 TARGETS = [
     ROOT / "README.md",
     ROOT / "docs" / "index.md",
+    ROOT / "docs" / "index.el.md",
     ADR_DIR / "README.md",
     SPECS_DIR / "README.md",
 ]
