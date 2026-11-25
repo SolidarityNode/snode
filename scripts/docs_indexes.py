@@ -17,7 +17,8 @@ Generated blocks sit between ``<!-- BEGIN GENERATED: <name> ... -->`` and
 
 ``--check`` also enforces the diagram rule (AGENTS.md "Documentation rules"): no diagram files
 (``.svg``, ``.drawio``, ``.puml``, ...) and no non-Mermaid diagram code blocks in the docs.
-The logo in ``docs/assets/brand/`` is not a diagram and is exempt.
+The logo in ``docs/assets/brand/`` is not a diagram and is exempt; ``--check`` also fails when its
+copy in ``frontend/public/brand/`` (the frontend image builds from ``frontend/`` only) differs.
 
 Standard library only.
 """
@@ -36,6 +37,7 @@ SPECS_DIR = ROOT / "docs" / "specs"
 OPEN_QUESTIONS = SPECS_DIR / "open-questions.md"
 VERSION_FILE = ROOT / "VERSION"
 BRAND_DIR = ROOT / "docs" / "assets" / "brand"  # logo files, not diagrams
+FRONTEND_BRAND_DIR = ROOT / "frontend" / "public" / "brand"  # copy: the image builds from frontend/
 
 _BLOCK = re.compile(
     r"(?P<indent>[ \t]*)(?P<begin><!-- BEGIN GENERATED: (?P<name>[a-z-]+)[^>]*-->\n)"
@@ -173,6 +175,17 @@ def diagram_problems() -> list[str]:
     return problems
 
 
+def brand_problems() -> list[str]:
+    """Return logo files whose frontend copy differs from docs/assets/brand/."""
+    return [
+        f"{(FRONTEND_BRAND_DIR / p.name).relative_to(ROOT)}: differs from {p.relative_to(ROOT)}; "
+        "copy it again"
+        for p in sorted(BRAND_DIR.glob("*.svg"))
+        if not (FRONTEND_BRAND_DIR / p.name).is_file()
+        or (FRONTEND_BRAND_DIR / p.name).read_bytes() != p.read_bytes()
+    ]
+
+
 def main(argv: list[str]) -> int:
     """Rewrite or check every target file; return the exit code."""
     check = "--check" in argv
@@ -184,7 +197,7 @@ def main(argv: list[str]) -> int:
             stale.append(path.relative_to(ROOT))
             if not check:
                 path.write_text(new, encoding="utf-8")
-    problems = diagram_problems() if check else []
+    problems = diagram_problems() + brand_problems() if check else []
     for problem in problems:
         print(problem)
     if check and (stale or problems):

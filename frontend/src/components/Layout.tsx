@@ -17,7 +17,10 @@ export function Layout() {
       </a>
       <MapPatterns />
       <header className="layout__header">
-        <h1>SolidarityNode</h1>
+        <h1 className="layout__brand">
+          <img src="/brand/logo.svg" alt="" width="56" height="32" />
+          SN Kintsugi
+        </h1>
         <nav aria-label={t("nav.main")}>
           {user && (
             <>
