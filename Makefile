@@ -36,11 +36,12 @@ FRONTEND_URL := http://127.0.0.1:$(FRONTEND_HOST_PORT)
 BACKEND_URL := http://127.0.0.1:$(BACKEND_HOST_PORT)
 
 .PHONY: help check-tools check-engine env check-config setup setup-core setup-backend setup-frontend \
-        lint lint-core lint-backend lint-frontend \
+        lint lint-repo lint-core lint-backend lint-frontend \
         test test-core test-backend test-frontend \
         fmt stop up down logs ps wait db-shell seed reset uat images licenses labels clean distclean \
         test-db test-e2e e2e-setup import-package activate-version create-admin schemas \
-        clear-login-locks
+        clear-login-locks version version-sync docs docs-build docs-generate docs-check docs-links \
+        deps-report deps-report-check
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -83,7 +84,10 @@ setup-frontend:
 
 # --- Lint and type check -----------------------------------------------------------------
 
-lint: lint-core lint-backend lint-frontend ## ruff, mypy, eslint, prettier, tsc
+lint: lint-core lint-backend lint-frontend lint-repo ## ruff, mypy, eslint, prettier, tsc, version and generated docs
+
+lint-repo:
+	python3 scripts/version.py check
 
 lint-core:
 	cd core && $(UV_RUN) ruff check . && $(UV_RUN) ruff format --check . && $(UV_RUN) mypy
@@ -276,6 +280,14 @@ licenses: ## Fail on dependency licences incompatible with AGPL-3.0
 	cd core && $(UV_RUN) python ../scripts/check_licenses.py python
 	cd backend && $(UV_RUN) python ../scripts/check_licenses.py python
 	cd frontend && $(PNPM) licenses list --json --long | python3 ../scripts/check_licenses.py pnpm
+
+version: ## Print the platform version (single source: the VERSION file)
+	@python3 scripts/version.py
+
+version-sync: ## Write VERSION into pyproject.toml, package.json and the uv locks
+	python3 scripts/version.py sync
+	cd core && $(UV) lock
+	cd backend && $(UV) lock
 
 labels: ## Create or update GitHub labels from .github/labels.yml (needs gh auth)
 	scripts/create-labels.sh

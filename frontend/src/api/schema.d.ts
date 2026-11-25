@@ -1377,7 +1377,7 @@ export interface components {
       edge_effect_units: string[];
       /**
        * Environment
-       * @description Python, NumPy and platform of the worker (not in the hash)
+       * @description Platform (SolidarityNode), Python and NumPy versions and the OS of the worker (not in the hash)
        */
       environment?: {
         [key: string]: string;

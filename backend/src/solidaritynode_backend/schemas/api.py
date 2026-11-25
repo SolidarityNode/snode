@@ -427,7 +427,9 @@ class RunOut(BaseModel):
         "reproducible only on the machine that made it",
     )
     environment: dict[str, str] | None = Field(
-        default=None, description="Python, NumPy and platform of the worker (not in the hash)"
+        default=None,
+        description="Platform (SolidarityNode), Python and NumPy versions and the OS of the worker "
+        "(not in the hash)",
     )
     reuse_refused: str | None = Field(
         default=None,
