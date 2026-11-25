@@ -32,6 +32,14 @@ describe("AdminPage rollback", () => {
       "GET /data-versions": () => versions,
       "GET /packages/available": () => [],
       "GET /users": () => [],
+      "GET /storage": () => ({
+        results_dir: "/data/results",
+        runs_with_samples: 3,
+        samples_files: 3,
+        samples_bytes: 2_500_000,
+        total_bytes: 10_000_000_000,
+        free_bytes: 7_250_000_000,
+      }),
       "POST /data-versions/1/activate": () => {
         versions = [version(1, "1.0.0", true), version(2, "1.1.0", false)];
         return {
@@ -63,5 +71,8 @@ describe("AdminPage rollback", () => {
     );
     expect(screen.getByText(/F4 staff \+1/)).toBeInTheDocument();
     expect(calls.filter((c) => c.path === "/data-versions/1/activate")).toHaveLength(1);
+    expect(screen.getByTestId("storage")).toHaveTextContent(
+      "3 samples file(s) for 3 run(s): 2.5 MB; free on the results volume: 7,250 MB.",
+    );
   });
 });

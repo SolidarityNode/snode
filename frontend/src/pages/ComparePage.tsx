@@ -108,7 +108,7 @@ export function ComparePage() {
       ),
     [rows],
   );
-  const maxAbs = Math.max(0, ...rows.map((r) => Math.abs(r.difference ?? 0)));
+  const maxAbs = Math.max(0, ...rows.map((r) => Math.abs(r.difference_of_medians ?? 0)));
 
   const layers = useMemo(() => {
     if (!units) return { a: [], b: [], diff: [] };
@@ -146,8 +146,9 @@ export function ComparePage() {
       b: make("b", b.fill, b.tip),
       diff: make(
         "diff",
-        (r) => (r.difference === null ? "" : divergingColour(r.difference, maxAbs)),
-        (r) => `${t("compare.col_diff")}: ${num(r.difference, lang)}`,
+        (r) =>
+          r.difference_of_medians === null ? "" : divergingColour(r.difference_of_medians, maxAbs),
+        (r) => `${t("compare.col_diff")}: ${num(r.difference_of_medians, lang)}`,
       ),
     };
   }, [units, rows, scale, wScale, maxAbs, options, unit, statistic, lang, t]);
@@ -283,7 +284,7 @@ export function ComparePage() {
                   interval={intervalB}
                 />
               </td>
-              <td>{num(r.difference, lang)}</td>
+              <td>{num(r.difference_of_medians, lang)}</td>
               <td>{r.edge_effect_warning ? `⚠ ${t("results.edge_effect")}` : ""}</td>
             </tr>
           ))}

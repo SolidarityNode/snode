@@ -639,6 +639,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/storage": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Storage
+     * @description Disk usage of the results volume: samples files and free space (ADR 0017).
+     *
+     *     Nothing is deleted automatically in v0.1; this lets an administrator watch the volume.
+     */
+    get: operations["storage_storage_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/users": {
     parameters: {
       query?: never;
@@ -806,10 +828,10 @@ export interface components {
       a: components["schemas"]["IntervalOut"];
       b: components["schemas"]["IntervalOut"];
       /**
-       * Difference
-       * @description Difference of the medians, A − B
+       * Difference Of Medians
+       * @description Difference of the medians, A − B (not a difference of draws; ADR 0017)
        */
-      difference: number | null;
+      difference_of_medians: number | null;
       /** Edge Effect Warning */
       edge_effect_warning: boolean;
       /** Group Id */
@@ -1310,9 +1332,9 @@ export interface components {
       scenario_version?: number | null;
       /**
        * Seed
-       * @default 1
+       * @description Random seed; when omitted one is drawn and recorded (seed_source: drawn)
        */
-      seed: number;
+      seed?: number | null;
     };
     /**
      * RunOut
@@ -1323,6 +1345,12 @@ export interface components {
       can_cancel: boolean;
       /** Code Version */
       code_version: string;
+      /**
+       * Code Version Dirty
+       * @description The code version has uncommitted changes (-dirty) or is unknown: the run is reproducible only on the machine that made it
+       * @default false
+       */
+      code_version_dirty: boolean;
       /** Config */
       config: {
         [key: string]: unknown;
@@ -1344,6 +1372,13 @@ export interface components {
       } | null;
       /** Edge Effect Units */
       edge_effect_units: string[];
+      /**
+       * Environment
+       * @description Python, NumPy and platform of the worker (not in the hash)
+       */
+      environment?: {
+        [key: string]: string;
+      } | null;
       /** Error */
       error: string | null;
       /** Finished At */
@@ -1375,6 +1410,11 @@ export interface components {
       /** Progress */
       progress: number;
       /**
+       * Reuse Refused
+       * @description Why a matching earlier run was not reused (its results file failed the integrity check)
+       */
+      reuse_refused?: string | null;
+      /**
        * Reused
        * @default false
        */
@@ -1405,6 +1445,13 @@ export interface components {
       scenario_version: number;
       /** Seed */
       seed: number;
+      /**
+       * Seed Source
+       * @description Whether the seed was given or drawn because none was
+       * @default given
+       * @enum {string}
+       */
+      seed_source: "given" | "drawn";
       /** Started At */
       started_at: string | null;
       /**
@@ -1642,6 +1689,24 @@ export interface components {
       facility_id: string;
       /** Severity */
       severity: number;
+    };
+    /**
+     * StorageOut
+     * @description Disk usage of the results volume (admin; ADR 0017).
+     */
+    StorageOut: {
+      /** Free Bytes */
+      free_bytes: number | null;
+      /** Results Dir */
+      results_dir: string;
+      /** Runs With Samples */
+      runs_with_samples: number;
+      /** Samples Bytes */
+      samples_bytes: number;
+      /** Samples Files */
+      samples_files: number;
+      /** Total Bytes */
+      total_bytes: number | null;
     };
     /**
      * UserIn
@@ -2790,6 +2855,26 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  storage_storage_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StorageOut"];
         };
       };
     };

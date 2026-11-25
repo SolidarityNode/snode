@@ -25,7 +25,7 @@ function row(unit: string, a: number, b: number) {
     indicator: "x",
     a: { mean: a, median: a, low: a - 0.5, high: a + 0.5 },
     b: { mean: b, median: b, low: b - 1, high: b + 1 },
-    difference: a - b,
+    difference_of_medians: a - b,
     edge_effect_warning: false,
   };
 }

@@ -15,7 +15,40 @@ export function AdminPage() {
     <section aria-labelledby="admin-title">
       <h2 id="admin-title">{t("admin.title")}</h2>
       <Packages />
+      <Storage />
       <Users />
+    </section>
+  );
+}
+
+function Storage() {
+  const { t, lang } = useT();
+  const [storage, setStorage] = useState<Schemas["StorageOut"] | null>(null);
+  const [error, setError] = useState<unknown>(null);
+  useEffect(() => {
+    unwrap(api.GET("/storage")).then(setStorage).catch(setError);
+  }, []);
+  const mb = (bytes: number | null | undefined) =>
+    bytes === null || bytes === undefined
+      ? "—"
+      : (bytes / 1e6).toLocaleString(lang === "el" ? "el-GR" : "en-GB", {
+          maximumFractionDigits: 1,
+        });
+  return (
+    <section aria-labelledby="storage-title">
+      <h3 id="storage-title">{t("admin.storage")}</h3>
+      <ErrorMessage error={error} />
+      {storage && (
+        <p data-testid="storage">
+          {t("admin.storage_usage", {
+            files: storage.samples_files,
+            runs: storage.runs_with_samples,
+            used: mb(storage.samples_bytes),
+            free: mb(storage.free_bytes),
+          })}
+        </p>
+      )}
+      <p className="muted">{t("admin.storage_note")}</p>
     </section>
   );
 }

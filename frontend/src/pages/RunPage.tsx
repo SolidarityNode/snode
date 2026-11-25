@@ -227,6 +227,16 @@ export function RunPage() {
       {run.diagnostic && <DiagnosticBanner />}
       <RunStatus run={run} onCancel={() => void cancel()} cancelling={cancelling} />
       <ErrorMessage error={error} />
+      {run.code_version_dirty && (
+        <p className="banner banner--warning" role="note" data-testid="dirty-code">
+          {t("run.dirty_code", { code: run.code_version })}
+        </p>
+      )}
+      {run.reuse_refused && (
+        <p className="banner banner--warning" role="note" data-testid="reuse-refused">
+          {t("run.reuse_refused")} <span className="muted">{run.reuse_refused}</span>
+        </p>
+      )}
       {run.samples_estimate_bytes != null &&
         run.samples_limit_bytes != null &&
         run.samples_estimate_bytes > run.samples_limit_bytes && (
@@ -452,10 +462,23 @@ export function RunPage() {
             ["data", `${run.package_id} ${run.package_version}`],
             ["code", run.code_version],
             ["model", `${run.model_id} ${run.model_version}`],
-            ["seed", String(run.seed)],
+            [
+              "seed",
+              run.seed_source === "drawn"
+                ? t("run.seed_drawn", { seed: run.seed })
+                : String(run.seed),
+            ],
             ["config", JSON.stringify(run.config)],
             ["hash", run.input_hash],
             ["samples", run.samples_sha256 ?? "—"],
+            [
+              "environment",
+              run.environment
+                ? Object.entries(run.environment)
+                    .map(([k, v]) => `${k} ${v}`)
+                    .join(" · ")
+                : "—",
+            ],
             ["created", `${run.created_at} (${run.created_by ?? t("scenarios.system")})`],
             ["finished", run.finished_at ?? "—"],
           ] as const

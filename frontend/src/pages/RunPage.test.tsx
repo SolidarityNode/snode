@@ -129,3 +129,32 @@ describe("RunPage recorded-only interventions", () => {
     expect([...items].map((li) => li.textContent)).toEqual(lines);
   });
 });
+
+describe("RunPage provenance warnings", () => {
+  it("warns about dirty code and refused reuse, and marks a drawn seed", async () => {
+    const run = {
+      ...RUN,
+      code_version: "0123456789ab-dirty",
+      code_version_dirty: true,
+      reuse_refused: "run x: samples file of run x is missing",
+      seed: 424242,
+      seed_source: "drawn",
+      environment: { python: "3.12.16", numpy: "2.3.0", platform: "Linux" },
+    };
+    stubApi({
+      "GET /runs/r1": () => run,
+      "GET /runs": () => [run],
+      "GET /data-versions/1/layers/spatial_units": () => UNITS,
+      "GET /data-versions/1/catalog": () => CATALOG,
+      "GET /runs/r1/results": () => [],
+      "GET /runs/r1/tables/unit_changes": () => [],
+    });
+    renderWithSession(<RunPage />, { path: "/runs/r1", route: "/runs/:runId" });
+    expect(await screen.findByTestId("dirty-code")).toHaveTextContent(
+      "uncommitted changes or of unknown version (0123456789ab-dirty)",
+    );
+    expect(screen.getByTestId("reuse-refused")).toHaveTextContent("failed the integrity check");
+    expect(screen.getByText("424242 (drawn, none was given)")).toBeInTheDocument();
+    expect(screen.getByText("python 3.12.16 · numpy 2.3.0 · platform Linux")).toBeInTheDocument();
+  });
+});
