@@ -172,18 +172,18 @@ flowchart LR
         AGG[("aggregated indicators<br/>(optional)")]
         RAW --> ONB --> PKG
     end
-    subgraph MUN["municipal installation (one per study area)"]
+    subgraph MUN["municipal installation<br/>(one study area of one or more core municipalities)"]
         IMP["package import<br/>preview of changes"]
         APP["scenarios (ADR 0016), runs (ADR 0017),<br/>results, users (ADR 0015)"]
         TIX[("anonymous tickets<br/>never leave the installation")]
         IMP --> APP
         TIX --> APP
     end
-    PKG -->|"download / import"| IMP
+    IMP -->|"pulls (outbound only) or manual import"| PKG
     APP -.->|"opt-in, aggregated,<br/>anonymised only (ADR 0014, OQ-21)"| AGG
 ```
 
-- The same images run as `municipality` or `hub`, chosen by `DEPLOYMENT_MODE` (ADR 0012).
+- The same images run as `municipality` or `hub`, chosen by `DEPLOYMENT_MODE` and locked in the database at first initialisation; the other role's routes and tables do not exist (ADR 0012). Any future connection is opened by the installation, never by the hub.
 - Data packages carry a `manifest.json` listing files with checksums, layer coverage, changelog and the `DP-NNN` processing notes behind the data (format in ADR 0013; demo packages in `data/synthetic/packages/`, DP-002). Import validates, previews changes and imports in one transaction; every version is kept and runs point to theirs.
 - Core units next to a buffer municipality without facility data carry an edge-effect warning (OQ-28, warning only); results are reported for core units only.
 - Runs record scenario version, package version, git commit, model and parameter version, seed and configuration (ADR 0017).
