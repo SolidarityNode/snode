@@ -7,6 +7,10 @@ example OpenID Connect) can replace :class:`LocalIdentityProvider` without touch
 
 Roles: ``viewer`` sees shared scenarios and results; ``analyst`` also creates, edits, runs and
 shares their own scenarios; ``admin`` also manages users and imports data packages.
+
+Password policy: at least 12 characters and not in the bundled list of common passwords
+(``resources/common_passwords.txt``, SecLists, MIT); no composition rules. It applies when a
+password is set; existing hashes keep working.
 """
 
 from __future__ import annotations
@@ -16,6 +20,8 @@ import secrets
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from functools import lru_cache
+from importlib.resources import files
 from typing import Annotated, Literal, Protocol
 
 from argon2 import PasswordHasher
@@ -30,13 +36,17 @@ from solidaritynode_backend.orm import Session, User
 
 __all__ = [
     "COOKIE_NAME",
+    "MIN_PASSWORD_LENGTH",
     "ROLES",
     "CurrentUser",
     "IdentityProvider",
     "LocalIdentityProvider",
+    "PasswordPolicyError",
     "Principal",
     "Role",
+    "check_password",
     "create_user",
+    "ensure_not_last_admin",
     "get_identity_provider",
     "hash_password",
     "require_role",
@@ -46,15 +56,44 @@ __all__ = [
 Role = Literal["admin", "analyst", "viewer"]
 ROLES: tuple[Role, ...] = ("admin", "analyst", "viewer")
 COOKIE_NAME = "sn_session"
-MIN_PASSWORD_LENGTH = 8
+MIN_PASSWORD_LENGTH = 12
 
 _hasher = PasswordHasher()
 
 
-def hash_password(password: str) -> str:
-    """Return the Argon2id hash of ``password``."""
+class PasswordPolicyError(ValueError):
+    """A new password does not meet the policy (the message says why)."""
+
+
+@lru_cache
+def _common_passwords() -> frozenset[str]:
+    text = (
+        files("solidaritynode_backend")
+        .joinpath("resources/common_passwords.txt")
+        .read_text(encoding="utf-8")
+    )
+    return frozenset(
+        line.strip().casefold() for line in text.splitlines() if line and not line.startswith("#")
+    )
+
+
+def check_password(password: str) -> None:
+    """Check a new password against the policy (ADR 0015).
+
+    Raises:
+        PasswordPolicyError: If it is shorter than 12 characters or a common password.
+    """
     if len(password) < MIN_PASSWORD_LENGTH:
-        raise ValueError(f"password must have at least {MIN_PASSWORD_LENGTH} characters")
+        raise PasswordPolicyError(f"password must have at least {MIN_PASSWORD_LENGTH} characters")
+    if password.strip().casefold() in _common_passwords():
+        raise PasswordPolicyError(
+            "this password is on the list of commonly used passwords; choose another one"
+        )
+
+
+def hash_password(password: str) -> str:
+    """Return the Argon2id hash of a new ``password`` after checking the policy."""
+    check_password(password)
     return _hasher.hash(password)
 
 
@@ -193,7 +232,8 @@ def create_user(db: DbSession, username: str, password: str, role: Role) -> User
     """Create a local account (caller commits).
 
     Raises:
-        ValueError: On an unknown role, short password or existing username.
+        ValueError: On an unknown role or existing username.
+        PasswordPolicyError: If the password does not meet the policy.
     """
     if role not in ROLES:
         raise ValueError(f"unknown role {role!r}")
@@ -203,3 +243,25 @@ def create_user(db: DbSession, username: str, password: str, role: Role) -> User
     db.add(user)
     db.flush()
     return user
+
+
+def ensure_not_last_admin(
+    db: DbSession, user: User, new_role: Role | None, new_active: bool | None
+) -> None:
+    """Refuse a change that would leave no active administrator (ADR 0015).
+
+    The active admin rows are locked (``FOR UPDATE``) until the caller commits, so two admins
+    demoting each other at the same time cannot both succeed.
+
+    Raises:
+        ValueError: If ``user`` is the last active admin and would be demoted or disabled.
+    """
+    demoted = new_role is not None and new_role != "admin"
+    disabled = new_active is False
+    if user.role != "admin" or not user.active or not (demoted or disabled):
+        return
+    admins = db.scalars(
+        select(User.id).where(User.role == "admin", User.active).with_for_update()
+    ).all()
+    if not set(admins) - {user.id}:
+        raise ValueError("the last active administrator cannot be disabled or demoted")

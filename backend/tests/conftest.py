@@ -29,7 +29,7 @@ PACKAGES = REPO / "data" / "synthetic" / "packages"
 DEFAULT_SERVER = "postgresql+psycopg://solidaritynode:change-me@127.0.0.1:5432/solidaritynode"
 TABLES = (
     "run_tables, run_results, runs, jobs, scenario_versions, scenarios, data_warnings, "
-    "data_coverage, data_records, data_features, data_versions, sessions, users"
+    "data_coverage, data_records, data_features, data_versions, sessions, users, login_throttle"
 )
 PASSWORDS = {"admin": "admin-pass-123", "analyst": "analyst-pass-123", "viewer": "viewer-pass-123"}
 
@@ -96,6 +96,7 @@ def settings(engine: Engine, tmp_path: Path) -> Any:
         diagnostic_step_delay_s=0,
         git_commit="test-commit",
         basemap="blank",
+        login_delay_base_s=0,  # throttling tests set their own delays
     )
 
 

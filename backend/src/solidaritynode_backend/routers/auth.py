@@ -19,6 +19,10 @@ from solidaritynode_backend.config import Settings, get_settings
 from solidaritynode_backend.db import get_session
 from solidaritynode_backend.orm import User
 from solidaritynode_backend.schemas.api import AppConfigOut, LoginIn, UserOut
+from solidaritynode_backend.services.throttle import Throttle, throttle_keys
+
+GENERIC_FAILURE = "wrong username or password"
+TOO_MANY = "too many failed sign-in attempts; try again later"
 
 router = APIRouter(tags=["auth"])
 
@@ -43,13 +47,37 @@ def app_config(settings: Config) -> AppConfigOut:
 @router.post(
     "/auth/login",
     response_model=UserOut,
-    responses={status.HTTP_401_UNAUTHORIZED: {"description": "Wrong username or password"}},
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"description": "Wrong username or password"},
+        status.HTTP_429_TOO_MANY_REQUESTS: {
+            "description": "Too many failed attempts for this username or client address"
+        },
+    },
 )
-def login(body: LoginIn, response: Response, db: Db, idp: Idp, settings: Config) -> UserOut:
-    """Check credentials and set the session cookie (HttpOnly, SameSite=Strict)."""
+def login(
+    body: LoginIn, request: Request, response: Response, db: Db, idp: Idp, settings: Config
+) -> UserOut:
+    """Check credentials and set the session cookie (HttpOnly, SameSite=Strict).
+
+    Throttled per username and per client address (ADR 0015): while delayed or locked the answer
+    is a generic 429 with ``Retry-After``, whether or not the user exists, and the password is
+    not checked. Failures answer the same 401 for unknown users and wrong passwords.
+    """
+    throttle = Throttle(settings)
+    keys = throttle_keys(body.username, request.client.host if request.client else None)
+    wait = throttle.retry_after(db, keys)
+    if wait:
+        db.commit()
+        raise HTTPException(
+            status.HTTP_429_TOO_MANY_REQUESTS, TOO_MANY, headers={"Retry-After": str(wait)}
+        )
     outcome = idp.login(db, body.username, body.password)
     if outcome is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "wrong username or password")
+        throttle.failure(db, keys)
+        db.commit()
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, GENERIC_FAILURE)
+    throttle.success(db, keys)
+    db.commit()
     principal, token = outcome
     response.set_cookie(
         COOKIE_NAME,
@@ -57,7 +85,8 @@ def login(body: LoginIn, response: Response, db: Db, idp: Idp, settings: Config)
         max_age=int(settings.session_hours * 3600),
         httponly=True,
         samesite="strict",
-        secure=settings.session_cookie_secure,
+        # Always Secure in production (the settings refuse production without it).
+        secure=settings.session_cookie_secure or settings.app_env == "production",
         path="/",
     )
     return UserOut(id=principal.id, username=principal.username, role=principal.role, active=True)

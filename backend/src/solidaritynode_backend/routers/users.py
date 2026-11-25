@@ -8,7 +8,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session as DbSession
 
-from solidaritynode_backend.auth import Principal, create_user, hash_password, require_role
+from solidaritynode_backend.auth import (
+    PasswordPolicyError,
+    Principal,
+    create_user,
+    ensure_not_last_admin,
+    hash_password,
+    require_role,
+)
 from solidaritynode_backend.db import get_session
 from solidaritynode_backend.orm import Session, User
 from solidaritynode_backend.schemas.api import UserIn, UserOut, UserPatch
@@ -34,6 +41,8 @@ def add_user(body: UserIn, _: Admin, db: Db) -> UserOut:
     """Create a local account."""
     try:
         user = create_user(db, body.username, body.password, body.role)
+    except PasswordPolicyError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
     except ValueError as exc:
         raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from None
     db.commit()
@@ -42,12 +51,20 @@ def add_user(body: UserIn, _: Admin, db: Db) -> UserOut:
 
 @router.patch("/{user_id}", response_model=UserOut)
 def change_user(user_id: int, body: UserPatch, admin: Admin, db: Db) -> UserOut:
-    """Change role, active flag or password. Admins cannot demote or disable themselves."""
+    """Change role, active flag or password.
+
+    Admins cannot demote or disable themselves, and the last active admin can never be demoted
+    or disabled (409).
+    """
     user = db.get(User, user_id)
     if user is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "user not found")
     if user.id == admin.id and (body.active is False or (body.role and body.role != "admin")):
         raise HTTPException(status.HTTP_409_CONFLICT, "you cannot demote or disable yourself")
+    try:
+        ensure_not_last_admin(db, user, body.role, body.active)
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from None
     if body.role is not None:
         user.role = body.role
     if body.active is not None:
@@ -55,7 +72,11 @@ def change_user(user_id: int, body: UserPatch, admin: Admin, db: Db) -> UserOut:
         if not body.active:
             db.execute(delete(Session).where(Session.user_id == user.id))
     if body.password is not None:
-        user.password_hash = hash_password(body.password)
+        try:
+            user.password_hash = hash_password(body.password)
+        except PasswordPolicyError as exc:
+            db.rollback()
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
         db.execute(delete(Session).where(Session.user_id == user.id))
     db.commit()
     return _out(user)

@@ -47,7 +47,14 @@ class Settings(BaseSettings):
         basemap: ``osm`` (OpenStreetMap tiles, needs internet) or ``blank`` (offline).
         auth_backend: Authentication backend (ADR 0015); only ``local`` accounts in v0.1.
         session_hours: Lifetime of a login session.
-        session_cookie_secure: Send the session cookie only over HTTPS (set in production).
+        session_cookie_secure: Send the session cookie only over HTTPS. Required (``true``) with
+            ``APP_ENV=production``: the backend refuses to start otherwise.
+        login_max_failures_account: Failed sign-ins for one username before it is locked.
+        login_max_failures_address: Failed sign-ins from one client address before it is locked.
+        login_lock_minutes: How long a lock lasts; failures older than this are forgotten.
+        login_delay_base_s: After failure ``n``, the next attempt for that username or address is
+            refused for ``base × 2^(n-1)`` seconds (capped by ``login_delay_max_s``).
+        login_delay_max_s: Upper bound of that delay.
         diagnostic_step_delay_s: Pause after each progress step of a run, so progress and
             cancellation can be followed by hand. Part of the run configuration (and its hash).
         worker_name: Name of this worker process, for logs and the ``jobs.worker`` column only.
@@ -92,6 +99,11 @@ class Settings(BaseSettings):
     auth_backend: Literal["local"] = "local"
     session_hours: float = Field(default=12.0, gt=0)
     session_cookie_secure: bool = False
+    login_max_failures_account: int = Field(default=5, ge=1)
+    login_max_failures_address: int = Field(default=20, ge=1)
+    login_lock_minutes: float = Field(default=15.0, gt=0)
+    login_delay_base_s: float = Field(default=1.0, ge=0)
+    login_delay_max_s: float = Field(default=30.0, ge=0)
     diagnostic_step_delay_s: float = Field(default=0.5, ge=0, le=60)
     worker_name: str = "worker"
     worker_poll_s: float = Field(default=1.0, gt=0)
@@ -131,6 +143,15 @@ class Settings(BaseSettings):
         if password is not None and str(password).startswith(PLACEHOLDER_PREFIX):
             found.append("database_url (password)")
         return found
+
+    @model_validator(mode="after")
+    def _secure_cookie_in_production(self) -> Self:
+        if self.app_env == "production" and not self.session_cookie_secure:
+            raise ValueError(
+                "APP_ENV=production needs SOLIDARITYNODE_SESSION_COOKIE_SECURE=true: the session "
+                "cookie must only travel over HTTPS (ADR 0015)"
+            )
+        return self
 
     @model_validator(mode="after")
     def _check_job_timing(self) -> Self:

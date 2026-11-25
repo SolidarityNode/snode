@@ -117,7 +117,7 @@ function Users() {
           <input
             type="password"
             autoComplete="new-password"
-            minLength={8}
+            minLength={12}
             required
             value={form.password}
             onChange={(e) => {

@@ -70,7 +70,7 @@ class UserIn(_In):
     """New user."""
 
     username: str = Field(pattern=r"^[A-Za-z0-9_.-]{3,64}$")
-    password: str = Field(min_length=8, max_length=256)
+    password: str = Field(min_length=12, max_length=256)
     role: Role
 
 
@@ -79,7 +79,7 @@ class UserPatch(_In):
 
     role: Role | None = None
     active: bool | None = None
-    password: str | None = Field(default=None, min_length=8, max_length=256)
+    password: str | None = Field(default=None, min_length=12, max_length=256)
 
 
 class AppConfigOut(BaseModel):

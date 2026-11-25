@@ -16,6 +16,10 @@ export interface paths {
     /**
      * Login
      * @description Check credentials and set the session cookie (HttpOnly, SameSite=Strict).
+     *
+     *     Throttled per username and per client address (ADR 0015): while delayed or locked the answer
+     *     is a generic 429 with ``Retry-After``, whether or not the user exists, and the password is
+     *     not checked. Failures answer the same 401 for unknown users and wrong passwords.
      */
     post: operations["login_auth_login_post"];
     delete?: never;
@@ -674,7 +678,10 @@ export interface paths {
     head?: never;
     /**
      * Change User
-     * @description Change role, active flag or password. Admins cannot demote or disable themselves.
+     * @description Change role, active flag or password.
+     *
+     *     Admins cannot demote or disable themselves, and the last active admin can never be demoted
+     *     or disabled (409).
      */
     patch: operations["change_user_users__user_id__patch"];
     trace?: never;
@@ -1684,6 +1691,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+      /** @description Too many failed attempts for this username or client address */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

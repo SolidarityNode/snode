@@ -1,6 +1,7 @@
 import { useState, type SyntheticEvent } from "react";
 import { useLocation, useNavigate } from "react-router";
 
+import { ApiError } from "../api/client";
 import { useSession } from "../app/session";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { useT } from "../i18n/context";
@@ -23,8 +24,10 @@ export function LoginPage() {
       await login(username, password);
       const from = (location.state as { from?: string } | null)?.from ?? "/";
       void navigate(from, { replace: true });
-    } catch {
-      setError(new Error(t("login.failed")));
+    } catch (e) {
+      // The same generic messages whether or not the user exists (ADR 0015).
+      const throttled = e instanceof ApiError && e.status === 429;
+      setError(new Error(t(throttled ? "login.throttled" : "login.failed")));
     } finally {
       setBusy(false);
     }

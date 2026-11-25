@@ -168,7 +168,7 @@ def activate_command(settings: Settings, version: str, package_id: str | None, y
 def create_admin(settings: Settings) -> int:
     """Create an administrator interactively."""
     username = input("Admin username: ").strip()
-    password = getpass.getpass("Password (at least 8 characters): ")
+    password = getpass.getpass("Password (at least 12 characters; common passwords are refused): ")
     if password != getpass.getpass("Repeat password: "):
         print("Passwords differ; nothing created.", file=sys.stderr)
         return 1

@@ -41,6 +41,7 @@ def test_placeholders_allowed_in_development_and_test(
 @pytest.mark.parametrize("url", [PLACEHOLDER_URL, OTHER_PLACEHOLDER_URL])
 def test_production_refuses_placeholder_secrets(monkeypatch: pytest.MonkeyPatch, url: str) -> None:
     monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("SOLIDARITYNODE_SESSION_COOKIE_SECURE", "true")
     monkeypatch.setenv("SOLIDARITYNODE_DATABASE_URL", url)
     with pytest.raises(ValidationError, match="placeholder secrets"):
         Settings()
@@ -57,7 +58,19 @@ def test_validation_errors_do_not_echo_secrets(monkeypatch: pytest.MonkeyPatch) 
 
 def test_production_accepts_real_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("SOLIDARITYNODE_SESSION_COOKIE_SECURE", "true")
     monkeypatch.setenv("SOLIDARITYNODE_DATABASE_URL", REAL_URL)
     settings = Settings()
     assert settings.placeholder_secrets() == []
     assert "s3cr3t" not in repr(settings)
+
+
+def test_production_requires_a_secure_session_cookie(monkeypatch: pytest.MonkeyPatch) -> None:
+    """ADR 0015: in production the cookie is always Secure; check-config fails otherwise."""
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("SOLIDARITYNODE_DATABASE_URL", REAL_URL)
+    monkeypatch.setenv("SOLIDARITYNODE_SESSION_COOKIE_SECURE", "false")
+    with pytest.raises(ValidationError, match="SESSION_COOKIE_SECURE=true"):
+        Settings()
+    monkeypatch.setenv("APP_ENV", "development")
+    assert Settings().session_cookie_secure is False  # allowed outside production

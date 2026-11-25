@@ -2083,7 +2083,7 @@
         "properties": {
           "password": {
             "maxLength": 256,
-            "minLength": 8,
+            "minLength": 12,
             "title": "Password",
             "type": "string"
           },
@@ -2163,7 +2163,7 @@
             "anyOf": [
               {
                 "maxLength": 256,
-                "minLength": 8,
+                "minLength": 12,
                 "type": "string"
               },
               {
@@ -2333,7 +2333,7 @@
   "paths": {
     "/auth/login": {
       "post": {
-        "description": "Check credentials and set the session cookie (HttpOnly, SameSite=Strict).",
+        "description": "Check credentials and set the session cookie (HttpOnly, SameSite=Strict).\n\nThrottled per username and per client address (ADR 0015): while delayed or locked the answer\nis a generic 429 with ``Retry-After``, whether or not the user exists, and the password is\nnot checked. Failures answer the same 401 for unknown users and wrong passwords.",
         "operationId": "login_auth_login_post",
         "requestBody": {
           "content": {
@@ -2368,6 +2368,9 @@
               }
             },
             "description": "Validation Error"
+          },
+          "429": {
+            "description": "Too many failed attempts for this username or client address"
           }
         },
         "summary": "Login",
@@ -3907,7 +3910,7 @@
     },
     "/users/{user_id}": {
       "patch": {
-        "description": "Change role, active flag or password. Admins cannot demote or disable themselves.",
+        "description": "Change role, active flag or password.\n\nAdmins cannot demote or disable themselves, and the last active admin can never be demoted\nor disabled (409).",
         "operationId": "change_user_users__user_id__patch",
         "parameters": [
           {

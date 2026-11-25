@@ -15,7 +15,10 @@ export function jsonResponse(body: unknown, status = 200): Response {
 
 type Handler = (url: string, init: { method: string; body: string | null }) => unknown;
 
-/** Stub `fetch` with a router of `METHOD path` handlers; unknown requests answer 404. */
+/**
+ * Stub `fetch` with a router of `METHOD path` handlers; unknown requests answer 404. A handler
+ * returns a JSON body (status 200) or a full `Response`.
+ */
 export function stubApi(routes: Record<string, Handler>) {
   const calls: { method: string; path: string; body: unknown }[] = [];
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -34,7 +37,8 @@ export function stubApi(routes: Record<string, Handler>) {
         pattern !== undefined &&
         new RegExp(`^${pattern}$`).test(path)
       ) {
-        return jsonResponse(handler(path, { method: request.method, body }));
+        const result = handler(path, { method: request.method, body });
+        return result instanceof Response ? result : jsonResponse(result);
       }
     }
     return jsonResponse({ detail: "not found" }, 404);

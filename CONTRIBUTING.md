@@ -59,7 +59,12 @@ All configuration comes from `.env` (git-ignored), created by `make setup` from 
 | `SOLIDARITYNODE_BASEMAP` | backend → frontend | `osm` | Map background: `osm` (OpenStreetMap tiles, attributed, needs internet) or `blank` (offline) |
 | `SOLIDARITYNODE_DIAGNOSTIC_STEP_DELAY_S` | runs | `0.5` | Pause after each progress step so progress and cancel can be followed; recorded in the run configuration |
 | `SOLIDARITYNODE_SESSION_HOURS` | backend | `12` | Login session lifetime |
-| `SOLIDARITYNODE_SESSION_COOKIE_SECURE` | backend | `false` | Session cookie only over HTTPS (set `true` behind TLS) |
+| `SOLIDARITYNODE_SESSION_COOKIE_SECURE` | backend | `false` | Session cookie only over HTTPS; **must be `true` with `APP_ENV=production`** (the backend and `make check-config` refuse otherwise) |
+| `SOLIDARITYNODE_LOGIN_MAX_FAILURES_ACCOUNT` | backend | `5` | Failed sign-ins for one username before it is locked (ADR 0015) |
+| `SOLIDARITYNODE_LOGIN_MAX_FAILURES_ADDRESS` | backend | `20` | Failed sign-ins from one client address before it is locked |
+| `SOLIDARITYNODE_LOGIN_LOCK_MINUTES` | backend | `15` | Lock duration; failures older than this are forgotten |
+| `SOLIDARITYNODE_LOGIN_DELAY_BASE_S`, `SOLIDARITYNODE_LOGIN_DELAY_MAX_S` | backend | `1`, `30` | After failure n the next attempt waits base × 2^(n-1) seconds, at most the maximum |
+| `FORWARDED_ALLOW_IPS` | backend (uvicorn) | loopback and private networks | Peers whose `X-Forwarded-For` gives the client address; the bundled nginx overwrites that header |
 | `SOLIDARITYNODE_RESULTS_DIR` | backend, worker on the host | `var/results` (`/data/results` volume in compose) | Per-sample Parquet results and package uploads |
 | `SOLIDARITYNODE_PACKAGES_DIR` | backend | `data/synthetic/packages` | Data packages offered for import on the Admin screen |
 | `SOLIDARITYNODE_WORKER_NAME` | worker | `worker` | Worker name, for logs and the job row only |

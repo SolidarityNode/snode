@@ -15,8 +15,8 @@ def test_passwords_are_hashed_with_argon2() -> None:
     assert hashed.startswith("$argon2id$")
     assert verify_password(hashed, "a-long-password")
     assert not verify_password(hashed, "wrong")
-    with pytest.raises(ValueError, match="at least 8"):
-        hash_password("short")
+    with pytest.raises(ValueError, match="at least 12"):
+        hash_password("short-pass")
 
 
 def test_login_logout_and_me(app, users) -> None:  # type: ignore[no-untyped-def]
