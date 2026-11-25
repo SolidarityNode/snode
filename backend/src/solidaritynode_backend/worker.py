@@ -281,12 +281,19 @@ class Worker:
 
 
 def build_worker(settings: Settings, engine: Engine | None = None) -> Worker:
-    """Return a worker with the platform's handlers."""
+    """Return a worker with the platform's handlers, plus the hub's when ``DEPLOYMENT_MODE=hub``."""
     engine = engine or create_engine(settings.database_url.get_secret_value(), pool_pre_ping=True)
+    handlers: dict[str, Handler] = {RUN_JOB_KIND: partial(execute_run, engine, settings)}
+    if settings.deployment_mode == "hub":
+        from solidaritynode_backend.services.hub.base import BASE_JOB_KIND, run_base
+        from solidaritynode_backend.services.hub.publish import PUBLISH_JOB_KIND, run_publish
+
+        handlers[BASE_JOB_KIND] = partial(run_base, engine, settings)
+        handlers[PUBLISH_JOB_KIND] = partial(run_publish, engine, settings)
     return Worker(
         engine,
         settings.worker_name,
-        {RUN_JOB_KIND: partial(execute_run, engine, settings)},
+        handlers,
         heartbeat_s=settings.job_heartbeat_seconds,
         stale_s=settings.job_stale_seconds,
         max_runtime_s=settings.max_runtimes(),

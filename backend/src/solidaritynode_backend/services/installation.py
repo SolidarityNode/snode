@@ -30,8 +30,18 @@ __all__ = [
 
 MUNICIPALITY_ONLY_TABLES: tuple[str, ...] = ()
 """Tables that exist only in municipal installations (tickets will be added here, ADR 0010)."""
-HUB_ONLY_TABLES: tuple[str, ...] = ()
-"""Tables that exist only in the hub (onboarding will be added here)."""
+HUB_ONLY_TABLES: tuple[str, ...] = (
+    "hub_sources",
+    "hub_features",
+    "hub_onboarding",
+    "hub_onboarding_events",
+    "hub_processing_records",
+    "hub_changesets",
+    "hub_changeset_items",
+    "hub_study_areas",
+    "hub_packages",
+)
+"""Tables that exist only in the hub (migration 0011)."""
 
 
 class RoleMismatchError(RuntimeError):

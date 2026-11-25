@@ -16,10 +16,87 @@ from typing import Final
 
 from solidaritynode_core.model.messages import CORE_MESSAGES, render
 
-__all__ = ["BACKEND_MESSAGES", "all_messages", "messages_json", "msg"]
+__all__ = ["BACKEND_MESSAGES", "HUB_MESSAGES", "all_messages", "messages_json", "msg"]
+
+HUB_MESSAGES: Final[Mapping[str, str]] = MappingProxyType(
+    {
+        # Hub: general errors
+        "hub.error.municipality_unknown": (
+            "municipality {municipality} is not in the registered boundaries"
+        ),
+        "hub.error.transition_not_allowed": (
+            "{municipality}: the status cannot change from {current} to {target}"
+        ),
+        "hub.error.source_not_found": "source {id} not found",
+        "hub.error.changeset_not_found": "changeset {id} not found",
+        "hub.error.changeset_decided": "changeset {id} was already {status}",
+        "hub.error.facility_not_found": "facility {id} not found",
+        "hub.error.study_area_not_found": "study area {id} not found",
+        "hub.error.study_area_exists": "study area {id} already exists",
+        "hub.error.package_not_found": "package {id} {version} not found",
+        "hub.error.job_not_found": "job not found",
+        "hub.error.not_onboarded": (
+            "municipality {municipality} has no base data yet: run the base step first"
+        ),
+        # Hub: raw sources
+        "hub.source.field_required": "{field} is required",
+        "hub.source.unknown_layer_type": "unknown layer type {layer_type} (allowed: {allowed})",
+        "hub.source.bad_note": "processing note {note} must look like DP-001",
+        "hub.source.bad_quality": "unknown quality {quality}",
+        "hub.source.not_gpkg": "{file} is not a GeoPackage: {detail}",
+        "hub.source.missing_table": "{file} has no {kinds} table with the columns {columns}",
+        "hub.source.not_utf8": "{file} is not UTF-8 text",
+        "hub.source.missing_columns": "{file}: the header row lacks {columns}",
+        "hub.source.too_large": "the file is larger than {limit} MB",
+        "hub.source.empty": "the file is empty",
+        "hub.source.version_conflict": (
+            "source {name} version {version} is already registered with different content; "
+            "register it as a new version"
+        ),
+        # Hub: base step of onboarding (DP-003)
+        "hub.base.missing_sources": "register these source types first: {layers}",
+        "hub.base.already_running": "a base step for {municipality} is already queued or running",
+        "hub.base.crs_unknown": "source {source} declares the CRS {crs}, which is not an EPSG code",
+        "hub.base.reprojected": "source {source} was reprojected from {source_crs} to {crs}",
+        "hub.base.municipality_without_code": ("a boundary without municipality_code was skipped"),
+        "hub.base.invalid_geometry": "{layer} {id}: invalid geometry",
+        "hub.base.duplicate_code": "{layer}: the code {id} appears {count} times",
+        "hub.base.no_units": "municipality {municipality} has no spatial units in the source",
+        "hub.base.node_without_code": "a network node without node_code was found",
+        "hub.base.edges_outside": "{count} edge(s) with an end outside the area were left out",
+        "hub.base.edge_values": "edge {id}: length or travel times missing or negative",
+        "hub.base.centroid_rule": (
+            "{count} spatial unit(s) were linked to the network node nearest to a point inside "
+            "them (DP-003)"
+        ),
+        "hub.base.unit_without_node": "spatial unit {id} has no network node",
+        "hub.base.components": "the network of the area has {count} connected part(s)",
+        "hub.base.unit_disconnected": (
+            "spatial unit {id}: its node {node} is not connected to the main network"
+        ),
+        "hub.base.population_unknown_group": "population line {line}: unknown group {group}",
+        "hub.base.population_not_count": ("population line {line}: {value} is not a whole number"),
+        "hub.base.population_duplicate": "population: unit {unit} has group {group} twice",
+        "hub.base.population_missing": "population: unit {unit} has no value for {groups}",
+        "hub.base.population_total": "population of {municipality}: {total} (all groups summed)",
+        "hub.base.population_mismatch": (
+            "population of {municipality}: {stored} stored but {source} in the source"
+        ),
+        "hub.base.source_unreadable": "a source could not be read: {detail}",
+        "hub.base.cancelled": "cancelled; nothing was stored",
+        "hub.base.crashed": "the base step failed and nothing was stored: {detail}",
+        "hub.base.stopped": "stopped by {errors} error(s); nothing was stored",
+        "hub.base.summary": (
+            "{municipality}: {added} feature(s) added, {changed} changed, {closed} closed"
+        ),
+        "hub.base.status_note": "base step, processing record {record}",
+    }
+)
+"""Hub message templates by code (ADR 0012); part of :data:`BACKEND_MESSAGES`."""
 
 BACKEND_MESSAGES: Final[Mapping[str, str]] = MappingProxyType(
     {
+        **HUB_MESSAGES,
         # Sign-in and roles (ADR 0015)
         "error.login_required": "login required",
         "error.requires_role": "requires role {roles}",

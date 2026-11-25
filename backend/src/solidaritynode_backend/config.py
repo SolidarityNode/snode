@@ -12,11 +12,20 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from solidaritynode_core.uncertainty import check_interval
 from sqlalchemy.engine import make_url
 
-__all__ = ["PLACEHOLDER_PREFIX", "AppEnv", "Basemap", "DeploymentMode", "Settings", "get_settings"]
+__all__ = [
+    "PLACEHOLDER_PREFIX",
+    "AppEnv",
+    "Basemap",
+    "BufferRule",
+    "DeploymentMode",
+    "Settings",
+    "get_settings",
+]
 
 AppEnv = Literal["development", "test", "production"]
 DeploymentMode = Literal["municipality", "hub"]
 Basemap = Literal["osm", "blank"]
+BufferRule = Literal["whole_neighbouring_municipalities", "distance"]
 
 PROBLEM_SEPARATOR = "\n  - "
 """Joins configuration problems in one validation error (one problem per line)."""
@@ -43,9 +52,8 @@ class Settings(BaseSettings):
         database_url: SQLAlchemy URL for PostgreSQL/PostGIS. Kept secret in logs and reprs.
         cors_origins: Origins allowed to call the API from a browser.
         deployment_mode: ``municipality`` (one study area of one or more core municipalities,
-            ADR 0012) or ``hub``; locked in the database at first initialisation. Only the
-            municipal installation is implemented in v0.1; ``hub`` starts but offers no hub
-            features yet.
+            ADR 0012) or ``hub`` (raw sources, onboarding, facility imports, package
+            publishing); locked in the database at first initialisation.
         packages_dir: Directory of data packages offered for import on the Admin screen.
         results_dir: Directory for per-sample results (Parquet) and package staging; a mounted
             volume in compose.
@@ -84,6 +92,23 @@ class Settings(BaseSettings):
             pairs separated by commas (for example ``run=3600``). Empty (the default) means no
             limit for any kind, including the diagnostic model's ``run`` jobs. A job over its
             limit is stopped at its next progress step and marked failed.
+        docs_base_url: Base address of the documentation site. The footer links to
+            ``<base><major.minor>/`` of the running platform version, or ``<base>dev/`` in
+            development. Set it to a local mirror for offline installations.
+        hub_storage_dir: Hub only: directory of registered raw sources and published packages
+            (a mounted volume in compose).
+        hub_crs: Hub only: projected CRS of curated features and packages (``EPSG:n``). Sources
+            in another CRS are reprojected with PostGIS when they are processed.
+        hub_buffer_rule: Hub only: default buffer around an onboarded municipality and of new
+            study areas. ``whole_neighbouring_municipalities`` (default, as in the demo
+            packages) or ``distance`` (units within ``hub_buffer_distance_m``). The buffer
+            definition is open (OQ-28); this is a configurable placeholder, not a method.
+        hub_buffer_distance_m: Hub only: distance for the ``distance`` buffer rule, in metres.
+        hub_duplicate_distance_m: Hub only: a facility within this distance of another (or with
+            the same name in the same municipality) is reported as a likely duplicate.
+        hub_max_source_mb: Hub only: largest raw source file accepted by the upload screen.
+        hub_max_facility_file_mb: Hub only: largest facility import file.
+        hub_max_facility_rows: Hub only: most rows in one facility import file.
     """
 
     model_config = SettingsConfigDict(
@@ -125,6 +150,32 @@ class Settings(BaseSettings):
     job_max_runtime_seconds: str = ""
     result_interval_quantiles: str = "0.05,0.95"
     samples_warn_mb: float = Field(default=500.0, gt=0)
+    docs_base_url: str = "https://solidaritynode.github.io/snode/"
+    hub_storage_dir: Path = Path("var/hub")
+    hub_crs: str = Field(default="EPSG:2100", pattern=r"^EPSG:\d{4,6}$")
+    hub_buffer_rule: BufferRule = "whole_neighbouring_municipalities"
+    hub_buffer_distance_m: float = Field(default=1000.0, gt=0)
+    hub_duplicate_distance_m: float = Field(default=25.0, ge=0)
+    hub_max_source_mb: float = Field(default=4096.0, gt=0)
+    hub_max_facility_file_mb: float = Field(default=5.0, gt=0)
+    hub_max_facility_rows: int = Field(default=5000, gt=0)
+
+    @property
+    def hub_srid(self) -> int:
+        """Return the EPSG code of :attr:`hub_crs`."""
+        return int(self.hub_crs.removeprefix("EPSG:"))
+
+    def docs_url(self, version: str) -> str:
+        """Return the user-guide address matching the running platform ``version``.
+
+        ``<docs_base_url><major.minor>/`` (the documentation site publishes one version per
+        minor release), or ``<docs_base_url>dev/`` with ``APP_ENV=development``.
+        """
+        base = self.docs_base_url if self.docs_base_url.endswith("/") else self.docs_base_url + "/"
+        if self.app_env == "development":
+            return f"{base}dev/"
+        major_minor = ".".join(version.split(".")[:2])
+        return f"{base}{major_minor}/"
 
     def interval_quantiles(self) -> tuple[float, float]:
         """Return the interval quantile levels ``(low, high)`` of result values."""
