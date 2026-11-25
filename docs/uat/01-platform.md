@@ -29,7 +29,7 @@ administrator or viewer, so both stay logged in.
 | --- | --- | --- | --- |
 | 3 | Open http://127.0.0.1:8080 | The **Log in** page opens. The footer shows `no data imported` or the data version, then `backend 0.0.1 (<commit>, development) · frontend <commit>`. The commit matches `git rev-parse --short=12 HEAD`. | ☐ |
 | 4 | Log in as `demo-analyst` with the password `wrong-password` | Red message "Wrong username or password." | ☐ |
-| 4a | Log in as `uat-nobody` (a user that does not exist) with any password, six times in a row, waiting a few seconds between tries | The first tries say "Wrong username or password." (the same message as for a real user). If you try again at once, or from the sixth try on, the message is "Too many failed sign-in attempts. Wait a few minutes and try again." Nothing says whether the user exists. `demo-analyst` is not affected. | ☐ |
+| 4a | Log in as `uat-nobody` (a user that does not exist) with any password, six times in a row, waiting a few seconds between tries | The first tries say "Wrong username or password." (the same message as for a real user). If you try again at once, or from the sixth try on, the message is "Too many failed sign-in attempts. Wait a few minutes and try again." Nothing says whether the user exists. Logging in as `demo-analyst` right after still works (one wrong name does not delay others at the same address). | ☐ |
 | 5 | Log in as `demo-analyst` / `demo-analyst-pass` | The **Study area** page opens. The header says "Signed in as demo-analyst (analyst)". There is no **Admin** link. The footer shows `data demo-study-area-a 1.0.0`. | ☐ |
 
 ## C. Study area

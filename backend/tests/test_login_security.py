@@ -76,12 +76,25 @@ def test_increasing_delay_between_failures(settings: Any, users: Any, engine: An
         waits = conn.execute(
             text("SELECT extract(epoch FROM next_allowed_at - last_failure_at) FROM login_throttle")
         ).scalars()
-        assert sorted(round(float(w)) for w in waits) == [20, 20]  # 10 × 2, account and address
+        assert sorted(round(float(w)) for w in waits) == [0, 20]  # account 10 × 2; address none
     with engine.begin() as conn:
         conn.execute(text("UPDATE login_throttle SET next_allowed_at = now() - interval '1 s'"))
     assert _try(client, "analyst", PASSWORDS["analyst"]).status_code == 200
     with engine.connect() as conn:  # success forgets the failures
         assert conn.execute(text("SELECT count(*) FROM login_throttle")).scalar_one() == 0
+
+
+def test_one_users_typo_does_not_delay_others_at_the_same_address(
+    settings: Any, users: Any
+) -> None:
+    app = _app(settings, login_delay_base_s=10, login_max_failures_address=6)
+    client = TestClient(app)
+    assert _try(client, "analyst", "wrong-password-1").status_code == 401
+    assert _try(client, "viewer", PASSWORDS["viewer"]).status_code == 200  # no address delay
+    for name in ("b1", "b2"):  # address failures 1 to 3 (the viewer's success reset it)
+        assert _try(client, name, "wrong-password-1").status_code == 401
+    assert _try(client, "b3", "wrong-password-1").status_code == 401  # 3rd: delay starts (6 / 2)
+    assert _try(client, "admin", PASSWORDS["admin"]).status_code == 429  # address delayed now
 
 
 def test_lock_expires(settings: Any, users: Any, engine: Any) -> None:

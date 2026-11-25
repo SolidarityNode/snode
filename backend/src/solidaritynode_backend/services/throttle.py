@@ -1,7 +1,9 @@
 """Login throttling per account and per client address (ADR 0015).
 
-After a failed sign-in, the next attempt for the same username or the same client address is
-refused for an increasing delay (``login_delay_base_s × 2^(n-1)``, capped), and after
+After a failed sign-in, the next attempt for the same username is refused for an increasing
+delay (``login_delay_base_s × 2^(n-1)``, capped). A client address gets the same increasing
+delay only from half its limit on (so one person's typo does not delay colleagues behind the
+same office address), and after
 ``login_max_failures_account`` (per username) or ``login_max_failures_address`` (per address)
 failures within ``login_lock_minutes`` the key is locked for that long. While a key is delayed
 or locked, credentials are **not checked** and the answer is the same generic 429 for existing
@@ -51,6 +53,11 @@ class Throttle:
         self._window = timedelta(minutes=settings.login_lock_minutes)
         self._base = settings.login_delay_base_s
         self._max = settings.login_delay_max_s
+        # Failure count from which each kind is delayed (addresses: half their lock limit).
+        self._delay_from = {
+            "account": 1,
+            "address": max(1, -(-settings.login_max_failures_address // 2)),
+        }
 
     def retry_after(self, db: Session, keys: list[tuple[str, str]]) -> int:
         """Return the seconds to wait before an attempt is allowed (0: allowed now)."""
@@ -92,7 +99,12 @@ class Throttle:
             failures = 1
             if row is not None and row.last_failure_at >= now - self._window:
                 failures = row.failures + 1
-            delay = min(self._base * 2 ** (failures - 1), self._max) if self._base else 0.0
+            start = self._delay_from[kind]
+            delay = (
+                min(self._base * 2 ** (failures - start), self._max)
+                if self._base and failures >= start
+                else 0.0
+            )
             locked = now + self._window if failures >= self._limits[kind] else None
             db.execute(
                 text(

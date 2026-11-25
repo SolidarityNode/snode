@@ -39,7 +39,9 @@ can replace it later without changing routers.
   hashes keep working.
 - **Sign-in throttling** per username and per client address
   (`services/throttle.py`, table `login_throttle`, migration 0009): after failure *n* the next
-  attempt for that username or address is refused for `1 s × 2^(n-1)` (at most 30 s); after
+  attempt for that username is refused for `1 s × 2^(n-1)` (at most 30 s); a client address is
+  delayed the same way only from half its limit on (10 failures), so one person's typo does not
+  delay colleagues behind the same office address; after
   5 failures for a username or 20 for an address within 15 minutes it is locked for 15 minutes
   (all configurable, `SOLIDARITYNODE_LOGIN_*`). While delayed or locked the password is not
   checked and the answer is a generic 429 with `Retry-After`; wrong passwords and unknown users

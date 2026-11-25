@@ -52,8 +52,9 @@ class Settings(BaseSettings):
         login_max_failures_account: Failed sign-ins for one username before it is locked.
         login_max_failures_address: Failed sign-ins from one client address before it is locked.
         login_lock_minutes: How long a lock lasts; failures older than this are forgotten.
-        login_delay_base_s: After failure ``n``, the next attempt for that username or address is
-            refused for ``base × 2^(n-1)`` seconds (capped by ``login_delay_max_s``).
+        login_delay_base_s: After failure ``n``, the next attempt for that username is refused for
+            ``base × 2^(n-1)`` seconds (capped by ``login_delay_max_s``); a client address is
+            delayed the same way from half its lock limit on.
         login_delay_max_s: Upper bound of that delay.
         diagnostic_step_delay_s: Pause after each progress step of a run, so progress and
             cancellation can be followed by hand. Part of the run configuration (and its hash).
