@@ -175,6 +175,20 @@ HUB_MESSAGES: Final[Mapping[str, str]] = MappingProxyType(
             "{closed} closed"
         ),
         "hub.import.status_note": "first approved facility changeset {changeset}",
+        # Hub: study areas, publishing and propagation (DP-006)
+        "hub.study_area.bad_id": (
+            "study area id {id} must be 2-63 lower-case letters, digits or hyphens"
+        ),
+        "hub.study_area.bad_rule": "unknown buffer rule {rule}",
+        "hub.publish.building": "version {version} of {id} is being built; wait for it to finish",
+        "hub.publish.no_changes": (
+            "nothing changed for {id} since version {version}; there is nothing to publish"
+        ),
+        "hub.publish.failed": "publishing failed; nothing was published: {detail}",
+        "hub.publish.invalid": "the assembled package does not pass the import checks: {detail}",
+        "hub.publish.summary": "published {id} {version}",
+        "hub.publish.status_note": "published in {id} {version}",
+        "hub.publish.initial": "First version of study area {id}.",
     }
 )
 """Hub message templates by code (ADR 0012); part of :data:`BACKEND_MESSAGES`."""

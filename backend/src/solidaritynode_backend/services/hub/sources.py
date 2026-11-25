@@ -102,6 +102,7 @@ class SourceMeta:
     attribution: str
     processing_note: str
     quality: str = "open_data"
+    synthetic: bool = False
 
     def check(self) -> None:
         """Refuse missing or unknown values.
@@ -253,8 +254,9 @@ def register_source(
             db.execute(
                 text(
                     "INSERT INTO hub_sources (name, layer_type, coverage, version, licence, "
-                    "attribution, processing_note, quality, file_name, path, sha256, bytes, "
-                    "details, registered_by) VALUES (:n, :t, :c, :v, :l, :a, :p, :q, :f, '', "
+                    "attribution, processing_note, quality, synthetic, file_name, path, sha256, "
+                    "bytes, "
+                    "details, registered_by) VALUES (:n, :t, :c, :v, :l, :a, :p, :q, :syn, :f, '', "
                     ":s, :b, CAST(:d AS jsonb), :u) RETURNING id"
                 ),
                 {
@@ -266,6 +268,7 @@ def register_source(
                     "a": meta.attribution,
                     "p": meta.processing_note,
                     "q": meta.quality,
+                    "syn": meta.synthetic,
                     "f": safe,
                     "s": sha,
                     "b": size,
@@ -289,6 +292,7 @@ def register_source(
 
 _COLUMNS = (
     "id, name, layer_type, coverage, version, licence, attribution, processing_note, quality, "
+    "synthetic, "
     "file_name, path, sha256, bytes, details, registered_at, registered_by"
 )
 
@@ -371,6 +375,7 @@ def register_from_metadata(
             attribution=entry["attribution"],
             processing_note=entry["processing_note"],
             quality=entry.get("quality", "open_data"),
+            synthetic=bool(entry.get("synthetic", False)),
         )
         with (directory / entry["file"]).open("rb") as handle:
             out.append(register_source(db, settings, handle, entry["file"], meta, user_id))
