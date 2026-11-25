@@ -45,8 +45,13 @@ The demo scenario `data/synthetic/demo/scenarios/C-DEMO-REF.json` uses a draft l
   - `population_changes`: one unit and group, `absolute` (persons) or `relative` (percent).
   They map to `core.model.EdgeChange`, `NewEdge` and `PopulationChange`, are validated (schema
   rules, duplicates, references against the data version, no negative results where the
-  baseline is known) and **recorded only**: runs list them under `recorded_only`, nothing is
-  applied yet. The editor keeps them when saving and says they have no effect yet.
+  baseline is known) and **recorded only**: runs list them under `recorded_only` (shown on the
+  run page as "Recorded, no effect yet"), nothing is applied yet. The editor keeps them when
+  saving and says they have no effect yet. Travel times and speeds must stay **strictly
+  positive** (relative changes above −100 %, absolute travel-time changes leaving more than
+  0 minutes, new-edge times > 0): **closing a road uses `closed_edges`**, never a change to zero.
+  A new edge that the same scenario also closes is reported on the run ("added, then closed,
+  so no net effect", OQ-30), never ignored silently.
 - **Order of application** (OQ-30, *proposed default*, recorded in `core.scenarios.overlay` and
   `core.model.Scenario`): interventions first (new facilities, capacity, network, population),
   then disruptions (severities, closed edges), which may also hit the new facilities and new
