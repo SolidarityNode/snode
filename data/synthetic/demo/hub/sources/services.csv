@@ -1,0 +1,3 @@
+service_id,name,service_unit,max_acceptable_wait
+S-HC,Home care (synthetic),hour,P7D
+S-SD,Social services desk (synthetic),appointment,P14D
