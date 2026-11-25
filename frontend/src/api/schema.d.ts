@@ -406,6 +406,8 @@ export interface paths {
     /**
      * Export Run
      * @description Export results as CSV or GeoPackage in a zip, with ``metadata.json`` (reproducibility).
+     *
+     *     The run's samples file is verified against its recorded SHA-256 first (409 if it differs).
      */
     get: operations["export_run_runs__run_id__export_get"];
     put?: never;
@@ -1206,6 +1208,21 @@ export interface components {
        * @default false
        */
       reused: boolean;
+      /**
+       * Samples Estimate Bytes
+       * @description Estimated samples file size before compression, computed before the run
+       */
+      samples_estimate_bytes?: number | null;
+      /**
+       * Samples Limit Bytes
+       * @description Warning limit for the samples file in force at creation
+       */
+      samples_limit_bytes?: number | null;
+      /**
+       * Samples Sha256
+       * @description SHA-256 of the samples Parquet file (verified on export)
+       */
+      samples_sha256?: string | null;
       /**
        * Scenario Id
        * Format: uuid
@@ -2148,6 +2165,13 @@ export interface operations {
         content: {
           "application/zip": unknown;
         };
+      };
+      /** @description The run's samples file is missing or does not match its SHA-256 */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {

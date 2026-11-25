@@ -224,6 +224,16 @@ export function RunPage() {
       {run.diagnostic && <DiagnosticBanner />}
       <RunStatus run={run} onCancel={() => void cancel()} cancelling={cancelling} />
       <ErrorMessage error={error} />
+      {run.samples_estimate_bytes != null &&
+        run.samples_limit_bytes != null &&
+        run.samples_estimate_bytes > run.samples_limit_bytes && (
+          <p className="banner banner--warning" role="note" data-testid="samples-warning">
+            {t("run.samples_warning", {
+              size: num(run.samples_estimate_bytes / 1e6, lang),
+              limit: num(run.samples_limit_bytes / 1e6, lang),
+            })}
+          </p>
+        )}
       {dv && dv.id !== run.data_version_id && (
         <p className="banner banner--warning" role="note">
           {t("run.old_data", { run: run.package_version, active: dv.version })}{" "}
@@ -432,6 +442,7 @@ export function RunPage() {
             ["seed", String(run.seed)],
             ["config", JSON.stringify(run.config)],
             ["hash", run.input_hash],
+            ["samples", run.samples_sha256 ?? "—"],
             ["created", `${run.created_at} (${run.created_by ?? t("scenarios.system")})`],
             ["finished", run.finished_at ?? "—"],
           ] as const

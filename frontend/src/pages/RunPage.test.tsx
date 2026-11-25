@@ -89,3 +89,21 @@ describe("RunPage results map", () => {
     expect(screen.getByTestId("value-legend")).toHaveTextContent("Quality: estimated (hatched)");
   });
 });
+
+describe("RunPage samples size", () => {
+  it("warns when the estimated samples file is above the limit", async () => {
+    const big = { ...RUN, samples_estimate_bytes: 750_000_000, samples_limit_bytes: 500_000_000 };
+    stubApi({
+      "GET /runs/r1": () => big,
+      "GET /runs": () => [big],
+      "GET /data-versions/1/layers/spatial_units": () => UNITS,
+      "GET /data-versions/1/catalog": () => CATALOG,
+      "GET /runs/r1/results": () => [],
+      "GET /runs/r1/tables/unit_changes": () => [],
+    });
+    renderWithSession(<RunPage />, { path: "/runs/r1", route: "/runs/:runId" });
+    expect(await screen.findByTestId("samples-warning")).toHaveTextContent(
+      "about 750 MB of samples (estimate before compression), above the warning limit of 500 MB",
+    );
+  });
+});
