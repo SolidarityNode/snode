@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { getHealth, getVersion, type Version } from "../api/client";
+import { useT } from "../i18n/context";
 
 type State =
   | { kind: "loading" }
@@ -8,6 +9,7 @@ type State =
   | { kind: "error"; message: string };
 
 export function HealthPage() {
+  const { t } = useT();
   const [state, setState] = useState<State>({ kind: "loading" });
 
   useEffect(() => {
@@ -28,18 +30,18 @@ export function HealthPage() {
 
   return (
     <section aria-labelledby="health-title">
-      <h2 id="health-title">Backend health</h2>
-      {state.kind === "loading" && <p role="status">Checking…</p>}
+      <h2 id="health-title">{t("health.title")}</h2>
+      {state.kind === "loading" && <p role="status">{t("health.checking")}</p>}
       {state.kind === "ok" && (
         <p role="status" data-testid="health-status">
-          Backend status: <strong>ok</strong>
+          {t("health.status")} <strong>ok</strong>
           {state.version &&
-            ` (backend ${state.version.version}, core ${state.version.core_version})`}
+            ` ${t("health.versions", { backend: state.version.version, core: state.version.core_version })}`}
         </p>
       )}
       {state.kind === "error" && (
         <p role="alert" data-testid="health-status">
-          Backend unreachable: {state.message}
+          {t("health.unreachable", { message: state.message })}
         </p>
       )}
     </section>

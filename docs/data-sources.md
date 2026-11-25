@@ -4,7 +4,8 @@ Every third-party dataset used by SolidarityNode is listed here with its licence
 
 | Source | Provider | Licence | Required attribution | Use in SolidarityNode | Added |
 | --- | --- | --- | --- | --- | --- |
-| *(none yet)* | | | | | |
+| Common passwords list (`backend/src/solidaritynode_backend/resources/common_passwords.txt`) | SecLists, `Passwords/Common-Credentials/100k-most-used-passwords-NCSC.txt` (https://github.com/danielmiessler/SecLists), downloaded 2026-11-25, filtered to 12+ characters | MIT (Copyright (c) 2018 Daniel Miessler) | MIT notice kept in the file header | Refusing common passwords (ADR 0015); not geodata, never shown to users | 2026-11-25 |
+| OpenStreetMap standard tile layer (basemap only, when `SOLIDARITYNODE_BASEMAP=osm`) | OpenStreetMap Foundation | Tiles: CC BY-SA 2.0; data: ODbL 1.0 | "© OpenStreetMap contributors", linked to https://www.openstreetmap.org/copyright (shown on every map) | Background tiles in the browser; no OSM data is stored or processed. Light interactive use within the OSMF tile usage policy; set `blank` for offline use or heavy traffic | 2026-11-25 |
 
 ## Real open data stays local
 
@@ -14,7 +15,7 @@ tickets**. `data/local/` is git-ignored: nothing in it is ever committed. Each d
 gets a row in the table above and each processed dataset a `DP-NNN` note in
 [`docs/data-processing/`](data-processing/README.md). No real data has been downloaded yet.
 
-The synthetic demo dataset (`data/synthetic/demo/`, DP-001) uses no third-party source.
+The synthetic demo dataset (`data/synthetic/demo/`, DP-001) and the demo packages built from it (`data/synthetic/packages/`, DP-002) use no third-party source.
 
 How to add a source:
 

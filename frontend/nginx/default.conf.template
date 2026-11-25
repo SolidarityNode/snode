@@ -6,6 +6,11 @@ server {
     server_name _;
     root /usr/share/nginx/html;
 
+    # Send the origin (not the full URL) as Referer on cross-origin requests. Map tile servers
+    # need it: the OSMF tile usage policy requires a valid Referer (ADR 0007). Never use
+    # no-referrer or same-origin here. Applies to every location (none sets its own add_header).
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
     # Re-resolve the backend name, so a restarted backend container (new IP) is found again.
     resolver ${NGINX_LOCAL_RESOLVERS} valid=10s ipv6=off;
 
@@ -16,6 +21,13 @@ server {
         proxy_pass $backend_upstream;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
+        # The browser's address, for sign-in throttling per client address (ADR 0015). nginx is
+        # the edge, so it overwrites (never appends to) any X-Real-IP / X-Forwarded-For a client
+        # sends. The backend trusts them only from SOLIDARITYNODE_TRUSTED_PROXIES. Behind
+        # rootless Podman's port forwarder $remote_addr is nginx's own address; the backend then
+        # treats the client address as unknown and throttles per username only.
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
     }
 
     # Single-page app routing.

@@ -26,6 +26,7 @@ def test_ticket_has_exactly_the_allowed_fields() -> None:
         "unit",
         "group",
         "service",
+        "facility_id",
         "requested_at",
         "scheduled_at",
         "fulfilled_at",
@@ -63,3 +64,8 @@ def test_recording_coverage_bounds() -> None:
         RecordingCoverage(synthetic.FACILITIES[0], period, 1.5)
     with pytest.raises(ValueError, match="after"):
         Period(synthetic.T0, synthetic.T0)
+
+
+def test_ticket_records_its_facility() -> None:
+    """OQ-29: every ticket records the facility where the request is made or scheduled."""
+    assert synthetic.ticket().facility_id == synthetic.FACILITIES[0]

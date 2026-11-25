@@ -42,6 +42,18 @@ All user-facing text goes through translation files (Greek and English). No hard
 
 **Why:** the platform is used in Greek and English; strings scattered in components are missed in translation.
 
+### Greek terms follow the glossary; server texts are translated by code
+
+Use the terms of [`docs/i18n/glossary.md`](../i18n/glossary.md) (for example τρωτότητα for
+vulnerability, φαινόμενο ορίου for edge effect, ανοιχτά δεδομένα for open data). Add a missing
+term to the glossary in the same pull request. Texts that come from the server (errors,
+reference problems, "recorded only" lines, run failures) are shown with `serverText(t, text)`,
+which matches them against the exported templates (`src/api/messages.json`) and shows
+`server.<code>`.
+
+**Why:** one concept translated two ways confuses users and reviewers; server texts in English
+inside the Greek UI were the most visible gap in UAT.
+
 ## Libraries only as decided in ADRs
 
 Use the map library and other major libraries only as decided in ADRs (for example ADR 0007, map library).

@@ -9,7 +9,7 @@ on:
     paths:
       - "backend/**"
       - "core/**"
-      - "data/synthetic/demo/**"
+      - "data/synthetic/packages/**"
       - "frontend/**"
       - "compose.yaml"
       - "Makefile"
@@ -19,7 +19,7 @@ on:
     paths:
       - "backend/**"
       - "core/**"
-      - "data/synthetic/demo/**"
+      - "data/synthetic/packages/**"
       - "frontend/**"
       - "compose.yaml"
       - "Makefile"

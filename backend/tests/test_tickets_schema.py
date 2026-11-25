@@ -14,6 +14,7 @@ VALID = {
     "unit": "U-A",
     "group": "G-older",
     "service": "S-homecare",
+    "facility_id": "F-1",
     "requested_at": T0.isoformat(),
     "scheduled_at": (T0 + timedelta(days=1)).isoformat(),
     "first_request_in_period": True,
@@ -53,3 +54,11 @@ def test_inconsistent_timestamps_are_rejected() -> None:
 def test_identifiers_are_constrained() -> None:
     with pytest.raises(ValidationError):
         TicketRequest.model_validate({**VALID, "unit": "Main Street 12, Athens"})
+
+
+def test_facility_is_required() -> None:
+    """OQ-29: the facility where the request is made is a required ticket field."""
+    body = {k: v for k, v in VALID.items() if k != "facility_id"}
+    with pytest.raises(ValidationError, match="facility_id"):
+        TicketRequest.model_validate(body)
+    assert TicketRequest.model_validate(VALID).to_core().facility_id == "F-1"

@@ -2,11 +2,11 @@
 
 - Status: Proposed (stub, needs a human decision)
 - Date: 2026-11-24
-- Related: OQ-21, OQ-6, OQ-8; AGENTS.md "Data and privacy rules"; `core.model.Ticket`
+- Related: OQ-21, OQ-29, OQ-6, OQ-8; AGENTS.md "Data and privacy rules"; `core.model.Ticket`
 
 ## Context
 
-Tickets are anonymous by design (spatial unit, group, service, timestamps, a yes/no "first request in this period" flag). In small units, the combination of unit, group and timestamps can still identify people (OQ-21). These rules also limit how finely observations can be used for learning (OQ-8, OQ-16). No ticket may be stored before this ADR is accepted.
+Tickets are anonymous by design (spatial unit, group, service, the facility where the request is made or scheduled, timestamps, a yes/no "first request in this period" flag). The facility was added by OQ-29 (decided 2026-11-24): facility state, facility output and recording coverage (Paper 4 §5, §14; OQ-8) need it. In small units, the combination of unit, group, facility and timestamps can still identify people (OQ-21); the facility makes cells smaller, so every rule below applies to it too (OQ-29). These rules also limit how finely observations can be used for learning (OQ-8, OQ-16). No ticket may be stored before this ADR is accepted.
 
 ## Options to evaluate
 
@@ -22,7 +22,7 @@ Tickets are anonymous by design (spatial unit, group, service, timestamps, a yes
 - Which waiting-time indicators (Paper 4 §4.2) survive timestamp coarsening?
 - How is the "first request in this period" flag set without storing an identifier (OQ-8)?
 - How are people in several groups recorded (OQ-6)?
-- How are tickets attributed to facilities, which Paper 4 needs but the ticket fields do not include?
+- Does the minimum cell size apply to `unit × group × service × facility × period`, or are facilities aggregated first (OQ-29)?
 - GDPR assessment (DPIA) for deployments.
 
 ## Decision

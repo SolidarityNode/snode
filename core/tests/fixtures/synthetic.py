@@ -71,6 +71,7 @@ def ticket(**overrides: object) -> Ticket:
         "unit": UNITS[0],
         "group": GROUPS[0],
         "service": SERVICES[0],
+        "facility_id": FACILITIES[0],
         "requested_at": T0,
         "scheduled_at": T0 + timedelta(days=2),
         "fulfilled_at": None,

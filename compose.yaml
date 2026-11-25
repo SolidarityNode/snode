@@ -1,10 +1,35 @@
 # Compose spec file. Works with `podman compose` (default) and `docker compose`.
 # Start with `make up`; engine and compose command come from the Makefile variables
 # CONTAINER_ENGINE and COMPOSE. All values can be overridden in .env (see .env.example).
-# Ports are non-privileged and bound to 127.0.0.1. No bind mounts: data lives in a named volume.
+# Ports are non-privileged and bound to 127.0.0.1. No bind mounts: data lives in named volumes
+# (db-data for PostgreSQL, results for per-sample Parquet files and package uploads).
 # GIT_COMMIT is passed as a build argument by `make up` so /version and the frontend footer
 # show which build is under test.
 name: solidaritynode
+
+# Settings shared by the API and the worker (see .env.example).
+x-backend-env: &backend-env
+  SOLIDARITYNODE_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-solidaritynode}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-solidaritynode}
+  APP_ENV: ${APP_ENV:-development}
+  DEPLOYMENT_MODE: ${DEPLOYMENT_MODE:-municipality}
+  SOLIDARITYNODE_LOG_LEVEL: ${SOLIDARITYNODE_LOG_LEVEL:-info}
+  SOLIDARITYNODE_BASEMAP: ${SOLIDARITYNODE_BASEMAP:-osm}
+  SOLIDARITYNODE_RESULTS_DIR: /data/results
+  SOLIDARITYNODE_PACKAGES_DIR: /app/data/synthetic/packages
+  SOLIDARITYNODE_DIAGNOSTIC_STEP_DELAY_S: ${SOLIDARITYNODE_DIAGNOSTIC_STEP_DELAY_S:-0.5}
+  SOLIDARITYNODE_SESSION_HOURS: ${SOLIDARITYNODE_SESSION_HOURS:-12}
+  SOLIDARITYNODE_SESSION_COOKIE_SECURE: ${SOLIDARITYNODE_SESSION_COOKIE_SECURE:-false}
+  SOLIDARITYNODE_LOGIN_MAX_FAILURES_ACCOUNT: ${SOLIDARITYNODE_LOGIN_MAX_FAILURES_ACCOUNT:-5}
+  SOLIDARITYNODE_LOGIN_MAX_FAILURES_ADDRESS: ${SOLIDARITYNODE_LOGIN_MAX_FAILURES_ADDRESS:-20}
+  SOLIDARITYNODE_LOGIN_LOCK_MINUTES: ${SOLIDARITYNODE_LOGIN_LOCK_MINUTES:-15}
+  SOLIDARITYNODE_LOGIN_DELAY_BASE_S: ${SOLIDARITYNODE_LOGIN_DELAY_BASE_S:-1}
+  SOLIDARITYNODE_LOGIN_DELAY_MAX_S: ${SOLIDARITYNODE_LOGIN_DELAY_MAX_S:-30}
+  SOLIDARITYNODE_TRUSTED_PROXIES: ${SOLIDARITYNODE_TRUSTED_PROXIES:-127.0.0.1/32,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
+  SOLIDARITYNODE_RESULT_INTERVAL_QUANTILES: ${SOLIDARITYNODE_RESULT_INTERVAL_QUANTILES:-0.05,0.95}
+  SOLIDARITYNODE_SAMPLES_WARN_MB: ${SOLIDARITYNODE_SAMPLES_WARN_MB:-500}
+  SOLIDARITYNODE_JOB_HEARTBEAT_SECONDS: ${SOLIDARITYNODE_JOB_HEARTBEAT_SECONDS:-10}
+  SOLIDARITYNODE_JOB_STALE_SECONDS: ${SOLIDARITYNODE_JOB_STALE_SECONDS:-120}
+  SOLIDARITYNODE_JOB_MAX_RUNTIME_SECONDS: ${SOLIDARITYNODE_JOB_MAX_RUNTIME_SECONDS:-}
 
 services:
   db:
@@ -34,9 +59,9 @@ services:
         GIT_COMMIT: ${GIT_COMMIT:-unknown}
     image: localhost/solidaritynode-backend:dev
     environment:
-      SOLIDARITYNODE_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-solidaritynode}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-solidaritynode}
-      APP_ENV: ${APP_ENV:-development}
-      SOLIDARITYNODE_LOG_LEVEL: ${SOLIDARITYNODE_LOG_LEVEL:-info}
+      <<: *backend-env
+    volumes:
+      - results:/data/results
     depends_on:
       db:
         condition: service_healthy
@@ -52,6 +77,23 @@ services:
       timeout: 3s
       retries: 20
       start_period: 15s
+    restart: unless-stopped
+
+  # Background worker: runs queued jobs (ADR 0006). Same image as the API; the API container
+  # applies migrations first. Stop it with `make stop SERVICE=worker`: a running job is marked
+  # failed with a clear message. If it is killed instead, the job's heartbeat stops and any worker
+  # fails it after SOLIDARITYNODE_JOB_STALE_SECONDS.
+  worker:
+    image: localhost/solidaritynode-backend:dev
+    command: ["python", "-m", "solidaritynode_backend.worker"]
+    environment:
+      <<: *backend-env
+      SOLIDARITYNODE_WORKER_NAME: worker
+    volumes:
+      - results:/data/results
+    depends_on:
+      backend:
+        condition: service_healthy
     restart: unless-stopped
 
   frontend:
@@ -77,3 +119,4 @@ services:
 
 volumes:
   db-data:
+  results:

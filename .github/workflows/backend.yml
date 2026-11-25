@@ -3,9 +3,9 @@ name: backend
 on:
   push:
     branches: [main]
-    paths: ["backend/**", "core/**", "data/synthetic/**", "Makefile", ".github/workflows/backend.yml"]
+    paths: ["backend/**", "core/**", "data/synthetic/**", "scripts/**", "docs/schemas/**", "Makefile", ".github/workflows/backend.yml"]
   pull_request:
-    paths: ["backend/**", "core/**", "data/synthetic/**", "Makefile", ".github/workflows/backend.yml"]
+    paths: ["backend/**", "core/**", "data/synthetic/**", "scripts/**", "docs/schemas/**", "Makefile", ".github/workflows/backend.yml"]
 
 permissions:
   contents: read
@@ -17,6 +17,20 @@ concurrency:
 jobs:
   lint-test:
     runs-on: ubuntu-24.04
+    # The tests create and drop a throw-away database on this PostGIS server.
+    services:
+      db:
+        image: docker.io/postgis/postgis:18-3.6
+        env:
+          POSTGRES_DB: solidaritynode
+          POSTGRES_USER: solidaritynode
+          POSTGRES_PASSWORD: ci-only
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U solidaritynode -d solidaritynode"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      SOLIDARITYNODE_TEST_DATABASE_URL: postgresql+psycopg://solidaritynode:ci-only@localhost:5432/solidaritynode
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.4.0

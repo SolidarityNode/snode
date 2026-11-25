@@ -1,11 +1,13 @@
 """Anonymous request tickets and recording coverage (Paper 4 §4.1; OQ-8, OQ-21).
 
 Tickets are **anonymous by design** (AGENTS.md, "Data and privacy rules"): they store only the
-spatial unit of origin, the social group, the service and timestamps, plus a yes/no flag
-"first request in this period" that lets people be counted without being identified (OQ-8).
+spatial unit of origin, the social group, the service, the facility where the request is made or
+scheduled (OQ-29) and timestamps, plus a yes/no flag "first request in this period" that lets
+people be counted without being identified (OQ-8).
 No names, contact details, exact addresses or device identifiers. Re-identification risk in
 small units, minimum cell sizes and retention are **open** (OQ-21); the flag must never become
-an identifier.
+an identifier. The facility raises that risk further and is subject to the same rules (OQ-29,
+ADR 0010); no ticket is stored until they are decided.
 """
 
 from __future__ import annotations
@@ -26,13 +28,16 @@ def _require_aware(name: str, value: datetime | None) -> None:
 
 @dataclass(frozen=True, slots=True)
 class Ticket:
-    """One anonymous service request (Paper 4 §4.1; Spec 00 §4.4; OQ-6, OQ-8, OQ-21).
+    """One anonymous service request (Paper 4 §4.1; Spec 00 §4.4; OQ-6, OQ-8, OQ-21, OQ-29).
 
     Attributes:
         unit: Spatial unit of origin ``i``.
         group: Social group ``g``. Whether a ticket can carry several groups, or a priority
             rule applies, is open (OQ-6); the paper states a single group.
         service: Service (need) requested ``s``.
+        facility_id: Facility ``f`` where the request is made or scheduled, in practice the
+            facility that issues the QR code or appointment (OQ-29). Not personal data, but it
+            raises re-identification risk in small units and follows the OQ-21 rules.
         requested_at: Request time ``t_r``.
         scheduled_at: Scheduled time ``t_a``, if any.
         fulfilled_at: Service (fulfilment) time ``t_f``, if fulfilled.
@@ -44,6 +49,7 @@ class Ticket:
     unit: UnitId
     group: GroupId
     service: ServiceId
+    facility_id: FacilityId
     requested_at: datetime
     scheduled_at: datetime | None
     fulfilled_at: datetime | None
@@ -66,6 +72,7 @@ TICKET_FIELDS: frozenset[str] = frozenset(
         "unit",
         "group",
         "service",
+        "facility_id",
         "requested_at",
         "scheduled_at",
         "fulfilled_at",
@@ -99,9 +106,9 @@ class Period:
 class RecordingCoverage:
     """Share of a facility's requests captured by the ticket system in a period (OQ-8).
 
-    Observations are used for learning only where coverage is full or known (OQ-8). Note that
-    tickets themselves carry no facility (Paper 4 §4.1, AGENTS.md privacy rules); coverage is
-    recorded separately per facility and period.
+    Observations are used for learning only where coverage is full or known (OQ-8). Tickets
+    record their facility (OQ-29), but coverage (the share of requests captured at all) cannot be
+    derived from tickets and is recorded separately per facility and period.
 
     Attributes:
         facility: Facility ``f``.

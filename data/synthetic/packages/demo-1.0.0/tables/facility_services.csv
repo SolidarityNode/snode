@@ -1,0 +1,5 @@
+facility_id,service_id,places,staff,throughput
+F1,S-HC,20,4,160
+F1,S-SD,10,2,120
+F2,S-SD,8,2,100
+F3,S-HC,12,3,110

@@ -2,7 +2,7 @@
 
 > Issues found while turning Papers 1–4 into a model. **None of these may be resolved in code.** Implementation tickets that depend on one are labelled `needs-spec`. Each question becomes a `research-question` or `adr` issue. Reference them in code and docs as `OQ-n`.
 >
-> Status values: `open`, `decided` (with link to ADR or spec update).
+> Status values: `open`, `proposed` (a default the platform uses until the spec confirms or replaces it), `decided` (with link to ADR or spec update).
 
 ## Summary
 
@@ -37,6 +37,7 @@
 | OQ-27 | weight of expert priors against observed data | open |
 | OQ-28 | study-area buffer and cross-border demand | open |
 | OQ-29 | facility on anonymous tickets | decided (2026-11-24) |
+| OQ-30 | order of applying interventions and disruptions | proposed (2026-11-25) |
 
 Future-work notes (`N-…`): N-2a 3SFCA, N-2b constrained allocation for sensitivity, N-2c constrained allocation in Paper 4, N-8a intensity of hidden need, N-8b small area estimation, N-8c direct validation of hidden need, N-24a severity weighting, N-24b breadth as BN parent.
 
@@ -251,3 +252,10 @@ Future-work notes (`N-…`): N-2a 3SFCA, N-2b constrained allocation for sensiti
 - **Rationale.** A facility is not personal data, and it is required for the facility layer of Paper 4. Without it, facility state would need a separate data source and recording coverage could not be measured.
 - **Privacy constraint.** The combination spatial unit × group × service × facility × time raises re-identification risk in small units. The facility field is subject to the rules decided in OQ-21 / ADR 0010 (minimum cell sizes, aggregation, retention); until those are decided, no ticket is stored (as today).
 - **Spec impact.** Paper 4 §4.1 (ticket fields), §5 and §14; the privacy rule in AGENTS.md (allowed ticket fields).
+
+**OQ-30 (order of applying interventions and disruptions in one scenario; raised 2026-11-25 with ADR 0016).** A scenario may combine what-if interventions (Paper 1 §13, §15.7: new facilities, capacity, network and population changes) with disruptions (Paper 3 §7–10: facility severities `DS_{f,c}`, closed edges). The papers do not say in which order they apply, and the order changes results: a disruption can hit a new facility only if the facility exists first, and a relative capacity change gives a different value before or after a severity is applied. This touches the method, so it must be confirmed when the Paper 3 spec is written (and then recorded in `paper-revisions.md`). **Status: proposed (2026-11-25).**
+
+- **Proposed default** (used by the platform, `core.scenarios.apply_overlay`, ADR 0016): interventions first, in the order new facilities, capacity changes, network changes (edge changes, then new edges), population changes; then disruptions (severities, then closed edges), which may also hit the new facilities and new edges of the same scenario.
+- **Rationale.** A disruption acts on the system as it is after the planned interventions ("what if we add a centre, and then a flood closes the road to it?"); applying disruptions first would make it impossible to disrupt what an intervention adds.
+- **Open.** Whether some combinations should be refused; whether a severity applies to a facility's capacity before or after a capacity change to the same facility (only recorded today, no behaviour).
+

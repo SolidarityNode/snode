@@ -4,6 +4,9 @@ Expert validation, plausibility and monotonicity checks, sensitivity, and later 
 against observed data (Spec 00 §5). Decided checks to support include: a zero-severity scenario
 gives zero Service Loss (OQ-12), and aggregate calibration of visible need where aggregate
 administrative figures exist (OQ-8). Direct validation of hidden need is future work (N-8c).
+
+The diagnostic model ``diagnostic-v0`` (:mod:`solidaritynode_core.validation.diagnostic`) checks
+the platform's mechanics against the demo hand-check table. It is not a research result.
 """
 
 from __future__ import annotations
@@ -13,7 +16,26 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Protocol
 
-__all__ = ["CheckOutcome", "CheckResult", "ValidationCheck"]
+from solidaritynode_core.validation.diagnostic import (
+    DIAGNOSTIC_LABEL,
+    DIAGNOSTIC_MODEL_ID,
+    DIAGNOSTIC_MODEL_VERSION,
+    DIAGNOSTIC_V0,
+    run_diagnostic,
+    shortest_travel_times,
+)
+
+__all__ = [
+    "DIAGNOSTIC_LABEL",
+    "DIAGNOSTIC_MODEL_ID",
+    "DIAGNOSTIC_MODEL_VERSION",
+    "DIAGNOSTIC_V0",
+    "CheckOutcome",
+    "CheckResult",
+    "ValidationCheck",
+    "run_diagnostic",
+    "shortest_travel_times",
+]
 
 
 class CheckOutcome(StrEnum):

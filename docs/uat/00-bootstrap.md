@@ -4,6 +4,10 @@ Manual acceptance test for the bootstrap PR (`chore/bootstrap`). It checks that 
 installs, starts, shows which build is running, loads the synthetic demo data and keeps its
 safety rules. No scientific results exist yet.
 
+> **Superseded in part** by [`01-platform.md`](01-platform.md): since the platform PR there is no
+> `demo` schema; `make seed` imports demo package 1.0.0 instead (steps about `make seed` and
+> `demo.*` tables no longer apply).
+
 Before you start, complete the one-time setup in [`README.md`](README.md#1-one-time-setup-on-a-fresh-machine-windows-with-wsl2-and-podman).
 Tick each step when the result matches. If a step does not match, stop and report it (step
 number, what you saw, build commit) as a comment on the PR.

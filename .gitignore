@@ -58,3 +58,9 @@ Thumbs.db
 # Re-apply cache ignores below the data exceptions above.
 **/__pycache__/
 *.py[cod]
+
+# Playwright output
+frontend/test-results/
+frontend/playwright-report/
+# Local results (backend on the host)
+backend/var/

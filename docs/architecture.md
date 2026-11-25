@@ -1,6 +1,6 @@
 # Architecture
 
-> Status: v0 skeleton. Describes the structure set up by the bootstrap; it will grow with each module. The science is specified in [`docs/specs/`](specs/README.md); decisions are recorded in [`docs/adr/`](adr/README.md).
+> Status: v0.1 platform mechanics (no scientific method yet: the only model is the diagnostic model `diagnostic-v0`). It will grow with each module. The science is specified in [`docs/specs/`](specs/README.md); decisions are recorded in [`docs/adr/`](adr/README.md).
 
 ## 1. Components
 
@@ -12,15 +12,17 @@ flowchart LR
     subgraph Containers["compose.yaml (Podman default, Docker supported)"]
         NGX["frontend container<br/>nginx-unprivileged :8080"]
         BE["backend<br/>FastAPI :8000"]
-        JOBS["background jobs<br/>(JobRunner, ADR 0006)"]
-        DB[("PostgreSQL + PostGIS<br/>metadata, result index")]
+        JOBS["worker service<br/>PostgreSQL job queue (ADR 0006)"]
+        DB[("PostgreSQL + PostGIS<br/>data versions, scenarios, runs,<br/>result summaries")]
     end
-    FILES[("Parquet files<br/>large arrays (ADR 0008)")]
+    FILES[("results volume<br/>Parquet samples (ADR 0008)")]
     CORE["core<br/>solidaritynode_core<br/>(pure Python library)"]
 
     FE -->|"/api/*"| NGX -->|proxy| BE
     BE --> DB
-    BE --> JOBS
+    BE -->|"queue job"| DB
+    DB -->|"claim job"| JOBS
+    JOBS --> DB
     JOBS --> CORE
     BE --> CORE
     JOBS --> FILES
@@ -29,10 +31,11 @@ flowchart LR
 | Component | Path | Responsibility | Depends on |
 | --- | --- | --- | --- |
 | `core` | `core/` | Domain model and modelling methods (accessibility, need, vulnerability, dynamics, resilience). No web framework, no database driver. | NumPy, xarray |
-| `backend` | `backend/` | HTTP API, scenario and run management, anonymous request logging, background jobs, persistence. | `core`, FastAPI, SQLAlchemy, Alembic |
-| `frontend` | `frontend/` | Web UI: scenarios, results, maps (map library: ADR 0007). | backend API over HTTP |
-| database | `compose.yaml` | Metadata and result indexes in PostgreSQL/PostGIS. | — |
-| files | `data/` (not in git) | Large datasets and result arrays in Parquet. | — |
+| `backend` | `backend/` | HTTP API: data package import, users and roles, scenarios, runs, results, comparison, export; the worker process; persistence. | `core`, FastAPI, SQLAlchemy, Alembic, argon2-cffi, PyArrow |
+| `worker` | `backend/` (same image) | Runs queued jobs (model runs) outside the request cycle. | `core`, PostgreSQL |
+| `frontend` | `frontend/` | Web UI: study area, scenarios, runs, comparison, admin; maps with Leaflet (ADR 0007). | backend API over HTTP |
+| database | `compose.yaml` | Data versions, scenarios, runs and result summaries in PostgreSQL/PostGIS. | — |
+| files | `results` volume | Per-sample results in Parquet, package uploads. | — |
 
 ## 2. Dependency direction
 
@@ -105,7 +108,7 @@ sequenceDiagram
     participant DB as PostGIS
     participant J as background job
     participant C as core.operations / dynamics / resilience
-    P->>API: unit, group, service, timestamps, first-request flag
+    P->>API: unit, group, service, facility (OQ-29), timestamps, first-request flag
     Note over API: schema rejects any other field (no names, contacts, addresses, device ids)
     API->>DB: store ticket (only after ADR 0010 / OQ-21 rules exist)
     J->>DB: read tickets + recording coverage per facility and period
@@ -116,28 +119,49 @@ sequenceDiagram
 
 - Privacy rules (minimum cell sizes, retention, aggregation) are **open (OQ-21)** and must be decided in ADR 0010 before any ticket is stored.
 - Only facilities with full or known recording coverage feed learning (OQ-8).
-- Spec gap to raise: tickets carry no facility, but indicators, functional state and recording coverage are per facility (see `core/src/solidaritynode_core/operations/__init__.py`).
+- Tickets record the facility where the request is made or scheduled (OQ-29, decided), so indicators, functional state and recording coverage can be computed per facility. The facility field follows the OQ-21 rules.
 
-## 5. Background jobs
+## 5. Background jobs and runs
 
-Long-running simulations (Monte Carlo, scenario sweeps, DBN runs) never run inside a request handler.
+Model runs never execute inside a request handler.
 
-- `backend/src/solidaritynode_backend/jobs/` defines a `JobRunner` protocol (`submit`, `info`, `shutdown`) and an `InProcessJobRunner` (thread pool) for development and tests.
-- The production queue is open (ADR 0006). Routers depend only on `JobRunner`, so the queue can change without touching them.
-- Jobs call `core` directly and write large outputs to Parquet; the database stores the index (ADR 0008).
+```mermaid
+sequenceDiagram
+    participant UI as frontend
+    participant API as backend
+    participant DB as PostgreSQL
+    participant W as worker
+    participant C as core (model registry)
+    UI->>API: POST /runs (scenario, version, seed, config)
+    API->>DB: input hash; reuse a succeeded run, or insert run + queued job
+    W->>DB: claim job (FOR UPDATE SKIP LOCKED)
+    W->>C: diagnostic-v0(study area, scenario, config, seed, progress)
+    C-->>W: progress callbacks (cancel checked here)
+    W->>DB: run_results, run_tables; job succeeded
+    W->>W: samples.parquet in the results volume
+    UI->>API: GET /runs/{id} (poll status and progress)
+```
+
+- Interface: `JobRunner` (`submit(kind, payload)`, `info`, `cancel`) in `backend/.../jobs/`;
+  implementation `PostgresJobRunner`; worker `python -m solidaritynode_backend.worker` (ADR 0006).
+- A stopped worker marks its running job failed. A running job holds a lease (`jobs.heartbeat_at`,
+  renewed by its worker); any worker fails a job whose lease expired, for example after `SIGKILL`.
+  An optional maximum runtime per job kind stops a job and marks it failed.
+- Runs record every reproducibility field and an input hash (ADR 0017); models come from the core
+  registry (`solidaritynode_core.model.get_registry`), which holds only `diagnostic-v0`.
 
 ## 6. Containers and local development
 
-- `make up` builds and starts `db`, `backend` and `frontend` with `$(COMPOSE)` (default `podman compose`). Docker: `CONTAINER_ENGINE=docker COMPOSE="docker compose" make up`. ADR 0011.
+- `make up` builds and starts `db`, `backend`, `worker` and `frontend` with `$(COMPOSE)` (default `podman compose`). Docker: `CONTAINER_ENGINE=docker COMPOSE="docker compose" make up`. ADR 0011.
 - Ports (non-privileged, bound to 127.0.0.1): frontend 8080, backend 8000, database 5432; configurable in `.env`.
 - The backend container runs `alembic upgrade head` before starting the API.
-- Database data lives in the named volume `db-data`; there are no bind mounts, so the stack behaves the same under WSL2.
+- Database data lives in the named volume `db-data`, run samples and package uploads in `results`; there are no bind mounts, so the stack behaves the same under WSL2.
 - `make up` passes `GIT_COMMIT` to both image builds; `/version` and the frontend footer show it with `APP_ENV`, so a tester knows which build is running. Outside `development` and `test`, the backend refuses `change-me` secrets.
-- `make uat` resets the database, starts the stack, migrates and seeds the synthetic demo dataset into the temporary schema `demo` (migration `0002`); see [`docs/uat/`](uat/README.md).
+- `make uat` resets the database, starts the stack, imports demo package 1.0.0 (which queues the baseline run), seeds the development demo users and prints URLs and credentials; see [`docs/uat/`](uat/README.md).
 
-## 7. Deployment and data packages (planned)
+## 7. Deployment and data packages
 
-Spec 00 §3 describes one codebase running in two roles. Nothing below is implemented yet; the decisions are open in ADRs 0012–0017.
+Spec 00 §3 describes one codebase running in two roles. v0.1 implements the municipal installation (`DEPLOYMENT_MODE=municipality`) with manual package import; hub onboarding comes next (ADR 0012). ADRs 0012, 0013 and 0015–0017 are accepted for v0.1; ADR 0014 (upward flow) stays open and nothing is sent upwards.
 
 ```mermaid
 flowchart LR
@@ -148,19 +172,19 @@ flowchart LR
         AGG[("aggregated indicators<br/>(optional)")]
         RAW --> ONB --> PKG
     end
-    subgraph MUN["municipal installation (one per study area)"]
+    subgraph MUN["municipal installation<br/>(one study area of one or more core municipalities)"]
         IMP["package import<br/>preview of changes"]
         APP["scenarios (ADR 0016), runs (ADR 0017),<br/>results, users (ADR 0015)"]
         TIX[("anonymous tickets<br/>never leave the installation")]
         IMP --> APP
         TIX --> APP
     end
-    PKG -->|"download / import"| IMP
+    IMP -->|"pulls (outbound only) or manual import"| PKG
     APP -.->|"opt-in, aggregated,<br/>anonymised only (ADR 0014, OQ-21)"| AGG
 ```
 
-- The same images run as `municipality` or `hub`; how the role is chosen is ADR 0012.
-- Data packages carry a `manifest.json` listing files with checksums, layer coverage, changelog and the `DP-NNN` processing notes behind the data (draft format in ADR 0013, used by `data/synthetic/demo/manifest.json`).
-- Until package import exists, `make seed` loads the demo dataset into the `demo` schema; that schema is replaced by package import in the platform PR.
+- The same images run as `municipality` or `hub`, chosen by `DEPLOYMENT_MODE` and locked in the database at first initialisation; the other role's routes and tables do not exist (ADR 0012). Any future connection is opened by the installation, never by the hub.
+- Data packages carry a `manifest.json` listing files with checksums, layer coverage, changelog and the `DP-NNN` processing notes behind the data (format in ADR 0013; demo packages in `data/synthetic/packages/`, DP-002). Import validates, previews changes and imports in one transaction; every version is kept and runs point to theirs.
+- Core units next to a buffer municipality without facility data carry an edge-effect warning (OQ-28, warning only); results are reported for core units only.
 - Runs record scenario version, package version, git commit, model and parameter version, seed and configuration (ADR 0017).
 

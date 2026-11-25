@@ -22,7 +22,9 @@ Requirements: `git`, `make`, [`uv`](https://docs.astral.sh/uv/), Node.js 26 with
 
 ```bash
 make setup        # check tools, create .env if missing, install locked dependencies
-make lint test    # must pass before every commit
+make test-db      # once per session: PostGIS for the backend tests (or keep `make up` running)
+make lint test    # must pass before every commit (unit and integration tests, no containers)
+make test-e2e     # end-to-end test in a throw-away stack; also runs in CI on every PR
 make up           # start db, backend and frontend (Podman by default)
 make down
 ```
@@ -53,8 +55,26 @@ All configuration comes from `.env` (git-ignored), created by `make setup` from 
 | `SOLIDARITYNODE_LOG_LEVEL` | backend | `info` | `debug`, `info`, `warning` or `error` |
 | `SOLIDARITYNODE_DATABASE_URL` | backend on the host | built from `POSTGRES_*` in compose | SQLAlchemy URL (secret) |
 | `SOLIDARITYNODE_CORS_ORIGINS` | backend | `["http://localhost:5173"]` | Origins allowed to call the API directly |
-| `SOLIDARITYNODE_DEMO_DATA_DIR` | `make seed` | `data/synthetic/demo` | Synthetic demo dataset directory |
-| `GIT_COMMIT` | image builds | set by `make up` | Build identity shown by `/version` and the footer |
+| `DEPLOYMENT_MODE` | backend, worker, CLI | `municipality` | `municipality` or `hub` (ADR 0012). Stored in the database at first initialisation; the backend refuses to start if it later differs. Only the municipal installation is complete in v0.1 |
+| `SOLIDARITYNODE_BASEMAP` | backend → frontend | `osm` | Map background: `osm` (OpenStreetMap tiles, attributed, needs internet) or `blank` (offline) |
+| `SOLIDARITYNODE_DIAGNOSTIC_STEP_DELAY_S` | runs | `0.5` | Pause after each progress step so progress and cancel can be followed; recorded in the run configuration |
+| `SOLIDARITYNODE_SESSION_HOURS` | backend | `12` | Login session lifetime |
+| `SOLIDARITYNODE_SESSION_COOKIE_SECURE` | backend | `false` | Session cookie only over HTTPS; **must be `true` with `APP_ENV=production`** (the backend and `make check-config` refuse otherwise) |
+| `SOLIDARITYNODE_LOGIN_MAX_FAILURES_ACCOUNT` | backend | `5` | Failed sign-ins for one username before it is locked (ADR 0015) |
+| `SOLIDARITYNODE_LOGIN_MAX_FAILURES_ADDRESS` | backend | `20` | Failed sign-ins from one client address before it is locked |
+| `SOLIDARITYNODE_LOGIN_LOCK_MINUTES` | backend | `15` | Lock duration; failures older than this are forgotten |
+| `SOLIDARITYNODE_LOGIN_DELAY_BASE_S`, `SOLIDARITYNODE_LOGIN_DELAY_MAX_S` | backend | `1`, `30` | After failure n the next attempt for that username waits base × 2^(n-1) seconds, at most the maximum; an address is delayed the same way from half its limit on |
+| `SOLIDARITYNODE_TRUSTED_PROXIES` | backend | loopback and private networks | Reverse proxies whose `X-Real-IP` / `X-Forwarded-For` give the client address for sign-in throttling (the bundled nginx overwrites both); other peers' headers are ignored. A proxy address reported as client means the address is unknown: per-username limits only |
+| `SOLIDARITYNODE_RESULTS_DIR` | backend, worker on the host | `var/results` (`/data/results` volume in compose) | Per-sample Parquet results and package uploads |
+| `SOLIDARITYNODE_PACKAGES_DIR` | backend | `data/synthetic/packages` | Data packages offered for import on the Admin screen |
+| `SOLIDARITYNODE_WORKER_NAME` | worker | `worker` | Worker name, for logs and the job row only |
+| `SOLIDARITYNODE_JOB_HEARTBEAT_SECONDS` | worker | `10` | How often the worker renews the lease (`jobs.heartbeat_at`) of the running job |
+| `SOLIDARITYNODE_JOB_STALE_SECONDS` | worker | `120` | A running job without a heartbeat for this long is failed by any worker ("Interrupted … Start the run again."); at least twice the heartbeat |
+| `SOLIDARITYNODE_RESULT_INTERVAL_QUANTILES` | backend, worker | `0.05,0.95` | Quantile levels of the interval stored with every result (with the mean and the median); recorded in the run configuration and its input hash (ADR 0017) |
+| `SOLIDARITYNODE_SAMPLES_WARN_MB` | backend | `500` | Warn when a run's samples file is estimated, before the run starts, above this many megabytes (ADR 0008); the run is still queued |
+| `SOLIDARITYNODE_JOB_MAX_RUNTIME_SECONDS` | worker | empty (no limit) | Optional maximum runtime per job kind, as `kind=seconds` pairs (for example `run=3600`); a job over it is stopped at its next progress step and marked failed |
+| `SOLIDARITYNODE_TEST_DATABASE_URL` | backend tests | compose `db` on 127.0.0.1:5432 | PostGIS server on which the tests create a throw-away database |
+| `GIT_COMMIT` | image builds | set by `make up` | Build identity shown by `/version` and the footer, recorded on every run; with `APP_ENV=production` it must be known and not end in `-dirty` (backend and worker refuse to start otherwise) |
 | `CONTAINER_ENGINE`, `COMPOSE` | Makefile | `podman`, `podman compose` | Container engine and compose command |
 
 **Adding a setting:** add it to `.env.example` in the same PR with a safe development default (secrets as `change-me`) and a one-line comment, and add a row to this table (AGENTS.md, "Configuration").
@@ -118,7 +138,7 @@ Scientific methods (formulas, CPTs, thresholds, inference schemes) are **specifi
 ## Data and privacy
 
 - Never commit real personal or operational data. Synthetic data only, under `core/tests/fixtures/` and `data/synthetic/`.
-- Request tickets are anonymous by design: spatial unit of origin, social group, service and timestamps only (see OQ-21).
+- Request tickets are anonymous by design: spatial unit of origin, social group, service, facility (OQ-29) and timestamps only (see OQ-21).
 - No secrets in the repository. Use `.env` (gitignored) and keep `.env.example` current.
 - Attribute third-party data and record it in [`docs/data-sources.md`](docs/data-sources.md).
 - Real open data (OpenStreetMap, ELSTAT, DEM, GTFS) is downloaded to `data/local/` (git-ignored) by scripts, never committed.

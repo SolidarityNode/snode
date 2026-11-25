@@ -4,10 +4,9 @@ Tickets are anonymous (:class:`~solidaritynode_core.model.Ticket`; OQ-21 open). 
 are used for learning only from facilities with full or known recording coverage (OQ-8).
 The derivation of facility functional state from indicators is **OQ-17 (open)**.
 
-Spec gap to raise: Paper 4 computes indicators and functional state **per facility**, and
-recording coverage is per facility, but the ticket fields of Paper 4 §4.1 (and the privacy
-rules in AGENTS.md) carry no facility. How tickets are attributed to facilities is not
-specified; the interfaces below take the attribution as an explicit input.
+Paper 4 computes indicators and functional state **per facility**, and recording coverage is per
+facility. Since OQ-29 (decided) every ticket records the ``facility_id`` where the request is
+made or scheduled, so tickets can be attributed to facilities directly.
 """
 
 from __future__ import annotations

@@ -1,0 +1,21 @@
+{
+  "name": "UAT placeholders",
+  "description": "Network and population changes: recorded only, no effect yet (ADR 0016)",
+  "visibility": "private",
+  "body": {
+    "schema_version": "1.0",
+    "network_changes": {
+      "edge_changes": [
+        {"edge_id": "E01", "mode": "walk", "quantity": "travel_time", "change": "relative", "amount": -20}
+      ],
+      "new_edges": [
+        {"edge_id": "E-NEW", "from_node_id": "N-A1", "to_node_id": "N-A5", "travel_time_min": {"walk": 10}}
+      ]
+    },
+    "population_changes": [
+      {"unit_id": "A1", "group_id": "G-OLD", "change": "absolute", "amount": 10}
+    ],
+    "closed_edges": {"edge_ids": ["E-NEW"], "modes": ["walk"]},
+    "rationing": "uniform"
+  }
+}
