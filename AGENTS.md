@@ -37,6 +37,7 @@ Source of truth for the science: `docs/specs/` (research description and per-mod
 - Backend: FastAPI, Pydantic v2, SQLAlchemy + Alembic, PostgreSQL with PostGIS.
 - Core: NumPy, pandas, GeoPandas, NetworkX/OSMnx for network analysis, pgmpy (BN/DBN; evaluate limits via ADR before committing).
 - Frontend: React + TypeScript (strict), Vite, `pnpm`, Vitest, ESLint, Prettier, Playwright (end-to-end). Map library: Leaflet (ADR 0007).
+- Docs: MkDocs with the Material theme, versioned with mike, published to GitHub Pages (ADR 0018); tooling locked in `tools/docs/`.
 - Containers: Podman (rootless) is the default engine; Docker must keep working. The engine and compose command are set once in the Makefile (`CONTAINER_ENGINE ?= podman`, `COMPOSE ?= podman compose`) and are overridable from the environment. Never hard-code `docker` in scripts, docs or CI; call the Makefile variables instead. Compose files follow the Compose spec (`compose.yaml`) and images use fully qualified names (for example `docker.io/postgis/postgis:...`), since Podman requires them. Avoid privileged ports (<1024) and rootful-only features. Everything runs locally with `make up`.
 
 ## Commands
@@ -44,7 +45,7 @@ Source of truth for the science: `docs/specs/` (research description and per-mod
 Requires `uv`, Node.js 26 with `pnpm` 12, and Podman (or Docker). `make help` lists all targets.
 
 - `make setup` — check that `uv`, `node` and `pnpm` are on PATH (names any missing), create `.env` from `.env.example` if missing (warns about missing keys), then install locked dependencies (`uv sync --locked` in `core/` and `backend/`, `pnpm install --frozen-lockfile` in `frontend/`)
-- `make lint` — ruff check, ruff format --check and mypy (strict) for core and backend; eslint, prettier --check and `tsc` for frontend
+- `make lint` — ruff check, ruff format --check and mypy (strict) for core and backend; eslint, prettier --check and `tsc` for frontend; the platform version and the generated docs blocks are current
 - `make test` — fast, no container engine: unit and integration tests only, pytest (core; backend on a throw-away database on an existing PostGIS server: the `db` service of `make up` or `make test-db`, or `SOLIDARITYNODE_TEST_DATABASE_URL`) and Vitest (frontend)
 - `make test-e2e` — the Playwright end-to-end test, also run in CI: a separate throw-away stack (compose project `solidaritynode-e2e` on ports 18080/18000/15432, seeded with demo package 1.0.0 and removed afterwards); Playwright runs in its official image, `E2E_LOCAL=1` uses a host browser
 - `make fmt` — ruff fix/format, prettier, eslint --fix
@@ -62,6 +63,10 @@ Requires `uv`, Node.js 26 with `pnpm` 12, and Podman (or Docker). `make help` li
 - `make check-config APP_ENV=production` — validate backend settings in a one-off container (refuses `change-me` secrets outside development and test)
 - `make images` — build images with `$(CONTAINER_ENGINE)`
 - `make licenses` — fail on dependency licences incompatible with AGPL-3.0
+- `make docs` / `make docs-build` — serve the documentation site on http://127.0.0.1:8001 / build it with `--strict` (CI); `make docs-links` checks links with lychee
+- `make docs-generate` — regenerate the ADR index, the specs index and the open-question counts (never edit those blocks by hand)
+- `make deps-report` — regenerate `docs/architecture/dependencies.md` from the lock files (after `make setup`); CI fails if it is stale or a licence is not allowed
+- `make version` / `make version-sync` — print the platform version / write `VERSION` into the manifests and locks (`VERSION` is the only place to change it; `docs/releasing.md`)
 - `make labels` — create GitHub labels from `.github/labels.yml` (needs `gh auth login`)
 - `make clean` / `make distclean` — remove caches and build output / also virtualenvs and node_modules
 - Per component: `make lint-core`, `test-core`, `lint-backend`, `test-backend`, `lint-frontend`, `test-frontend`
@@ -78,6 +83,14 @@ Run `make lint test` before every commit. Do not mark work done if either fails.
 - Tests live next to the code's package in `tests/`. Use synthetic fixtures only.
 - Commits: Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`), signed off with `git commit -s` (DCO).
 - Branches: `feat/<issue-number>-short-name`. One ticket, one branch, one PR. Reference the issue in the PR (`Closes #N`).
+
+## Documentation rules
+
+- Diagrams in docs are Mermaid code blocks in the Markdown files (flowcharts for structure and data flow, sequence diagrams for lifecycles, state diagrams for statuses, entity-relationship diagrams for data models). No image files and no other diagram tools for diagrams. Update a diagram in the same PR as the change it describes.
+- Every PR that changes behaviour adds a line under **Unreleased** in `CHANGELOG.md` and updates the user guide page it affects (`docs/user-guide/`).
+- Do not copy what lives elsewhere; link to the single source: issues and plans in GitHub (project Kintsugi, milestones), open questions in `docs/specs/open-questions.md`, decisions in `docs/adr/`, method in `docs/specs/`.
+- Generated content (ADR index, specs index, open-question counts, `docs/architecture/dependencies.md`) comes from scripts and is checked in CI; never edit it by hand.
+- Do not move a file under `docs/` that code, tests or `AGENTS.md` link to; change the site navigation in `mkdocs.yml` instead.
 
 ## Data and privacy rules
 
@@ -97,14 +110,16 @@ Run `make lint test` before every commit. Do not mark work done if either fails.
 1. Read the issue fully, including acceptance criteria and the linked spec section.
 2. If anything is ambiguous or the spec is silent, do not invent methodology: comment on the issue with the question and stop.
 3. Plan briefly, implement in small commits, add tests that cover each acceptance criterion.
-4. Update docs and the spec cross-reference if behaviour changed.
-5. Run `make lint test`, then open a PR using the template, assigned to the maintainer who asked for it (`gh pr create --assignee <their-login>`; see "Pull requests" in `CONTRIBUTING.md`). Do not merge your own PR.
+4. Update docs and the spec cross-reference if behaviour changed: the user guide page, a line under **Unreleased** in `CHANGELOG.md`, and Mermaid diagrams.
+5. Run `make lint test` (and `make docs-build` when docs changed), then open a PR using the template, assigned to the maintainer who asked for it (`gh pr create --assignee <their-login>`; see "Pull requests" in `CONTRIBUTING.md`). Do not merge your own PR.
+
+Every paper issue carries both the `paper:N` label and the Kintsugi **Paper** field with the same value (the label makes issue search links work; the field drives the project views), plus the paper's milestone (`v0.3 Paper 1 Accessibility` … `v0.6 Paper 4 Resilience`).
 
 ## Definition of done
 
 - All acceptance criteria met and covered by tests.
 - Lint, type check and tests pass locally and in CI.
-- Public API documented; relevant `docs/` updated.
+- Public API documented; relevant `docs/` updated, including the user guide page and a `CHANGELOG.md` line under **Unreleased** when behaviour changed.
 - No real data, no secrets, no new dependency without a license check.
 - Domain invariants above still hold.
 

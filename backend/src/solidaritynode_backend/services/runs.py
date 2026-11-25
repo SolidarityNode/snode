@@ -107,10 +107,16 @@ def draw_seed() -> int:
 
 
 def execution_environment() -> dict[str, str]:
-    """Return the versions that executed a run (metadata only, not in the input hash)."""
+    """Return the versions that executed a run (metadata only, not in the input hash).
+
+    ``solidaritynode`` is the platform version (the ``VERSION`` file, docs/releasing.md).
+    """
     import numpy
 
+    import solidaritynode_backend
+
     return {
+        "solidaritynode": solidaritynode_backend.__version__,
         "python": platform.python_version(),
         "numpy": numpy.__version__,
         "platform": platform.platform(terse=True),

@@ -1,0 +1,15 @@
+[project]
+name = "solidaritynode-docs"
+version = "0.0.0"
+description = "Tooling for the SolidarityNode documentation site (MkDocs, Material theme, mike). Not a package."
+requires-python = ">=3.12,<3.13"
+license = "AGPL-3.0-or-later"
+# Docs tooling only (dev): `make docs`, `make docs-build`, the docs workflow.
+dependencies = [
+  "mkdocs==1.6.1",
+  "mkdocs-material==9.8.2",
+  "mike==2.2.0",
+]
+
+[tool.uv]
+package = false

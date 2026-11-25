@@ -28,7 +28,7 @@ administrator or viewer, so both stay logged in.
 
 | # | Do | Expected result | ✓ |
 | --- | --- | --- | --- |
-| 3 | Open http://127.0.0.1:8080 | The **Log in** page opens. The footer shows `no data imported` or the data version, then `backend 0.0.1 (<commit>, development) · frontend <commit>`. The commit matches `git rev-parse --short=12 HEAD`. | ☐ |
+| 3 | Open http://127.0.0.1:8080 | The **Log in** page opens. The footer shows `no data imported` or the data version, then `backend 0.1.0 (<commit>, development) · frontend <commit>`. The commit matches `git rev-parse --short=12 HEAD`. | ☐ |
 | 4 | Log in as `demo-analyst` with the password `wrong-password` | Red message "Wrong username or password." | ☐ |
 | 4a | Log in as `uat-nobody` (a user that does not exist) with any password, six times in a row, waiting a few seconds between tries | The first tries say "Wrong username or password." (the same message as for a real user). If you try again at once, or from the sixth try on, the message is "Too many failed sign-in attempts. Wait a few minutes and try again." Nothing says whether the user exists. Logging in as `demo-analyst` right after still works: failed tries for one username never block another. (Behind rootless Podman the platform cannot see browser addresses, so only usernames are counted; `make logs` shows the warning "client addresses are not visible … only per-username limits apply" once.) | ☐ |
 | 4b | In the terminal: `curl -s -o /dev/null -w '%{http_code}\n' -H 'Content-Type: application/json' -d '{"username":"demo-analyst","password":"demo-analyst-pass"}' http://127.0.0.1:8080/api/auth/login` | `200`: the same sign-in through the frontend proxy works. | ☐ |

@@ -1,6 +1,6 @@
 [project]
 name = "solidaritynode-core"
-version = "0.0.1"
+version = "0.1.0"
 description = "SolidarityNode core: spatial probabilistic modelling of social service networks (no web or database dependencies)."
 readme = "README.md"
 license = "AGPL-3.0-or-later"

@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use SolidarityNode, please cite it as below."
+title: "SolidarityNode: an open-source spatial probabilistic framework for social service accessibility, latent need, vulnerability and resilience"
+type: software
+authors:
+  - name: "SolidarityNode contributors"
+repository-code: "https://github.com/SolidarityNode/snode"
+url: "https://solidaritynode.github.io/snode/"
+license: AGPL-3.0-or-later
+version: "0.1.0"
+abstract: >-
+  SolidarityNode estimates accessibility, latent social need, social vulnerability and the
+  resilience of social service networks with Bayesian networks, dynamic Bayesian networks,
+  Monte Carlo simulation and network analysis, at the level of spatial unit, social group,
+  service and time. Early development: version 0.1.0 provides the platform foundation with a
+  diagnostic model only, and no research results.
+keywords:
+  - social services
+  - accessibility
+  - hidden need
+  - vulnerability
+  - resilience
+  - Bayesian networks
+  - spatial analysis

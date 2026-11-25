@@ -36,11 +36,12 @@ FRONTEND_URL := http://127.0.0.1:$(FRONTEND_HOST_PORT)
 BACKEND_URL := http://127.0.0.1:$(BACKEND_HOST_PORT)
 
 .PHONY: help check-tools check-engine env check-config setup setup-core setup-backend setup-frontend \
-        lint lint-core lint-backend lint-frontend \
+        lint lint-repo lint-core lint-backend lint-frontend \
         test test-core test-backend test-frontend \
         fmt stop up down logs ps wait db-shell seed reset uat images licenses labels clean distclean \
         test-db test-e2e e2e-setup import-package activate-version create-admin schemas \
-        clear-login-locks
+        clear-login-locks version version-sync docs docs-setup docs-build docs-generate docs-check docs-links \
+        deps-report deps-report-check
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -83,7 +84,11 @@ setup-frontend:
 
 # --- Lint and type check -----------------------------------------------------------------
 
-lint: lint-core lint-backend lint-frontend ## ruff, mypy, eslint, prettier, tsc
+lint: lint-core lint-backend lint-frontend lint-repo ## ruff, mypy, eslint, prettier, tsc, version and generated docs
+
+lint-repo:
+	python3 scripts/version.py check
+	python3 scripts/docs_indexes.py --check
 
 lint-core:
 	cd core && $(UV_RUN) ruff check . && $(UV_RUN) ruff format --check . && $(UV_RUN) mypy
@@ -270,12 +275,53 @@ images: ## Build the container images with $(CONTAINER_ENGINE)
 	$(CONTAINER_ENGINE) build -f backend/Containerfile -t localhost/solidaritynode-backend:dev .
 	$(CONTAINER_ENGINE) build -f frontend/Containerfile -t localhost/solidaritynode-frontend:dev frontend
 
+# --- Documentation -------------------------------------------------------------------------
+
+DOCS_RUN := cd tools/docs && $(UV_RUN)
+DOCS_PORT ?= 8001
+LYCHEE_IMAGE ?= docker.io/lycheeverse/lychee:0.24.2
+
+docs-setup: ## Install the locked documentation tooling (MkDocs, Material, mike)
+	cd tools/docs && $(UV) sync --locked
+
+docs: docs-setup ## Serve the documentation site on http://127.0.0.1:$(DOCS_PORT) with live reload
+	$(DOCS_RUN) mkdocs serve -f ../../mkdocs.yml -a 127.0.0.1:$(DOCS_PORT)
+
+docs-build: docs-setup docs-check ## Build the documentation site into site/ with --strict
+	$(DOCS_RUN) mkdocs build --strict -f ../../mkdocs.yml
+
+docs-generate: ## Regenerate the ADR index, specs index and open-question counts
+	python3 scripts/docs_indexes.py
+
+docs-check: ## Check the generated docs blocks and the version are current
+	python3 scripts/version.py check
+	python3 scripts/docs_indexes.py --check
+
+docs-links: check-engine ## Check links in README and docs with lychee (container; also in CI)
+	$(CONTAINER_ENGINE) run --rm -v "$(CURDIR):/input:ro,Z" -w /input $(LYCHEE_IMAGE) \
+	  --config lychee.toml README.md CHANGELOG.md CONTRIBUTING.md 'docs/**/*.md'
+
+deps-report: docs-setup ## Regenerate docs/architecture/dependencies.md from the lock files (needs make setup)
+	PNPM=$(PNPM) python3 scripts/deps_report.py
+
+deps-report-check: docs-setup ## Fail if dependencies.md is out of date or a licence is not allowed
+	PNPM=$(PNPM) python3 scripts/deps_report.py --check
+
 # --- Repository automation -----------------------------------------------------------------
 
 licenses: ## Fail on dependency licences incompatible with AGPL-3.0
 	cd core && $(UV_RUN) python ../scripts/check_licenses.py python
 	cd backend && $(UV_RUN) python ../scripts/check_licenses.py python
+	cd tools/docs && $(UV_RUN) python ../../scripts/check_licenses.py python
 	cd frontend && $(PNPM) licenses list --json --long | python3 ../scripts/check_licenses.py pnpm
+
+version: ## Print the platform version (single source: the VERSION file)
+	@python3 scripts/version.py
+
+version-sync: ## Write VERSION into pyproject.toml, package.json and the uv locks
+	python3 scripts/version.py sync
+	cd core && $(UV) lock
+	cd backend && $(UV) lock
 
 labels: ## Create or update GitHub labels from .github/labels.yml (needs gh auth)
 	scripts/create-labels.sh
@@ -283,10 +329,10 @@ labels: ## Create or update GitHub labels from .github/labels.yml (needs gh auth
 # --- Cleaning ------------------------------------------------------------------------------
 
 clean: ## Remove caches and build output
-	rm -rf core/.pytest_cache core/.mypy_cache core/.ruff_cache \
+	rm -rf site core/.pytest_cache core/.mypy_cache core/.ruff_cache \
 	       backend/.pytest_cache backend/.mypy_cache backend/.ruff_cache \
 	       frontend/dist frontend/coverage frontend/node_modules/.tmp
 	find core backend -type d -name __pycache__ -prune -exec rm -rf {} +
 
 distclean: clean ## Also remove virtual environments and node_modules
-	rm -rf core/.venv backend/.venv frontend/node_modules
+	rm -rf core/.venv backend/.venv tools/docs/.venv frontend/node_modules

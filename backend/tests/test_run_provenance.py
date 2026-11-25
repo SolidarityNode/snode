@@ -10,6 +10,7 @@ from typing import Any
 
 import numpy as np
 
+import solidaritynode_backend
 from tests.conftest import CLOSE_E02, import_version, login
 
 
@@ -99,6 +100,7 @@ def test_environment_is_recorded_and_exported_outside_the_hash(
     worker.run_until_idle()
     run = as_analyst.get(f"/runs/{queued['id']}").json()
     assert run["environment"]["numpy"] == np.__version__
+    assert run["environment"]["solidaritynode"] == solidaritynode_backend.__version__
     assert run["environment"]["python"].startswith("3.12")
     assert run["input_hash"] == queued["input_hash"]
     archive = zipfile.ZipFile(io.BytesIO(as_analyst.get(f"/runs/{run['id']}/export").content))

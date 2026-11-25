@@ -1,45 +1,61 @@
 # Changelog
 
-All notable changes are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project will use [Semantic Versioning](https://semver.org/) once releases start.
+All notable changes are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/) (while 0.x, see [docs/releasing.md](docs/releasing.md)).
+
+Every pull request that changes behaviour adds a line under **Unreleased** (AGENTS.md). Each release section also states known limitations and upgrade notes for installations.
 
 ## [Unreleased]
 
-### Added
+Nothing yet.
 
-- UAT follow-up: sign-in throttling takes the client address only from trusted proxies (`SOLIDARITYNODE_TRUSTED_PROXIES`, `X-Real-IP`/`X-Forwarded-For`) and treats it as unknown when a proxy reports a proxy address (rootless Podman), so one user's failures never lock out others; `make clear-login-locks`; `make check-config` lists every problem at once without a traceback or secret values; the Scenarios list and scenario page link only to existing runs ("Not run yet", "Latest run on data X"), a translated "Run not found" page; administrators see other users' private scenarios labelled "private (owner X)" (ADR 0015); one catalogue of English message templates with codes (`docs/schemas/messages.json`) so the UI translates server texts; `docs/i18n/glossary.md` (τρωτότητα, φαινόμενο ορίου, ανοιχτά δεδομένα); `docs/concepts.md` for municipal users; the hand-check says which modes it checked (`diagnostic-v0` 0.2.1).
-- Platform mechanics (no scientific method): data packages (ADR 0013) with validation, checksums, preview of changes and transactional import of versioned data; demo packages 1.0.0 and 1.1.0 (DP-002); edge-effect warnings for core units next to buffer municipalities without facility data (OQ-28, warning only).
-- Data packages schema 2.0 (ADR 0013): layers in one GeoPackage `layers.gpkg` in the projected CRS of the manifest (schema 1.0 GeoJSON in EPSG:2100 was not valid RFC 7946), strict CSV dialect, licence and attribution per layer, one name `verified_by_municipality` for coverage and quality, and rollback to an earlier imported version (Admin screen, `make activate-version`).
-- Runs (ADR 0017): production refuses unknown or dirty code versions (development runs show a warning); runs queued before an upgrade fail with "Start the run again"; cached reuse checks the results file first; a seed is drawn and recorded when none is given; Python and NumPy versions are recorded; the Admin screen shows results disk usage; comparisons show a "difference of medians".
-- Scenarios (ADR 0016): network changes (travel time or speed per edge and mode, new edges) and population changes as validated, recorded-only placeholders; the order of application (interventions, then disruptions) is a proposed default, OQ-30.
-- Accounts (ADR 0015): sign-in throttling per username and client address with increasing delays and temporary locks and generic messages; passwords of at least 12 characters not on a bundled common-password list; the session cookie is always Secure in production; the last active admin cannot be disabled or demoted.
-- `DEPLOYMENT_MODE` (`municipality` | `hub`; ADR 0012), locked in the database at first initialisation; each role mounts only its own routes (tickets in municipalities, hub routes in the hub). Only the municipal installation is complete.
-- Local accounts with Argon2id, sessions, roles admin, analyst and viewer (ADR 0015); `make create-admin`; demo users in development.
-- Versioned scenario overlays with a JSON Schema (`docs/schemas/scenario.schema.json`, ADR 0016); create, list, get, new version, duplicate, soft delete, validate, revalidate.
-- Runs with input hash and cached reuse, a PostgreSQL job queue and a `worker` service with progress, cancel, a heartbeat lease that lets any worker fail a dead worker's jobs, and an optional maximum runtime per job kind (ADR 0006, 0017); every result value stores mean, median and configurable interval quantiles computed from the samples, and totals come from samples (ADR 0017); samples are joint Monte Carlo draws (`diagnostic-v0` 0.2.0) stored in Parquet with run metadata, a SHA-256 checked on read and export, a compact sorted zstd layout and a size estimate with a warning before each run (ADR 0008); results in PostGIS, samples in Parquet (ADR 0008); comparison with the baseline; CSV and GeoPackage export with reproducibility metadata.
-- Core: model registry, scenario overlay and the diagnostic model `diagnostic-v0` (labelled "Diagnostic model: not a research result").
-- Frontend: login, study area, scenarios, scenario editor, run, compare and admin screens with Leaflet (ADR 0007), English and Greek, generated API types; Playwright end-to-end test. Results maps: values with intervals everywhere, an optional uncertainty map (interval width), a fixed 0–1 scale for probabilities, one shared scale on comparison screens, and the data-quality layer as a toggle.
-- Tickets record `facility_id` (OQ-29); nothing is stored yet (ADR 0010).
-- Monorepo skeleton: `core/`, `backend/`, `frontend/`, `docs/`, `data/synthetic/`, `.github/`, Makefile.
-- `core`: typed domain model (OQ-1 notation, entities, anonymous `Ticket`, recording coverage, recovery trajectories, `IndexedValues` container, uncertain values, Low/Medium/High states, service-unit quantities, variable catalogue) and typed interfaces for every module. No scientific method implemented.
-- `backend`: FastAPI app with `/health`, `/health/ready`, `/version`; settings; SQLAlchemy and Alembic wired to PostGIS; placeholder routers; anonymous ticket schema; background job interface.
-- `frontend`: Vite + React + TypeScript shell with a health page.
-- Containers: `compose.yaml` (PostGIS, backend, frontend), Podman by default, Docker supported.
-- CI: per-component workflows, DCO check, image builds with Podman and Docker, licence check, Dependabot.
-- Governance and docs: contributing guide, code of conduct, security and trademark policies, architecture, ADRs 0001–0011.
-- Scenario what-if intervention placeholders (`CapacityChange`, `NewFacility`; Paper 1 §13), no behaviour.
-- `APP_ENV` (`development` | `test` | `production`); the backend refuses `change-me` secrets outside development and test, and never echoes setting inputs in errors.
-- `/version` returns the git commit and `APP_ENV`; the frontend footer shows them.
-- Synthetic demo dataset (`data/synthetic/demo/`, DP-001): two fictional municipalities, GeoPackage + CSV, hand-check travel times, one reference disruption scenario; generator `scripts/generate_demo_data.py`.
-- Temporary database schema `demo` (migration 0002) and `make seed` loader; to be replaced by data-package import.
-- Make targets `env`, `check-config`, `wait`, `stop`, `db-shell`, `seed`, `reset`, `uat`; `make setup` checks tools and creates `.env`.
-- UAT: `docs/uat/README.md`, `docs/uat/00-bootstrap.md`, "How to test (UAT)" in the PR template, "Acceptance test (UAT)" in feature tickets, labels `uat` and `uat-failed`.
-- ADR stubs 0012–0017: deployment model, data packages, upward data flow, authentication and roles, scenario schema and versioning, run reproducibility.
-- `data-processing/` folders for QGIS models, scripts, projects and styles; `data/local/` and QGIS temporary files ignored.
+## [0.1.0] - unreleased
 
-### Changed
+<!-- The maintainer replaces "unreleased" with the date of the v0.1.0 tag (docs/releasing.md). -->
 
-- The temporary `demo` schema is dropped (migration 0003); `make seed` imports demo package 1.0.0. The job interface takes a kind and JSON payload and supports cancel; the in-process runner is removed.
-- CI: the DCO check exempts Dependabot commits; Dependabot no longer proposes TypeScript major updates until typescript-eslint supports TypeScript 7.
-- Agent instructions moved to the open `AGENTS.md` convention: root `AGENTS.md` (former `CLAUDE.md` content) plus area files for `core/`, `backend/`, `frontend/` and `data-processing/`, human-readable versions in `docs/conventions/`, `CLAUDE.md` files reduced to import bridges, and a Claude Code `/add-rule` command.
-- `SOLIDARITYNODE_ENVIRONMENT` replaced by `APP_ENV`; `.env.example` placeholders are plain `change-me`, with a comment per setting.
-- Ports and URLs use `127.0.0.1`.
+First version: the **platform foundation** of a municipal installation, on synthetic data, with the diagnostic model only. Pull requests [#1](https://github.com/SolidarityNode/snode/pull/1) (bootstrap), [#3](https://github.com/SolidarityNode/snode/pull/3) (AGENTS.md), [#4](https://github.com/SolidarityNode/snode/pull/4) (CI), [#5](https://github.com/SolidarityNode/snode/pull/5) (OQ-29), [#6](https://github.com/SolidarityNode/snode/pull/6) (platform mechanics) and the documentation site.
+
+### Added: for users
+
+- **Sign-in and roles**: local accounts (administrator, analyst, viewer); passwords of at least 12 characters, common passwords refused; sign-in throttling with delays and temporary locks; the last active administrator is always kept (ADR 0015).
+- **Study area** on a map (Leaflet): core and buffer units, facilities and network; data quality on every feature (verified by the municipality, open data, estimated); coverage per municipality and layer; **edge-effect warnings** for units next to a neighbour without facility data (OQ-28, warning only); keyboard navigation and a text list of every feature.
+- **Scenarios**: versioned "what if" overlays built on the map (close an edge per mode, facility disruption severity, capacity changes in percent or absolute amounts), validated against the active data, private or shared; network and population changes accepted as recorded-only placeholders (ADR 0016).
+- **Runs** in the background with progress and cancel; every run immutable and reproducible (scenario version, data version, code version, model and version, seed, configuration, environment); identical inputs reuse the earlier run (ADR 0017).
+- **Results** by spatial unit, group and service with the median and a 90 % interval everywhere, an optional uncertainty map and data-quality layer; **comparison** with the baseline or across data versions of one scenario (one shared colour scale, difference of medians); **export** to CSV and GeoPackage with the reproducibility metadata.
+- **Data packages** (ADR 0013): preview of changes, checksums, import in one transaction, every version kept, rollback to an earlier version (Admin screen, `make import-package`, `make activate-version`); after an update, a baseline run is queued and every scenario revalidated; old runs offer **Rerun on data X**.
+- English and Greek interface, with the terms of `docs/i18n/glossary.md`; the footer names the build (backend version and commit, frontend commit, data version).
+- `docs/concepts.md` for municipal staff; UAT checklists `docs/uat/00-bootstrap.md` and `docs/uat/01-platform.md` with screenshots.
+
+### Added: technical
+
+- Monorepo: `core` (Python 3.12, typed domain model and module interfaces, no web or database dependencies), `backend` (FastAPI, SQLAlchemy, Alembic, PostGIS), `frontend` (React, TypeScript, Vite), `docs`, synthetic data, Makefile; Podman by default, Docker supported (ADR 0001, 0011).
+- `core`: domain model indexed by `spatial unit × social group × service × time` (ADR 0003), uncertain values, variable catalogue, model registry, scenario overlay with the order of application (OQ-30, proposed), summary statistics of samples, and the diagnostic model `diagnostic-v0` 0.2.1 (labelled "Diagnostic model: not a research result").
+- `backend`: PostgreSQL job queue and `worker` service with heartbeat lease, cancel and optional maximum runtime (ADR 0006); results summaries in PostGIS and Monte Carlo samples in Parquet with SHA-256 (ADR 0008); deployment role `municipality` | `hub` locked in the database (ADR 0012); anonymous ticket schema with the facility field (OQ-29), nothing stored (ADR 0010); scenario JSON Schema and OpenAPI exported to `docs/schemas/` (`make schemas`); server messages with stable codes translated by the UI.
+- Operations: `make setup`, `up`, `uat`, `reset`, `seed`, `check-config` (refuses placeholder secrets in production), `create-admin`, `db-shell`, `clear-login-locks`; `APP_ENV`; `/health`, `/health/ready`, `/version`.
+- Synthetic demo dataset (DP-001) and demo packages 1.0.0 and 1.1.0 (DP-002), generated by scripts.
+- Quality: ruff, mypy strict, ESLint, Prettier, Vitest, pytest, Playwright end-to-end test in a throw-away stack; CI per component, image builds with Podman and Docker, licence check, DCO check, Dependabot.
+- Governance: AGPL-3.0-or-later, `AGENTS.md` rules for every contributor and coding agent, contributing guide, code of conduct, security and trademark policies, ADRs 0001–0017, open questions OQ-1 to OQ-30.
+
+### Documentation
+
+- Documentation site (MkDocs with the Material theme, versioned with mike, published to GitHub Pages): user guide with one page per screen, roles and FAQ; architecture pages per component with Mermaid diagrams of the run lifecycle, run statuses, data update flow, data model and scenario application order; roadmap; release process (`make docs`, `make docs-build`).
+- Generated and CI-checked: the ADR index, the specifications index, the open-question counts (`make docs-generate`) and the dependency and licence report `docs/architecture/dependencies.md` (`make deps-report`); link checking of the README and docs.
+- The platform version has one source, the file `VERSION` (`make version`, `make version-sync`, checked by `make lint`), and the run reproducibility record names it (`environment.solidaritynode`, not in the input hash).
+- README as a short landing page; `CITATION.cff`; milestones per roadmap step and labels `paper:1` … `paper:4`.
+- Rules: diagrams are Mermaid and change with the behaviour they describe; every PR that changes behaviour adds a line under **Unreleased** and updates the user guide page it affects.
+
+### Known limitations
+
+- **Diagnostic model only.** No research method is implemented; results check the platform and are not accessibility, need, vulnerability or resilience.
+- **No hub onboarding yet.** Only the municipal installation is complete; data packages are imported by hand (roadmap step 2).
+- **OpenStreetMap tiles are for development only.** Light interactive use within the OSMF tile usage policy; use `SOLIDARITYNODE_BASEMAP=blank` offline or for any heavier use, until a tile source for production is chosen.
+- **No backup guide yet.** The database and the results volume must be backed up together; nothing is deleted automatically.
+- Disruption severities, network and population changes are recorded only, with no effect on results.
+- No request tickets are stored until the privacy rules are decided (OQ-21, ADR 0010).
+- Synthetic data only.
+
+### Upgrade notes
+
+- First release: install from scratch (`make setup`, then `make up` and `make create-admin`, or `make uat` for a test machine). Runs queued before an upgrade fail with "Start the run again".
+
+[Unreleased]: https://github.com/SolidarityNode/snode/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/SolidarityNode/snode/commits/v0.1.0
