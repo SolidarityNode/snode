@@ -107,3 +107,25 @@ describe("RunPage samples size", () => {
     );
   });
 });
+
+describe("RunPage recorded-only interventions", () => {
+  it("lists placeholders and an edge the scenario adds and then closes", async () => {
+    const lines = [
+      "new edge E-NEW N-A1-N-A5 (walk 10 min) (recorded only)",
+      "new edge E-NEW is closed by the same scenario: added, then closed, so no net effect (OQ-30)",
+    ];
+    const withPlaceholders = { ...RUN, diagnostics: { recorded_only: lines } };
+    stubApi({
+      "GET /runs/r1": () => withPlaceholders,
+      "GET /runs": () => [withPlaceholders],
+      "GET /data-versions/1/layers/spatial_units": () => UNITS,
+      "GET /data-versions/1/catalog": () => CATALOG,
+      "GET /runs/r1/results": () => [],
+      "GET /runs/r1/tables/unit_changes": () => [],
+    });
+    renderWithSession(<RunPage />, { path: "/runs/r1", route: "/runs/:runId" });
+    expect(await screen.findByRole("heading", { name: /Recorded, no effect yet/ })).toBeVisible();
+    const items = screen.getByTestId("recorded-only").querySelectorAll("li");
+    expect([...items].map((li) => li.textContent)).toEqual(lines);
+  });
+});

@@ -287,6 +287,7 @@
   "run.open_scenario": "Open the scenario",
   "run.progress_label": "Run progress",
   "run.progress_value": "{value} % done",
+  "run.recorded_only_title": "Recorded, no effect yet (ADR 0016)",
   "run.reproducibility": "Reproducibility",
   "run.rerun_on": "Rerun on data {version}",
   "run.samples_warning": "This run will write about {size} MB of samples (estimate before compression), above the warning limit of {limit} MB. It will still run; check the free space of the results volume.",

@@ -418,11 +418,18 @@ class EdgeChange:
     amount: float
 
     def __post_init__(self) -> None:
-        """Check that the amount is finite and a relative change keeps a positive value."""
+        """Check that the amount is finite and a relative change keeps the value positive.
+
+        Travel times and speeds must stay strictly positive: a road is closed with the
+        scenario's closed edges, never with a change to zero.
+        """
         if not math.isfinite(self.amount):
             raise ValueError("edge change amount must be finite")
         if self.change is ChangeMode.RELATIVE and self.amount <= -100:
-            raise ValueError(f"edge {self.edge}: a relative change must be above -100 %")
+            raise ValueError(
+                f"edge {self.edge}: a relative change must be above -100 % so the "
+                f"{self.quantity} stays positive; to close a road use closed edges"
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -435,7 +442,7 @@ class NewEdge:
         id: New stable edge id; must not exist in the baseline.
         from_node: Existing node.
         to_node: Existing node, different from ``from_node``.
-        travel_time_min: Minutes to traverse it per mode (at least one mode).
+        travel_time_min: Minutes to traverse it per mode (at least one mode, each > 0).
         closable: Whether disruptions of the same scenario may close it.
     """
 
@@ -446,14 +453,14 @@ class NewEdge:
     closable: bool = True
 
     def __post_init__(self) -> None:
-        """Validate the nodes and non-negative finite times; freeze the mapping."""
+        """Validate the nodes and strictly positive finite times; freeze the mapping."""
         if self.from_node == self.to_node:
             raise ValueError(f"new edge {self.id}: from and to node must differ")
         if not self.travel_time_min:
             raise ValueError(f"new edge {self.id}: needs a travel time for at least one mode")
         for mode, minutes in self.travel_time_min.items():
-            if not math.isfinite(minutes) or minutes < 0:
-                raise ValueError(f"new edge {self.id}: travel time for {mode} must be >= 0")
+            if not math.isfinite(minutes) or minutes <= 0:
+                raise ValueError(f"new edge {self.id}: travel time for {mode} must be > 0")
         object.__setattr__(self, "travel_time_min", _freeze(self.travel_time_min))
 
 

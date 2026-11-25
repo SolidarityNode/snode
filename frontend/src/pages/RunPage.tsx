@@ -212,6 +212,9 @@ export function RunPage() {
     );
   }
 
+  // Interventions recorded without behaviour yet, and new edges the scenario also closes
+  // (ADR 0016, OQ-30): listed so nothing is ignored silently.
+  const recordedOnly = (run.diagnostics?.recorded_only as string[] | undefined) ?? [];
   const handCheck = run.diagnostics?.hand_check as
     | Record<"baseline" | "scenario", { available: boolean; checked: number; passed: number }>
     | undefined;
@@ -393,6 +396,16 @@ export function RunPage() {
                   })
                 : t("run.hand_check_none")}
             </p>
+          )}
+          {recordedOnly.length > 0 && (
+            <>
+              <h3>{t("run.recorded_only_title")}</h3>
+              <ul data-testid="recorded-only">
+                {recordedOnly.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </>
           )}
           <h3>{t("run.changes_title")}</h3>
           <ul>

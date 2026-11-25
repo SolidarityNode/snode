@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from solidaritynode_core.model import (
@@ -105,7 +105,8 @@ Mode = Literal["walk", "car", "public_transport"]
 class EdgeChangeIn(_Strict):
     """Change the travel time or speed of one edge for one mode (Paper 1 §13, §15.7).
 
-    A placeholder: checked and recorded, not applied yet.
+    A placeholder: checked and recorded, not applied yet. The value must stay strictly
+    positive (a relative change above -100 %); a road is closed with ``closed_edges``.
     """
 
     edge_id: str = _ID
@@ -123,8 +124,8 @@ class NewEdgeIn(_Strict):
     edge_id: str = _ID
     from_node_id: str = _ID
     to_node_id: str = _ID
-    travel_time_min: dict[Mode, float] = Field(
-        min_length=1, description="Minutes to traverse the edge per mode (>= 0)"
+    travel_time_min: dict[Mode, Annotated[float, Field(gt=0, allow_inf_nan=False)]] = Field(
+        min_length=1, description="Minutes to traverse the edge per mode (> 0)"
     )
     closable: bool = Field(default=True, description="Whether disruptions may close it")
 

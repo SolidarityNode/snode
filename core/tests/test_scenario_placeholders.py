@@ -53,6 +53,8 @@ def test_placeholders_are_checked_recorded_in_order_and_not_applied() -> None:
         "edge E01 walk travel_time -20 % (recorded only)",
         "new edge E-NEW N-A1-N-A5 (walk 10 min) (recorded only)",
         "unit A1 group G-OLD population +10 persons (recorded only)",
+        "new edge E-NEW is closed by the same scenario: added, then closed, so no net effect "
+        "(OQ-30)",
     )
     assert overlay.area == area  # no behaviour: the network and population are unchanged
     assert overlay.closed_edges == frozenset({"E-NEW"})
@@ -84,7 +86,7 @@ def test_scenarios_without_placeholders_keep_their_diagnostics() -> None:
         ),
         (
             EdgeChange("E01", WALK, EdgeQuantity.TRAVEL_TIME, ChangeMode.ABSOLUTE, -999),
-            "travel time would become negative",
+            "travel time would not stay positive; to close a road use closed edges",
         ),
         (NewEdge("E01", "N-A1", "N-A5", {WALK: 1.0}), "new edge E01: id already exists"),
         (NewEdge("E-NEW", "N-A1", "N-ZZ", {WALK: 1.0}), "network node N-ZZ missing"),
@@ -108,11 +110,32 @@ def test_a_new_edge_marked_not_closable_cannot_be_closed() -> None:
 
 
 def test_placeholder_values_are_validated() -> None:
-    with pytest.raises(ValueError, match="above -100"):
+    with pytest.raises(ValueError, match="above -100 % so the speed stays positive; to close"):
         EdgeChange("E01", WALK, EdgeQuantity.SPEED, ChangeMode.RELATIVE, -100)
+    with pytest.raises(ValueError, match="travel_time stays positive"):
+        EdgeChange("E01", WALK, EdgeQuantity.TRAVEL_TIME, ChangeMode.RELATIVE, -150)
+    with pytest.raises(ValueError, match="must be > 0"):
+        NewEdge("E-NEW", "N-A1", "N-A5", {WALK: 0.0})
     with pytest.raises(ValueError, match="must differ"):
         NewEdge("E-NEW", "N-A1", "N-A1", {WALK: 1.0})
     with pytest.raises(ValueError, match="at least one mode"):
         NewEdge("E-NEW", "N-A1", "N-A5", {})
     with pytest.raises(ValueError, match="finite"):
         PopulationChange(UnitId("A1"), GroupId("G-OLD"), ChangeMode.ABSOLUTE, float("nan"))
+
+
+def test_an_absolute_change_to_zero_travel_time_is_refused() -> None:
+    area = packages.load("1.0.0")
+    walk = dict(next(e for e in area.edges if e.id == "E01").travel_time_min)[WALK]
+    to_zero = EdgeChange("E01", WALK, EdgeQuantity.TRAVEL_TIME, ChangeMode.ABSOLUTE, -walk)
+    assert check_references(area, _scenario(to_zero)) == [
+        "edge E01: walk travel time would not stay positive; to close a road use closed edges"
+    ]
+    almost = EdgeChange("E01", WALK, EdgeQuantity.TRAVEL_TIME, ChangeMode.ABSOLUTE, -walk + 0.5)
+    assert check_references(area, _scenario(almost)) == []
+
+
+def test_closing_only_baseline_edges_adds_no_extra_line() -> None:
+    area = packages.load("1.0.0")
+    overlay = apply_overlay(area, _scenario(NEW_EDGE, close=frozenset({"E02"})))
+    assert overlay.recorded == ("new edge E-NEW N-A1-N-A5 (walk 10 min) (recorded only)",)

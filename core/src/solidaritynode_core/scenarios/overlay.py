@@ -93,7 +93,8 @@ class OverlayResult:
         closed_edges: Edges closed by the scenario.
         closed_modes: Modes for which those edges are closed.
         recorded: Interventions recorded but not applied (edge changes, new edges, population
-            changes), as human-readable lines in application order.
+            changes), as human-readable lines in application order, followed by a line for each
+            new edge the scenario also closes (added, then closed: no net effect, OQ-30).
     """
 
     area: StudyArea
@@ -180,9 +181,13 @@ def _edge_problems(
     if (
         change.quantity is EdgeQuantity.TRAVEL_TIME
         and change.change is ChangeMode.ABSOLUTE
-        and times[change.mode] + change.amount < 0
+        and times[change.mode] + change.amount <= 0
     ):
-        return [f"edge {change.edge}: {change.mode} travel time would become negative"]
+        return [
+            f"edge {change.edge}: {change.mode} travel time would not stay positive; "
+            "to close a road use closed edges"
+        ]
+    # An absolute speed change cannot be checked here: edges carry travel times, not speeds.
     return []
 
 
@@ -317,6 +322,14 @@ def apply_overlay(area: StudyArea, scenario: Scenario) -> OverlayResult:
         if isinstance(i, kind)
     ]
     disruption = scenario.network_disruption
+    new_edges = {i.id for i in scenario.interventions if isinstance(i, NewEdge)}
+    for eid in sorted(set(disruption.affected_link_ids) & new_edges if disruption else ()):
+        # Interventions before disruptions (OQ-30): the edge is added, then closed. Reported so
+        # it is never ignored silently.
+        recorded.append(
+            f"new edge {eid} is closed by the same scenario: added, then closed, "
+            "so no net effect (OQ-30)"
+        )
     changed = dataclasses.replace(
         area,
         facilities=tuple(facilities.values()),

@@ -54,7 +54,7 @@
     },
     "EdgeChangeIn": {
       "additionalProperties": false,
-      "description": "Change the travel time or speed of one edge for one mode (Paper 1 \u00a713, \u00a715.7).\n\nA placeholder: checked and recorded, not applied yet.",
+      "description": "Change the travel time or speed of one edge for one mode (Paper 1 \u00a713, \u00a715.7).\n\nA placeholder: checked and recorded, not applied yet. The value must stay strictly\npositive (a relative change above -100 %); a road is closed with ``closed_edges``.",
       "properties": {
         "amount": {
           "description": "Signed change",
@@ -193,9 +193,10 @@
         },
         "travel_time_min": {
           "additionalProperties": {
+            "exclusiveMinimum": 0,
             "type": "number"
           },
-          "description": "Minutes to traverse the edge per mode (>= 0)",
+          "description": "Minutes to traverse the edge per mode (> 0)",
           "minProperties": 1,
           "propertyNames": {
             "enum": [

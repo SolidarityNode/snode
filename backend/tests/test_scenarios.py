@@ -173,7 +173,11 @@ EDGE_CHANGE = {"edge_id": "E01", "mode": "walk", "quantity": "speed", "change": 
 @pytest.mark.parametrize(
     ("body", "message"),
     [
-        (_net(edge_changes=[{**EDGE_CHANGE, "amount": -100}]), "above -100"),
+        (_net(edge_changes=[{**EDGE_CHANGE, "amount": -100}]), "to close a road use closed edges"),
+        (
+            _net(edge_changes=[{**EDGE_CHANGE, "quantity": "travel_time", "amount": -120}]),
+            "above -100 % so the travel_time stays positive",
+        ),
         (_net(edge_changes=[{**EDGE_CHANGE, "quantity": "width", "amount": 1}]), "quantity"),
         (_net(edge_changes=[{**EDGE_CHANGE, "amount": 1}, {**EDGE_CHANGE, "amount": 2}]), "twice"),
         (
@@ -209,11 +213,11 @@ EDGE_CHANGE = {"edge_id": "E01", "mode": "walk", "quantity": "speed", "change": 
                         "edge_id": "X",
                         "from_node_id": "N-A1",
                         "to_node_id": "N-A2",
-                        "travel_time_min": {"walk": -1},
+                        "travel_time_min": {"walk": 0},
                     }
                 ]
             ),
-            "must be >= 0",
+            "greater than 0",
         ),
         (
             {
@@ -283,3 +287,25 @@ def test_placeholder_references_are_checked_and_recorded_on_runs(
         "new edge E-NEW N-A1-N-A5 (walk 10 min) (recorded only)",
         "unit A1 group G-OLD population +10 persons (recorded only)",
     ]
+
+
+def test_an_edge_added_and_closed_by_the_same_scenario_is_reported(
+    as_admin, as_analyst, worker
+) -> None:  # type: ignore[no-untyped-def]
+    import_version(as_admin, "1.0.0")
+    worker.run_until_idle()
+    body = {
+        "network_changes": PLACEHOLDERS["body"]["network_changes"],  # type: ignore[index]
+        "closed_edges": {"edge_ids": ["E-NEW"], "modes": ["walk"]},
+        "rationing": "uniform",
+    }
+    created = as_analyst.post("/scenarios", json={**PLACEHOLDERS, "body": body})
+    assert created.status_code == 201, created.text
+    run = as_analyst.post("/runs", json={"scenario_id": created.json()["id"]}).json()
+    worker.run_until_idle()
+    done = as_analyst.get(f"/runs/{run['id']}").json()
+    assert done["status"] == "succeeded"
+    assert done["diagnostics"]["recorded_only"][-1] == (
+        "new edge E-NEW is closed by the same scenario: added, then closed, so no net effect "
+        "(OQ-30)"
+    )

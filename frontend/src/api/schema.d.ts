@@ -923,7 +923,8 @@ export interface components {
      * EdgeChangeIn
      * @description Change the travel time or speed of one edge for one mode (Paper 1 §13, §15.7).
      *
-     *     A placeholder: checked and recorded, not applied yet.
+     *     A placeholder: checked and recorded, not applied yet. The value must stay strictly
+     *     positive (a relative change above -100 %); a road is closed with ``closed_edges``.
      */
     EdgeChangeIn: {
       /**
@@ -1121,7 +1122,7 @@ export interface components {
       to_node_id: string;
       /**
        * Travel Time Min
-       * @description Minutes to traverse the edge per mode (>= 0)
+       * @description Minutes to traverse the edge per mode (> 0)
        */
       travel_time_min: {
         [key: string]: number;
