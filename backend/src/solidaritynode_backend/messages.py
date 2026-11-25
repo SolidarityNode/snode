@@ -29,7 +29,7 @@ HUB_MESSAGES: Final[Mapping[str, str]] = MappingProxyType(
         ),
         "hub.error.source_not_found": "source {id} not found",
         "hub.error.changeset_not_found": "changeset {id} not found",
-        "hub.error.changeset_decided": "changeset {id} was already {status}",
+        "hub.error.changeset_decided": "changeset {id} was already {state}",
         "hub.error.facility_not_found": "facility {id} not found",
         "hub.error.study_area_not_found": "study area {id} not found",
         "hub.error.study_area_exists": "study area {id} already exists",
@@ -90,6 +90,91 @@ HUB_MESSAGES: Final[Mapping[str, str]] = MappingProxyType(
             "{municipality}: {added} feature(s) added, {changed} changed, {closed} closed"
         ),
         "hub.base.status_note": "base step, processing record {record}",
+        # Hub: facility import and changesets (DP-004)
+        "hub.import.unsupported_type": "{file}: unsupported file type (use .csv, .xlsx or .gpkg)",
+        "hub.import.not_utf8": "{file} is not UTF-8 text; save it as CSV UTF-8 or as .xlsx",
+        "hub.import.semicolon": (
+            "{file} uses ';' as delimiter (as a Greek-locale spreadsheet does); save it as .xlsx, "
+            "or as CSV with commas and a dot as decimal separator"
+        ),
+        "hub.import.unreadable": "{file} cannot be read: {detail}",
+        "hub.import.too_many_rows": "the file has more than {limit} rows; split it",
+        "hub.import.no_rows": "{file} has no data rows",
+        "hub.import.no_header": "the file has no header row",
+        "hub.import.personal_column": (
+            "column {column} looks like personal data and was dropped (facilities are "
+            "organisations, not people)"
+        ),
+        "hub.import.unknown_column": "column {column} is not in the template and was ignored",
+        "hub.import.personal_value": (
+            "row {row}, {column}: looks like personal contact data and was dropped; give the "
+            "facility's public switchboard or generic e-mail"
+        ),
+        "hub.import.required": "row {row}: {column} is required",
+        "hub.import.other_municipality": (
+            "row {row}: municipality {value} is not the municipality of this import "
+            "({municipality})"
+        ),
+        "hub.import.unknown_service": "row {row}: unknown service {service}",
+        "hub.import.wrong_unit": (
+            "row {row}: throughput unit {unit} does not match the unit of {service} ({expected})"
+        ),
+        "hub.import.comma_decimal": (
+            "row {row}, {column}: {value} uses a comma as decimal separator; use a dot"
+        ),
+        "hub.import.not_number": "row {row}, {column}: {value} is not a number",
+        "hub.import.negative": "row {row}, {column}: {value} must not be negative",
+        "hub.import.bad_quality": (
+            "row {row}: unknown quality {value} (open_data, estimated or verified_by_municipality)"
+        ),
+        "hub.import.bad_status": "row {row}: status must be open or closed, not {value}",
+        "hub.import.inconsistent": (
+            "row {row}: {column} differs from an earlier row of the same facility"
+        ),
+        "hub.import.duplicate_service": (
+            "row {row}: service {service} appears twice for one facility"
+        ),
+        "hub.import.no_coordinates": (
+            "row {row}: no coordinates; give x and y or lon and lat (addresses are not geocoded)"
+        ),
+        "hub.import.outside_municipality": (
+            "row {row}: the point is outside municipality {municipality}"
+        ),
+        "hub.import.no_unit": "row {row}: no spatial unit of {municipality} contains the point",
+        "hub.import.unknown_id": (
+            "row {row}: facility {id} does not exist; leave facility_id empty for a new facility"
+        ),
+        "hub.import.id_other_municipality": (
+            "row {row}: facility {id} belongs to another municipality, not {municipality}"
+        ),
+        "hub.import.matched_external": (
+            "row {row}: matched facility {id} by external id {external_id}"
+        ),
+        "hub.import.matched_twice": "row {row}: facility {id} appears twice in the file",
+        "hub.import.new_closed": "row {row}: a new facility cannot be closed",
+        "hub.import.duplicate_name": (
+            "row {row}: same name as {other} in this municipality (likely duplicate)"
+        ),
+        "hub.import.duplicate_near": "row {row}: {distance} m from {other} (likely duplicate)",
+        "hub.import.complete_list": (
+            "complete list of {municipality}: {count} open facility(ies) not in the file will be "
+            "closed"
+        ),
+        "hub.import.has_errors": (
+            "changeset {id} has errors in its validation report; fix the file and upload it again"
+        ),
+        "hub.import.confirm_close": (
+            "confirm the complete list of {municipality}: type the number of facilities that will "
+            "be closed ({count})"
+        ),
+        "hub.import.stale": (
+            "facility {id} changed after this preview was made; upload the file again"
+        ),
+        "hub.import.summary": (
+            "changeset {changeset} ({municipality}): {added} added, {updated} updated, "
+            "{closed} closed"
+        ),
+        "hub.import.status_note": "first approved facility changeset {changeset}",
     }
 )
 """Hub message templates by code (ADR 0012); part of :data:`BACKEND_MESSAGES`."""
