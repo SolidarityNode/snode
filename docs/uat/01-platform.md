@@ -29,6 +29,7 @@ administrator or viewer, so both stay logged in.
 | --- | --- | --- | --- |
 | 3 | Open http://127.0.0.1:8080 | The **Log in** page opens. The footer shows `no data imported` or the data version, then `backend 0.0.1 (<commit>, development) · frontend <commit>`. The commit matches `git rev-parse --short=12 HEAD`. | ☐ |
 | 4 | Log in as `demo-analyst` with the password `wrong-password` | Red message "Wrong username or password." | ☐ |
+| 4a | Log in as `uat-nobody` (a user that does not exist) with any password, six times in a row, waiting a few seconds between tries | The first tries say "Wrong username or password." (the same message as for a real user). If you try again at once, or from the sixth try on, the message is "Too many failed sign-in attempts. Wait a few minutes and try again." Nothing says whether the user exists. `demo-analyst` is not affected. | ☐ |
 | 5 | Log in as `demo-analyst` / `demo-analyst-pass` | The **Study area** page opens. The header says "Signed in as demo-analyst (analyst)". There is no **Admin** link. The footer shows `data demo-study-area-a 1.0.0`. | ☐ |
 
 ## C. Study area
@@ -111,7 +112,9 @@ administrator or viewer, so both stay logged in.
 | # | Do | Expected result | ✓ |
 | --- | --- | --- | --- |
 | 39 | In a private window log in as `demo-admin` / `demo-admin-pass`, click **Admin** | **Data packages** shows "Active data: demo-study-area-a 1.0.0" and one imported version (active). **Users** lists demo-admin and demo-analyst. | ☐ |
+| 39a | Under **New user** try `uat-viewer` with the password `qwerty123456`, role **viewer** | Refused: "this password is on the list of commonly used passwords; choose another one". The password field says "at least 12 characters; common passwords are refused". | ☐ |
 | 40 | Under **New user** create `uat-viewer`, password `uat-viewer-pass`, role **viewer** | The user appears in the table. | ☐ |
+| 40a | In the **Role of demo-admin** and **demo-admin is active** controls of your own row | They are greyed out: an admin cannot demote or disable themselves, and the last active admin can never be. | ☐ |
 | 41 | Under **Packages available on the server** click **Preview demo-1.1.0** | A preview appears: status "update", compared with active 1.0.0, schema 2.0. In **Changes per layer**, facilities: added **F4**, changed **F2 (services)**, closed **F3**, unchanged 1; all other layers have no changes. **Coverage changes:** M-B / facilities: missing → verified by the municipality. The changelog shows 1.0.0 and 1.1.0. Nothing is imported yet (footer and active version still 1.0.0). | ☐ |
 | 42 | Click **Confirm import** | "Imported as data version 2; it is now active." with a link **Baseline run for the new data**, and "Scenarios that refer to closed or missing features: UAT F3 staff: facility F3: closed or missing …". | ☐ |
 | 43 | Click **Preview demo-1.1.0** again | Status "same version already imported"; the button says "Already imported (nothing to do)". | ☐ |

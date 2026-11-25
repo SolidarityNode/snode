@@ -31,13 +31,32 @@ Analyst or researcher (scenarios, runs, results), facility staff (ticket entry o
 `IdentityProvider` interface (`backend/src/solidaritynode_backend/auth.py`), so OpenID Connect
 can replace it later without changing routers.
 
-- Passwords hashed with Argon2id (`argon2-cffi`, MIT); minimum 8 characters.
+- Passwords hashed with Argon2id (`argon2-cffi`, MIT). **Policy**: at least **12 characters**
+  and not on a bundled list of common passwords (1,210 entries of 12+ characters from SecLists'
+  NCSC list, MIT, `backend/src/solidaritynode_backend/resources/common_passwords.txt`; case is
+  ignored); **no composition rules** (no forced digits or symbols). Applied wherever a password
+  is set: user creation and change (API and Admin screen) and `make create-admin`. Existing
+  hashes keep working.
+- **Sign-in throttling** per username and per client address
+  (`services/throttle.py`, table `login_throttle`, migration 0009): after failure *n* the next
+  attempt for that username or address is refused for `1 s × 2^(n-1)` (at most 30 s); after
+  5 failures for a username or 20 for an address within 15 minutes it is locked for 15 minutes
+  (all configurable, `SOLIDARITYNODE_LOGIN_*`). While delayed or locked the password is not
+  checked and the answer is a generic 429 with `Retry-After`; wrong passwords and unknown users
+  get the same 401 "wrong username or password", so neither reveals which accounts exist.
+  Usernames and addresses are stored only as SHA-256 hashes. A successful sign-in clears both.
+  The client address comes from nginx, which overwrites `X-Forwarded-For`; uvicorn trusts it
+  only from `FORWARDED_ALLOW_IPS` (the compose network by default).
 - Opaque session token in an HttpOnly, SameSite=Strict cookie (`Secure` with
-  `SOLIDARITYNODE_SESSION_COOKIE_SECURE=true`); only its SHA-256 is stored; lifetime
+  `SOLIDARITYNODE_SESSION_COOKIE_SECURE=true`, **always** with `APP_ENV=production`: the
+  settings, and so `make check-config` and every start, refuse production without it); only its SHA-256 is stored; lifetime
   `SOLIDARITYNODE_SESSION_HOURS`. Disabling a user or changing a password ends their sessions.
 - Roles for v0.1: `viewer` (shared scenarios and their results), `analyst` (also creates, edits,
   runs and shares own scenarios), `admin` (also manages users and imports data packages). Every
   endpoint that reads or writes scenarios, runs, results, users or packages checks them.
+- **At least one active admin.** Admins cannot demote or disable themselves, and the last active
+  admin can never be demoted or disabled; the check locks the admin rows, so two admins demoting
+  each other at the same moment cannot leave none.
 - `make create-admin` creates the first administrator interactively. Two demo accounts are
   seeded only when `APP_ENV=development` (`docs/uat/README.md`).
 
@@ -46,5 +65,26 @@ can replace it later without changing routers.
 ## Consequences
 
 - Facility staff and hub operator roles are not implemented (ticket entry waits for ADR 0010).
-- No MFA, password policy beyond length, or audit log yet; revisit before any deployment beyond a
-  local machine.
+- Throttling state lives in PostgreSQL, so it holds across API processes; a distributed attack
+  from many addresses is limited only per username.
+
+### Before the first pilot (not implemented now)
+
+- **Email invitations and password reset**, with a **forced password change at first sign-in**
+  (no admin ever knows a user's working password).
+- **MFA with TOTP** (authenticator apps), at least for admins.
+- **Audit log** of sign-ins (successful and failed), user changes, package imports and rollbacks,
+  and exports: who, what, when, from which address; kept per OQ-21-compatible retention.
+- **Provider support account**: an account for the service provider that is disabled by
+  default, enabled by the municipality for a limited time, and fully audited.
+- **Transfer of ownership** of a departing user's scenarios to another analyst, so disabling a
+  user does not orphan shared work.
+- **Onboarding guide for the municipal admin**: first admin, users and roles, package import
+  and rollback, backups (ADR 0008), what the throttling and lock messages mean.
+
+### Later
+
+- **Single sign-on with OpenID Connect** behind the existing `IdentityProvider` interface.
+- A **facility manager** role scoped to one facility (Paper 4: operational data per facility).
+- **Per-facility device keys** for ticket entry on shared devices without personal accounts,
+  designed together with ADR 0010 and OQ-21 (no ticket is stored until those are decided).
