@@ -27,4 +27,5 @@ The table below is generated from the header lines (`Status`, `Date`, `Related`)
 | [0016](0016-scenario-schema-and-versioning.md) | Scenario schema and versioning | Accepted for v0.1, to be revisited | 2026-11-24 | OQ-16, OQ-24 |
 | [0017](0017-run-reproducibility-and-result-storage.md) | Run reproducibility and result storage | Accepted for v0.1, to be revisited | 2026-11-24 |  |
 | [0018](0018-documentation-site.md) | Documentation site: MkDocs Material, mike, Mermaid | Accepted for v0.1, to be revisited | 2026-11-25 |  |
+| [0019](0019-bilingual-documentation-site.md) | Bilingual documentation site: Greek user-facing pages with mkdocs-static-i18n | Proposed | 2026-11-26 |  |
 <!-- END GENERATED: adr-index -->

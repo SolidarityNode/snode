@@ -3,6 +3,7 @@
 #   make docs-build  build with --strict (CI)
 # Built from docs/; CHANGELOG.md, CONTRIBUTING.md and AGENTS.md are added by tools/docs/hooks.py.
 # Diagrams are Mermaid code blocks (AGENTS.md). Navigation below; files are never moved for it.
+# Bilingual (ADR 0019): page.el.md is the Greek version of page.md, served under el/.
 
 site_name: SolidarityNode
 site_description: Open-source spatial probabilistic framework for social service accessibility, latent need, vulnerability and resilience.
@@ -67,6 +68,49 @@ theme:
 
 plugins:
   - search
+  # Bilingual site (ADR 0018 tooling): page.md is English (default), page.el.md is Greek and
+  # is served under el/. Pages without a Greek file are shown in English in the Greek site.
+  # Greek terms follow docs/i18n/glossary.md; `make lint` checks Greek pages are current
+  # (scripts/docs_i18n.py). The language switcher links are made relative for mike by
+  # tools/docs/hooks.py.
+  - i18n:
+      docs_structure: suffix
+      fallback_to_default: true
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: en
+          name: English
+          default: true
+          build: true
+        - locale: el
+          name: Ελληνικά
+          build: true
+          site_description: Ανοιχτό χωρικό πιθανοτικό πλαίσιο για την προσβασιμότητα των κοινωνικών υπηρεσιών, την κρυφή ανάγκη, την τρωτότητα και την ανθεκτικότητα.
+          # Section labels of pages kept in English say so; English page titles inside them
+          # stay in English on purpose.
+          nav_translations:
+            Home: Αρχική
+            User guide: Οδηγός χρήσης
+            Signing in: Σύνδεση
+            Study area: Περιοχή μελέτης
+            Scenarios list: Λίστα σεναρίων
+            Scenario editor: Επεξεργασία σεναρίου
+            Run: Εκτέλεση
+            Compare: Σύγκριση
+            Admin: Διαχείριση
+            Data packages and updates: Πακέτα δεδομένων και ενημερώσεις
+            Roles: Ρόλοι
+            FAQ: Συχνές ερωτήσεις
+            Greek–English glossary: Γλωσσάριο ελληνικών–αγγλικών (στα αγγλικά)
+            Concepts: Βασικές έννοιες
+            Testing (UAT): Δοκιμές αποδοχής (στα αγγλικά)
+            Method: Μέθοδος (στα αγγλικά)
+            Architecture: Αρχιτεκτονική (στα αγγλικά)
+            Decisions: Αποφάσεις (στα αγγλικά)
+            Contributing: Συνεισφορά
+            Roadmap: Πορεία ανάπτυξης
+            Changelog: Ιστορικό αλλαγών (στα αγγλικά)
 
 extra:
   version:
