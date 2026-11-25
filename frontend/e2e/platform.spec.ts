@@ -6,7 +6,9 @@ const USER = { name: "demo-analyst", password: "demo-analyst-pass" };
 test("log in, close edge E02, run and see a changed travel time", async ({ page }) => {
   const scenario = `E2E close E02 ${String(Date.now())}`;
 
-  await page.goto("/");
+  const response = await page.goto("/");
+  // Map tiles need a Referer (OSMF tile usage policy, ADR 0007).
+  expect(response?.headers()["referrer-policy"]).toBe("strict-origin-when-cross-origin");
   await expect(page.getByRole("heading", { name: "Log in" })).toBeVisible();
   await page.getByLabel("Username").fill(USER.name);
   await page.getByLabel("Password").fill(USER.password);
@@ -36,4 +38,12 @@ test("log in, close edge E02, run and see a changed travel time", async ({ page 
   await expect(a3).toContainText("66");
   await expect(a3.getByTestId("changed")).toBeVisible();
   await expect(a3.locator("td").nth(1)).toHaveText("30");
+
+  // Results map layers: uncertainty map and data quality are off by default and toggle on.
+  await expect(page.getByTestId("uncertainty-map")).toHaveCount(0);
+  await page.getByLabel(/^Uncertainty/).check();
+  await expect(page.getByTestId("uncertainty-map")).toBeVisible();
+  await expect(page.getByTestId("value-legend")).not.toContainText("hatched");
+  await page.getByLabel(/^Data quality/).check();
+  await expect(page.getByTestId("value-legend")).toContainText("hatched");
 });

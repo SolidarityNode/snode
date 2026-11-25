@@ -42,6 +42,8 @@ export function MapView({ label, layers, basemap, height = 420 }: Props) {
     if (basemap === "osm") {
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
+        // Tiles must carry a Referer (OSMF tile usage policy, ADR 0007), as nginx also sets.
+        referrerPolicy: "strict-origin-when-cross-origin",
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(m);
