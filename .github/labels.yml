@@ -9,7 +9,7 @@
 - name: "frontend"
   color: "0e8a16"
   description: "Web UI"
-- name: "docs"
+- name: "documentation"
   color: "0075ca"
   description: "Documentation and specs"
 - name: "infra"
