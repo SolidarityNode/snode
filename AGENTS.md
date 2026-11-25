@@ -113,6 +113,8 @@ Run `make lint test` before every commit. Do not mark work done if either fails.
 4. Update docs and the spec cross-reference if behaviour changed: the user guide page, a line under **Unreleased** in `CHANGELOG.md`, and Mermaid diagrams.
 5. Run `make lint test` (and `make docs-build` when docs changed), then open a PR using the template, assigned to the maintainer who asked for it (`gh pr create --assignee <their-login>`; see "Pull requests" in `CONTRIBUTING.md`). Do not merge your own PR.
 
+Every paper issue carries both the `paper:N` label and the Kintsugi **Paper** field with the same value (the label makes issue search links work; the field drives the project views), plus the paper's milestone (`v0.3 Paper 1 Accessibility` … `v0.6 Paper 4 Resilience`).
+
 ## Definition of done
 
 - All acceptance criteria met and covered by tests.

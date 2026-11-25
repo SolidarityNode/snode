@@ -27,7 +27,7 @@ flowchart TB
 | In progress | someone has a branch for it |
 | Done | merged; listed under **Unreleased** in the changelog until the next release |
 
-Tickets that wait for a decision carry `needs-spec` or `blocked`; per-paper work carries `paper:1` … `paper:4` and the paper's milestone ([roadmap](../roadmap.md)).
+Tickets that wait for a decision carry `needs-spec` or `blocked`; per-paper work carries the label `paper:N` **and** the Kintsugi field **Paper** with the same value, plus the paper's milestone, `v0.3 Paper 1 Accessibility` … `v0.6 Paper 4 Resilience` ([roadmap](../roadmap.md), [rule](../../CONTRIBUTING.md#paper-issues)).
 
 ## Releases
 
