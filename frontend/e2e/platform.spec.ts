@@ -41,9 +41,9 @@ test("log in, close edge E02, run and see a changed travel time", async ({ page 
 
   // Results map layers: uncertainty map and data quality are off by default and toggle on.
   await expect(page.getByTestId("uncertainty-map")).toHaveCount(0);
-  await page.getByLabel(/^Uncertainty/).check();
+  await page.getByRole("checkbox", { name: /^Uncertainty/ }).check();
   await expect(page.getByTestId("uncertainty-map")).toBeVisible();
   await expect(page.getByTestId("value-legend")).not.toContainText("hatched");
-  await page.getByLabel(/^Data quality/).check();
+  await page.getByRole("checkbox", { name: /^Data quality/ }).check();
   await expect(page.getByTestId("value-legend")).toContainText("hatched");
 });
