@@ -45,7 +45,7 @@ Source of truth for the science: `docs/specs/` (research description and per-mod
 Requires `uv`, Node.js 26 with `pnpm` 12, and Podman (or Docker). `make help` lists all targets.
 
 - `make setup` — check that `uv`, `node` and `pnpm` are on PATH (names any missing), create `.env` from `.env.example` if missing (warns about missing keys), then install locked dependencies (`uv sync --locked` in `core/` and `backend/`, `pnpm install --frozen-lockfile` in `frontend/`)
-- `make lint` — ruff check, ruff format --check and mypy (strict) for core and backend; eslint, prettier --check and `tsc` for frontend; the platform version and the generated docs blocks are current
+- `make lint` — ruff check, ruff format --check and mypy (strict) for core and backend; eslint, prettier --check and `tsc` for frontend; the platform version and the generated docs blocks are current; Greek docs pages exist for the user guide (stale ones are a warning)
 - `make test` — fast, no container engine: unit and integration tests only, pytest (core; backend on a throw-away database on an existing PostGIS server: the `db` service of `make up` or `make test-db`, or `SOLIDARITYNODE_TEST_DATABASE_URL`) and Vitest (frontend)
 - `make test-e2e` — the Playwright end-to-end test, also run in CI: a separate throw-away stack (compose project `solidaritynode-e2e` on ports 18080/18000/15432, seeded with demo package 1.0.0 and removed afterwards); Playwright runs in its official image, `E2E_LOCAL=1` uses a host browser
 - `make fmt` — ruff fix/format, prettier, eslint --fix
@@ -65,6 +65,7 @@ Requires `uv`, Node.js 26 with `pnpm` 12, and Podman (or Docker). `make help` li
 - `make licenses` — fail on dependency licences incompatible with AGPL-3.0
 - `make docs` / `make docs-build` — serve the documentation site on http://127.0.0.1:8001 / build it with `--strict` (CI); `make docs-links` checks links with lychee
 - `make docs-generate` — regenerate the ADR index, the specs index and the open-question counts (never edit those blocks by hand)
+- `make docs-stamp PAGE=docs/<page>.el.md` — record that a Greek page matches its English source again (ADR 0019)
 - `make deps-report` — regenerate `docs/architecture/dependencies.md` from the lock files (after `make setup`); CI fails if it is stale or a licence is not allowed
 - `make version` / `make version-sync` — print the platform version / write `VERSION` into the manifests and locks (`VERSION` is the only place to change it; `docs/releasing.md`)
 - `make labels` — create GitHub labels from `.github/labels.yml` (needs `gh auth login`)
@@ -91,6 +92,7 @@ Run `make lint test` before every commit. Do not mark work done if either fails.
 - Do not copy what lives elsewhere; link to the single source: issues and plans in GitHub (project Kintsugi, milestones), open questions in `docs/specs/open-questions.md`, decisions in `docs/adr/`, method in `docs/specs/`.
 - Generated content (ADR index, specs index, open-question counts, `docs/architecture/dependencies.md`) comes from scripts and is checked in CI; never edit it by hand.
 - Do not move a file under `docs/` that code, tests or `AGENTS.md` link to; change the site navigation in `mkdocs.yml` instead.
+- The user-facing pages (home, user guide, concepts, roadmap) have a Greek version `page.el.md` next to `page.md` (ADR 0019). When you change one of these English pages, update its Greek page (terms from `docs/i18n/glossary.md`, button names as in the Greek UI) and run `make docs-stamp PAGE=<page>.el.md`, or say in the PR that the Greek page is stale. `make lint` warns about stale Greek pages and fails if a user-guide page has no Greek version. Other pages stay in English; Greek pages mark links to them "(στα αγγλικά)".
 
 ## Data and privacy rules
 

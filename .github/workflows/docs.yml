@@ -20,6 +20,7 @@ on:
       - "lychee.toml"
       - "tools/docs/**"
       - "scripts/docs_indexes.py"
+      - "scripts/docs_i18n.py"
       - "scripts/deps_report.py"
       - "scripts/version.py"
       - "scripts/check_licenses.py"
@@ -60,7 +61,7 @@ jobs:
           node-version: "26"
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
-      - name: Version and generated indexes are current (ADR index, specs index, OQ counts)
+      - name: Version, generated indexes (ADR index, specs index, OQ counts) and Greek pages are current
         run: make docs-check
       - run: make setup
       - name: Dependency report is current and every licence is allowed

@@ -40,7 +40,7 @@ BACKEND_URL := http://127.0.0.1:$(BACKEND_HOST_PORT)
         test test-core test-backend test-frontend \
         fmt stop up down logs ps wait db-shell seed reset uat images licenses labels clean distclean \
         test-db test-e2e e2e-setup import-package activate-version create-admin schemas \
-        clear-login-locks version version-sync docs docs-setup docs-build docs-generate docs-check docs-links \
+        clear-login-locks version version-sync docs docs-setup docs-build docs-generate docs-check docs-stamp docs-links \
         deps-report deps-report-check
 
 help: ## Show this help
@@ -89,6 +89,7 @@ lint: lint-core lint-backend lint-frontend lint-repo ## ruff, mypy, eslint, pret
 lint-repo:
 	python3 scripts/version.py check
 	python3 scripts/docs_indexes.py --check
+	python3 scripts/docs_i18n.py --check
 
 lint-core:
 	cd core && $(UV_RUN) ruff check . && $(UV_RUN) ruff format --check . && $(UV_RUN) mypy
@@ -293,9 +294,14 @@ docs-build: docs-setup docs-check ## Build the documentation site into site/ wit
 docs-generate: ## Regenerate the ADR index, specs index and open-question counts
 	python3 scripts/docs_indexes.py
 
-docs-check: ## Check the generated docs blocks and the version are current
+docs-check: ## Check the generated docs blocks, the version and the Greek pages are current
 	python3 scripts/version.py check
 	python3 scripts/docs_indexes.py --check
+	python3 scripts/docs_i18n.py --check
+
+docs-stamp: ## Record that a Greek page matches its English source again (PAGE=docs/x.el.md)
+	@test -n "$(PAGE)" || { echo "usage: make docs-stamp PAGE=docs/user-guide/run.el.md" >&2; exit 1; }
+	python3 scripts/docs_i18n.py --stamp $(PAGE)
 
 docs-links: check-engine ## Check links in README and docs with lychee (container; also in CI)
 	$(CONTAINER_ENGINE) run --rm -v "$(CURDIR):/input:ro,Z" -w /input $(LYCHEE_IMAGE) \
