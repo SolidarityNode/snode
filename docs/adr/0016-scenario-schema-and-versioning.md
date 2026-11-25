@@ -46,6 +46,9 @@ The demo scenario `data/synthetic/demo/scenarios/C-DEMO-REF.json` uses a draft l
 - Delete is soft; a hard delete is refused when runs exist. Interventions and disruptions may be
   combined (the spec does not forbid it).
 
+Maintainer decision (2026-11-25, PR #6): the optional `core.model.NewFacility.node_id` (the
+existing network node where a new facility is placed) is accepted.
+
 **Why:** one source of truth for validation in the backend; the published schema lets the hub and
 other tools check scenarios.
 

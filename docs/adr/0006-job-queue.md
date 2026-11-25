@@ -41,6 +41,9 @@ Monte Carlo runs and scenario sweeps can take minutes to hours and must not run 
   ("Interrupted: … Start the run again.").
 - Outputs are shared through the `results` volume mounted in both containers (ADR 0008).
 
+Maintainer decision (2026-11-25, PR #6): the evolved interface (`submit(kind, payload)` plus
+`cancel`) and the removal of the in-process runner are accepted.
+
 **Why:** no new service or dependency, job state lives next to the run metadata in one
 transaction, rootless Podman needs nothing extra, and runs are short at this stage. Cancellation
 and progress are simple column updates.

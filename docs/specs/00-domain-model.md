@@ -176,6 +176,11 @@ DBN (Paper 4 §12): `State(t−1) → FunctionalState(t) → ObservedConsequence
 | `sensitivity` | 1 §12, 2 §16, 3 §23 | sensitivity analysis |
 | `validation` | 1 §14, 2 §18, 3 §24 | validation tools |
 
+Platform machinery has no module of its own (maintainer decision, 2026-11-25, PR #6): the model
+registry lives in `model` (`model/registry.py`) and the diagnostic model `diagnostic-v0`, which
+only checks the platform's mechanics and is not a method, in `validation`
+(`validation/diagnostic.py`). The module list above is unchanged.
+
 ## 7. Invariants
 
 See the root `AGENTS.md` ("Domain invariants"). The most important: keep BN nodes, computed simulation variables and scenario parameters separate (section 4); never mix vulnerability and resilience; never treat estimated demand as total need.
