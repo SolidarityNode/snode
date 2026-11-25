@@ -45,5 +45,16 @@ it is small, well known and simple to wrap without a React binding.
 
 - Large layers (all Local Communities of a region) may need vector tiles: revisit with
   MapLibre GL JS (BSD-3-Clause) when layers grow.
-- Production installations should use their own tile server or a provider whose terms allow
-  their traffic; OSM's public tiles are not for heavy use.
+- **OpenStreetMap's public tile servers are for development and demos only.** The OSMF Tile
+  Usage Policy (https://operations.osmfoundation.org/policies/tiles/) gives no SLA and allows
+  access to be withdrawn at any time without notice. Production installations need their own
+  tiles or a tile provider whose terms cover their traffic.
+- Basemap options for later (none implemented now; the `osm | blank` setting stays for v0.1):
+  - **Preferred for production: self-hosted PMTiles (Protomaps).** The hub produces one basemap
+    extract per data package (same extent as the study area), served as a static file by the
+    installation itself: no tile server, no third-party traffic, works offline.
+  - **For demos and pilots: OpenFreeMap**, a free hosted vector-tile service, when
+    self-hosting is not yet set up.
+  - Both are vector basemaps. When vector basemaps are adopted, **MapLibre GL JS**
+    (BSD-3-Clause) is the candidate replacement for Leaflet; record that change in a new ADR.
+- Leaflet stays for v0.1.
