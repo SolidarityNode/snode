@@ -1,7 +1,9 @@
 """Data package validation, preview of changes and import (ADR 0013, accepted for v0.1).
 
-A package is a directory or a ``.zip``/``.tar``/``.tar.gz`` archive with a ``manifest.json``
-and GeoJSON layers and CSV tables listed with SHA-256 checksums. Import is two-step: a
+A package (schema 2.x) is a directory or a ``.zip``/``.tar``/``.tar.gz`` archive with a
+``manifest.json``, one GeoPackage ``layers.gpkg`` (one table per layer, in the projected CRS the
+manifest declares) and CSV tables (UTF-8, comma delimiter, dot decimals, header row), all listed
+with SHA-256 checksums, and a licence and attribution per layer. Import is two-step: a
 **preview** of the changes against the active data version (features added, changed, closed per
 layer, plus coverage changes), then the **import** after confirmation, in one transaction. The
 imported version becomes active; older versions stay, and runs keep pointing to theirs.
@@ -36,6 +38,7 @@ from sqlalchemy import select, text, update
 from sqlalchemy.orm import Session
 
 from solidaritynode_backend.config import Settings
+from solidaritynode_backend.gpkg import GeoPackageError, read_geopackage
 from solidaritynode_backend.orm import DataVersion, Scenario, ScenarioVersion
 from solidaritynode_backend.schemas.scenario import SCENARIO_SCHEMA_VERSION, ScenarioBody
 from solidaritynode_backend.services.runs import create_run, reference_problems
@@ -48,13 +51,15 @@ __all__ = [
     "IncompatibleSchemaError",
     "PackageContent",
     "PackageError",
+    "activate_version",
     "import_package",
     "opened_package",
     "preview_package",
     "read_package",
 ]
 
-SUPPORTED_SCHEMA_MAJOR = 1
+SUPPORTED_SCHEMA_MAJOR = 2
+LAYERS_FILE = "layers.gpkg"
 FORMAT = "solidaritynode-data-package"
 FEATURE_LAYERS: dict[str, str] = {
     "municipalities": "municipality_id",
@@ -73,8 +78,25 @@ TABLE_FILES = {
 }
 REQUIRED_TABLES = ("groups", "services", "population")
 COVERAGE_LAYERS = ("boundaries", "population", "network", "facilities", "transit")
-COVERAGE_STATUS = frozenset({"missing", "open_data", "estimated", "verified"})
-QUALITY = frozenset({"open_data", "estimated", "verified_by_municipality"})
+VERIFIED = "verified_by_municipality"
+"""The one name of the verified state, for feature quality and layer coverage alike."""
+QUALITY = frozenset({"open_data", "estimated", VERIFIED})
+COVERAGE_STATUS = QUALITY | {"missing"}
+# CSV tables: required columns and the numeric ones (dot decimals; "" allowed where optional).
+TABLE_COLUMNS: dict[str, tuple[str, ...]] = {
+    "groups": ("group_id", "name", "definition_rule"),
+    "services": ("service_id", "name", "service_unit", "max_acceptable_wait"),
+    "population": ("unit_id", "group_id", "population"),
+    "facility_services": ("facility_id", "service_id", "places", "staff", "throughput"),
+    "hand_checks": ("closed_edges", "mode", "unit_id", "facility_id", "travel_time_min"),
+}
+NUMERIC_COLUMNS: dict[str, tuple[tuple[str, bool], ...]] = {  # (column, optional)
+    "population": (("population", False),),
+    "facility_services": (("places", True), ("staff", True), ("throughput", True)),
+    "hand_checks": (("travel_time_min", False),),
+}
+_NUMBER = re.compile(r"^-?\d+(\.\d+)?([eE][-+]?\d+)?$")
+_COMMA_DECIMAL = re.compile(r"^-?\d+,\d+$")
 META_KEYS = ("municipality_id", "role", "quality", "valid_from", "valid_to", "processing_note")
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _SCHEMA = re.compile(r"^(\d+)\.(\d+)$")
@@ -97,7 +119,7 @@ class PackageContent:
     manifest: dict[str, Any]
     manifest_sha256: str
     srid: int
-    features: dict[str, dict[str, tuple[dict[str, Any], dict[str, Any]]]]
+    features: dict[str, dict[str, tuple[dict[str, Any], bytes]]]
     records: dict[str, list[dict[str, Any]]]
     coverage: list[tuple[str, str, str, str]]
     warnings: list[str] = field(default_factory=list)
@@ -192,6 +214,18 @@ def _check_manifest(m: dict[str, Any]) -> int:
         raise PackageError("manifest: study_area needs at least one core municipality")
     if not m.get("processing_notes"):
         raise PackageError("manifest: processing_notes (DP-NNN) are required")
+    layers = m.get("layers")
+    if not isinstance(layers, dict):
+        raise PackageError("manifest: missing 'layers' (table, licence and attribution per layer)")
+    for name, entry in layers.items():
+        if name not in FEATURE_LAYERS:
+            raise PackageError(f"manifest: unknown layer {name!r}")
+        for key in ("table", "licence", "attribution"):
+            if not str((entry or {}).get(key, "")).strip():
+                raise PackageError(f"manifest: layer {name} needs a {key}")
+    for name in REQUIRED_LAYERS:
+        if name not in layers:
+            raise PackageError(f"manifest: required layer {name} is missing")
     if not any(c.get("version") == m["version"] for c in m.get("changelog", [])):
         raise PackageError(f"manifest: changelog has no entry for version {m['version']}")
     for mun in [*area["core_municipalities"], *area.get("buffer_municipalities", [])]:
@@ -225,13 +259,67 @@ def _check_files(directory: Path, m: dict[str, Any]) -> None:
         raise PackageError(f"files not listed in the manifest: {', '.join(extra)}")
 
 
-def _csv(path: Path) -> list[dict[str, Any]]:
-    with path.open(encoding="utf-8", newline="") as fh:
-        return [dict(r) for r in csv.DictReader(fh)]
+def _csv(path: Path, rel: str, table: str) -> list[dict[str, Any]]:
+    """Read a CSV table in the package dialect, or refuse it with the reason.
 
-
-def _geom_hash(geometry: dict[str, Any]) -> str:
-    return hashlib.sha256(json.dumps(geometry, sort_keys=True).encode()).hexdigest()
+    Dialect (ADR 0013): UTF-8 (a leading byte-order mark is tolerated), comma delimiter, dot as
+    decimal separator, one header row with the expected column names.
+    """
+    raw = path.read_bytes()
+    try:
+        content = raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        raise PackageError(
+            f"{rel}: not UTF-8 (a spreadsheet may have saved it as Windows-1253 or ISO-8859-7); "
+            "save it as CSV UTF-8 with commas"
+        ) from None
+    lines = content.splitlines()
+    header = lines[0] if lines else ""
+    if not header.strip():
+        raise PackageError(f"{rel}: empty file or no header row")
+    if ";" in header and "," not in header:
+        raise PackageError(
+            f"{rel}: uses ';' as delimiter (as a Greek-locale spreadsheet does); the package "
+            "format needs commas, with a dot as decimal separator"
+        )
+    if "\t" in header and "," not in header:
+        raise PackageError(f"{rel}: uses tabs as delimiter; the package format needs commas")
+    try:
+        rows = list(csv.reader(io.StringIO(content, newline=""), strict=True))
+    except csv.Error as exc:
+        raise PackageError(f"{rel}: not valid CSV ({exc})") from None
+    columns = rows[0]
+    if missing := [c for c in TABLE_COLUMNS[table] if c not in columns]:
+        raise PackageError(
+            f"{rel}: header row lacks {', '.join(missing)} (found: {', '.join(columns)})"
+        )
+    out: list[dict[str, Any]] = []
+    for n, values in enumerate(rows[1:], start=2):
+        if not values:
+            continue
+        if len(values) != len(columns):
+            hint = (
+                " A comma used as decimal separator splits a number into two fields; use a dot."
+                if len(values) > len(columns)
+                else ""
+            )
+            raise PackageError(
+                f"{rel} line {n}: {len(values)} fields, the header has {len(columns)}.{hint}"
+            )
+        row = dict(zip(columns, values, strict=True))
+        for column, optional in NUMERIC_COLUMNS.get(table, ()):
+            value = row[column].strip()
+            if value == "" and optional:
+                continue
+            if _COMMA_DECIMAL.match(value):
+                raise PackageError(
+                    f"{rel} line {n}, {column}: {value!r} uses a comma as decimal separator; "
+                    "use a dot (for example 4.5)"
+                )
+            if not _NUMBER.match(value):
+                raise PackageError(f"{rel} line {n}, {column}: {value!r} is not a number")
+        out.append(row)
+    return out
 
 
 def read_package(directory: Path) -> PackageContent:
@@ -252,24 +340,36 @@ def read_package(directory: Path) -> PackageContent:
     area = manifest["study_area"]
     municipalities = {*area["core_municipalities"], *area.get("buffer_municipalities", [])}
 
-    features: dict[str, dict[str, tuple[dict[str, Any], dict[str, Any]]]] = {}
+    if LAYERS_FILE not in listed:
+        raise PackageError(f"required file missing: {LAYERS_FILE}")
+    try:
+        gpkg = read_geopackage(directory / LAYERS_FILE)
+    except GeoPackageError as exc:
+        raise PackageError(f"{LAYERS_FILE}: {exc}") from None
+    declared = manifest["layers"]
+    features: dict[str, dict[str, tuple[dict[str, Any], bytes]]] = {}
     for layer, key in FEATURE_LAYERS.items():
-        rel = f"layers/{layer}.geojson"
-        if rel not in listed:
-            if layer in REQUIRED_LAYERS:
-                raise PackageError(f"required layer missing: {rel}")
+        if layer not in declared:
             features[layer] = {}
             continue
-        data = json.loads((directory / rel).read_text("utf-8"))
-        out: dict[str, tuple[dict[str, Any], dict[str, Any]]] = {}
-        for feature in data.get("features", []):
-            props = dict(feature.get("properties") or {})
-            fid = str(props.get(key, ""))
+        table = str(declared[layer]["table"])
+        source = gpkg.get(table)
+        if source is None:
+            raise PackageError(f"{LAYERS_FILE}: layer {layer} (table {table}) is missing")
+        crs = (source.srs.organization.upper(), source.srs.organization_coordsys_id)
+        if crs != ("EPSG", srid):
+            raise PackageError(
+                f"{LAYERS_FILE}/{table}: geometries are in {crs[0]}:{crs[1]}, but the manifest "
+                f"declares EPSG:{srid}; reproject the layer or fix the manifest"
+            )
+        out: dict[str, tuple[dict[str, Any], bytes]] = {}
+        for props, wkb in source.rows:
+            fid = str(props.get(key) or "")
             if not fid:
                 raise PackageError(f"{layer}: feature without {key}")
             if fid in out:
                 raise PackageError(f"{layer}: duplicate id {fid}")
-            if feature.get("geometry") is None:
+            if wkb is None:
                 raise PackageError(f"{layer}/{fid}: missing geometry")
             for meta in META_KEYS:
                 if meta not in props:
@@ -277,7 +377,10 @@ def read_package(directory: Path) -> PackageContent:
             if props["role"] not in ("core", "buffer"):
                 raise PackageError(f"{layer}/{fid}: role must be core or buffer")
             if props["quality"] not in QUALITY:
-                raise PackageError(f"{layer}/{fid}: unknown quality {props['quality']!r}")
+                raise PackageError(
+                    f"{layer}/{fid}: unknown quality {props['quality']!r} "
+                    f"(expected one of {', '.join(sorted(QUALITY))})"
+                )
             if props["municipality_id"] not in municipalities:
                 raise PackageError(f"{layer}/{fid}: municipality not in the study area")
             for d in ("valid_from", "valid_to"):
@@ -286,14 +389,14 @@ def read_package(directory: Path) -> PackageContent:
                         date.fromisoformat(str(props[d]))
                     except ValueError:
                         raise PackageError(f"{layer}/{fid}: {d} is not a date") from None
-            props[_GEOM_HASH] = _geom_hash(feature["geometry"])
-            out[fid] = (props, feature["geometry"])
+            props[_GEOM_HASH] = hashlib.sha256(wkb).hexdigest()
+            out[fid] = (props, wkb)
         features[layer] = out
 
     tables: dict[str, list[dict[str, Any]]] = {}
     for table, rel in TABLE_FILES.items():
         if rel in listed:
-            tables[table] = _csv(directory / rel)
+            tables[table] = _csv(directory / rel, rel, table)
         elif table in REQUIRED_TABLES:
             raise PackageError(f"required table missing: {rel}")
         else:
@@ -585,7 +688,7 @@ def import_package(
             "layer": layer,
             "fid": fid,
             "props": json.dumps(props),
-            "geom": json.dumps(geometry),
+            "geom": geometry,
             "srid": content.srid,
         }
         for layer, items in content.features.items()
@@ -595,7 +698,7 @@ def import_package(
         text(
             "INSERT INTO data_features (data_version_id, layer, feature_id, properties, geom) "
             "VALUES (:dv, :layer, :fid, CAST(:props AS jsonb), "
-            "ST_SetSRID(ST_GeomFromGeoJSON(:geom), :srid))"
+            "ST_GeomFromWKB(:geom, :srid))"
         ),
         rows,
     )
@@ -647,6 +750,34 @@ def import_package(
     baseline = create_run(db, settings, scenario, version, dv, created_by=user_id)
     revalidation = revalidate_scenarios(db, dv.id)
     return ImportOutcome(dv.id, False, preview, str(baseline.run.id), revalidation)
+
+
+def activate_version(
+    db: Session, settings: Settings, data_version_id: int, user_id: int | None
+) -> ImportOutcome:
+    """Make an earlier imported data version active again (rollback, ADR 0013).
+
+    Like an import: the baseline scenario gets a version for this data, a baseline run is queued
+    and every scenario is revalidated against it. Nothing is deleted; runs keep pointing to the
+    data version they used.
+
+    Raises:
+        KeyError: If the data version does not exist.
+        PackageError: If it is already active.
+    """
+    dv = db.get(DataVersion, data_version_id)
+    if dv is None:
+        raise KeyError(data_version_id)
+    if dv.active:
+        raise PackageError(f"data version {dv.package_id} {dv.version} is already active")
+    db.execute(update(DataVersion).where(DataVersion.active).values(active=False))
+    db.flush()
+    dv.active = True
+    db.flush()
+    scenario, version = _baseline(db, dv, user_id)
+    baseline = create_run(db, settings, scenario, version, dv, created_by=user_id)
+    revalidation = revalidate_scenarios(db, dv.id)
+    return ImportOutcome(dv.id, False, {}, str(baseline.run.id), revalidation)
 
 
 def stage_upload(settings: Settings, data: bytes) -> str:

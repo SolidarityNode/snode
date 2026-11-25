@@ -155,6 +155,8 @@ function Packages() {
   const [outcome, setOutcome] = useState<Schemas["ImportOut"] | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
+  const [toActivate, setToActivate] = useState<Schemas["DataVersionOut"] | null>(null);
+  const [activated, setActivated] = useState<string | null>(null);
 
   const load = useCallback(() => {
     unwrap(api.GET("/data-versions")).then(setVersions).catch(setError);
@@ -200,6 +202,7 @@ function Packages() {
 
   function confirmImport() {
     if (!preview) return;
+    setActivated(null);
     void run(async () => {
       const body =
         preview.staging_id !== null && preview.staging_id !== undefined
@@ -207,6 +210,23 @@ function Packages() {
           : { name: preview.source };
       setOutcome(await unwrap(api.POST("/packages/import", { body })));
       setPreview(null);
+      load();
+      await refreshDataVersion();
+    });
+  }
+
+  function activate(dv: Schemas["DataVersionOut"]) {
+    void run(async () => {
+      setPreview(null);
+      setOutcome(
+        await unwrap(
+          api.POST("/data-versions/{data_version_id}/activate", {
+            params: { path: { data_version_id: dv.id } },
+          }),
+        ),
+      );
+      setActivated(dv.version);
+      setToActivate(null);
       load();
       await refreshDataVersion();
     });
@@ -228,6 +248,7 @@ function Packages() {
             <th scope="col">{t("admin.version")}</th>
             <th scope="col">{t("admin.imported_at")}</th>
             <th scope="col">{t("admin.status")}</th>
+            <th scope="col">{t("admin.action")}</th>
           </tr>
         </thead>
         <tbody>
@@ -238,10 +259,51 @@ function Packages() {
               </th>
               <td>{v.imported_at}</td>
               <td>{v.active ? t("admin.is_active") : t("admin.kept")}</td>
+              <td>
+                {!v.active && (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      setOutcome(null);
+                      setToActivate(v);
+                    }}
+                  >
+                    {t("admin.activate", { version: v.version })}
+                  </button>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+      {toActivate && (
+        <div role="alertdialog" className="panel" aria-labelledby="activate-question">
+          <p id="activate-question">
+            {t("admin.activate_confirm", {
+              package: toActivate.package_id,
+              version: toActivate.version,
+            })}
+          </p>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              activate(toActivate);
+            }}
+          >
+            {t("admin.activate_yes")}
+          </button>{" "}
+          <button
+            type="button"
+            onClick={() => {
+              setToActivate(null);
+            }}
+          >
+            {t("admin.cancel")}
+          </button>
+        </div>
+      )}
 
       <h4>{t("admin.available")}</h4>
       <ul>
@@ -286,7 +348,11 @@ function Packages() {
       {outcome && (
         <div role="status" className="panel" data-testid="import-outcome">
           <p>
-            {outcome.noop ? t("admin.noop") : t("admin.imported", { id: outcome.data_version_id })}
+            {activated
+              ? t("admin.activated", { version: activated })
+              : outcome.noop
+                ? t("admin.noop")
+                : t("admin.imported", { id: outcome.data_version_id })}
           </p>
           {outcome.baseline_run_id && (
             <p>

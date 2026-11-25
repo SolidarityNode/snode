@@ -22,6 +22,7 @@ from solidaritynode_backend.schemas.api import (
     DataVersionOut,
     ImportIn,
     ImportOut,
+    LayerLicenceOut,
     PreviewIn,
     PreviewOut,
     RevalidationOut,
@@ -29,6 +30,7 @@ from solidaritynode_backend.schemas.api import (
 from solidaritynode_backend.services.packages import (
     FEATURE_LAYERS,
     PackageError,
+    activate_version,
     available_packages,
     available_path,
     import_package,
@@ -84,6 +86,14 @@ def data_version_out(db: Session, dv: DataVersion) -> DataVersionOut:
         changelog=m.get("changelog", []),
         processing_notes=m.get("processing_notes", []),
         sources=m.get("sources", []),
+        layer_licences=[
+            LayerLicenceOut(
+                layer=name,
+                licence=str(e.get("licence", "")),
+                attribution=str(e.get("attribution", "")),
+            )
+            for name, e in sorted(m.get("layers", {}).items())
+        ],
         coverage=coverage,
         edge_effect_units=warned,
     )
@@ -244,6 +254,34 @@ def confirm_import(body: ImportIn, admin: Admin, db: Db, settings: Config) -> Im
     return ImportOut(
         data_version_id=outcome.data_version_id,
         noop=outcome.noop,
+        baseline_run_id=outcome.baseline_run_id,
+        revalidation=[RevalidationOut(**r) for r in outcome.revalidation],
+    )
+
+
+@router.post(
+    "/data-versions/{data_version_id}/activate",
+    response_model=ImportOut,
+    responses={409: {"description": "The data version is already active"}},
+)
+def activate_data_version(
+    data_version_id: int, admin: Admin, db: Db, settings: Config
+) -> ImportOut:
+    """Make an earlier imported data version active again (rollback).
+
+    Like an import, this queues a baseline run on that data and revalidates every scenario.
+    """
+    try:
+        outcome = activate_version(db, settings, data_version_id, admin.id)
+    except KeyError:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "data version not found") from None
+    except PackageError as exc:
+        db.rollback()
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from None
+    db.commit()
+    return ImportOut(
+        data_version_id=outcome.data_version_id,
+        noop=False,
         baseline_run_id=outcome.baseline_run_id,
         revalidation=[RevalidationOut(**r) for r in outcome.revalidation],
     )

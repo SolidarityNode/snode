@@ -7,6 +7,7 @@ import importlib.util
 import io
 import json
 import shutil
+import sqlite3
 import sys
 import zipfile
 from pathlib import Path
@@ -93,9 +94,11 @@ def test_unlisted_file_is_refused(tmp_path: Path) -> None:
 def test_incompatible_schema_is_refused_with_a_clear_message(tmp_path: Path) -> None:
     pkg = _copy(tmp_path)
     manifest = json.loads((pkg / "manifest.json").read_text())
-    manifest["schema_version"] = "2.0"
+    manifest["schema_version"] = "3.0"
     (pkg / "manifest.json").write_text(json.dumps(manifest))
-    with pytest.raises(IncompatibleSchemaError, match=r"schema version 2\.0 is not supported"):
+    with pytest.raises(
+        IncompatibleSchemaError, match=r"schema version 3\.0 is not supported.*schema 2\.x"
+    ):
         read_package(pkg)
 
 
@@ -139,7 +142,12 @@ def test_preview_lists_exactly_the_expected_changes(as_admin) -> None:  # type: 
         diff = layers[layer]
         assert (diff["added"], diff["changed"], diff["closed"], diff["removed"]) == ([], [], [], [])
     assert preview["coverage_changes"] == [
-        {"municipality_id": "M-B", "layer": "facilities", "before": "missing", "after": "verified"}
+        {
+            "municipality_id": "M-B",
+            "layer": "facilities",
+            "before": "missing",
+            "after": "verified_by_municipality",
+        }
     ]
     # Nothing written by the preview.
     assert as_admin.get("/data-versions/active").json()["version"] == "1.0.0"
@@ -190,10 +198,8 @@ def test_same_version_with_other_content_is_refused(as_admin, tmp_path: Path) ->
 def test_deleted_feature_is_refused(as_admin, tmp_path: Path) -> None:  # type: ignore[no-untyped-def]
     import_version(as_admin, "1.0.0")
     pkg = _copy(tmp_path, "1.1.0")
-    layer = pkg / "layers" / "facilities.geojson"
-    data = json.loads(layer.read_text())
-    data["features"] = [f for f in data["features"] if f["id"] != "F1"]
-    layer.write_text(json.dumps(data))
+    with sqlite3.connect(pkg / "layers.gpkg") as db:
+        db.execute("DELETE FROM facilities WHERE facility_id = 'F1'")
     rows = (pkg / "tables" / "facility_services.csv").read_text().splitlines()
     kept = [r for r in rows if not r.startswith("F1,")]
     (pkg / "tables" / "facility_services.csv").write_text("\n".join(kept) + "\n")
@@ -235,3 +241,98 @@ def test_cli_preview_only_signals_nothing_to_do(as_admin, settings, capsys) -> N
     assert import_command(settings, pkg, yes=True, preview_only=False) == 0
     assert import_command(settings, pkg, yes=False, preview_only=True) == NOTHING_TO_DO
     assert "already imported: nothing to do" in capsys.readouterr().out
+
+
+# --- Schema 2.0: GeoPackage layers, CRS, licences, CSV dialect (ADR 0013) ----------------------
+
+
+def test_layers_come_from_the_geopackage_in_the_manifest_crs() -> None:
+    content = read_package(PACKAGES / "demo-1.1.0")
+    props, wkb = content.features["network_edges"]["E01"]
+    assert props["closable"] is False
+    assert props["length_m"] == 2000.0
+    assert wkb[:5] == b"\x01\x02\x00\x00\x00"  # little-endian WKB LineString
+    assert content.manifest["layers"]["facilities"]["licence"] == "AGPL-3.0-or-later"
+    assert content.manifest["schema_version"] == "2.0"
+
+
+def test_geojson_package_of_schema_1_is_refused(tmp_path: Path) -> None:
+    pkg = _copy(tmp_path)
+    manifest = json.loads((pkg / "manifest.json").read_text())
+    manifest["schema_version"] = "1.0"
+    (pkg / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(IncompatibleSchemaError, match=r"schema version 1\.0 is not supported"):
+        read_package(pkg)
+
+
+def test_layer_in_another_crs_is_refused(tmp_path: Path) -> None:
+    pkg = _copy(tmp_path)
+    with sqlite3.connect(pkg / "layers.gpkg") as db:
+        db.execute(
+            "INSERT INTO gpkg_spatial_ref_sys VALUES ('WGS 84', 4326, 'EPSG', 4326, 'GEOGCS', NULL)"
+        )
+        db.execute("UPDATE gpkg_geometry_columns SET srs_id = 4326 WHERE table_name = 'facilities'")
+    _rechecksum(pkg)
+    with pytest.raises(PackageError, match=r"facilities: geometries are in EPSG:4326.*EPSG:2100"):
+        read_package(pkg)
+
+
+def test_a_file_that_is_not_a_geopackage_is_refused(tmp_path: Path) -> None:
+    pkg = _copy(tmp_path)
+    (pkg / "layers.gpkg").write_bytes(b'{"type": "FeatureCollection"}')
+    _rechecksum(pkg)
+    with pytest.raises(PackageError, match=r"layers\.gpkg: .*not an SQLite database"):
+        read_package(pkg)
+
+
+@pytest.mark.parametrize("missing", ["licence", "attribution"])
+def test_every_layer_needs_a_licence_and_attribution(tmp_path: Path, missing: str) -> None:
+    pkg = _copy(tmp_path)
+    manifest = json.loads((pkg / "manifest.json").read_text())
+    del manifest["layers"]["network_edges"][missing]
+    (pkg / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(PackageError, match=f"layer network_edges needs a {missing}"):
+        read_package(pkg)
+
+
+@pytest.mark.parametrize(
+    ("content", "message"),
+    [
+        (
+            "facility_id;service_id;places;staff;throughput\nF1;S-HC;10;4,5;100\n",
+            "uses ';' as delimiter",
+        ),
+        (
+            'facility_id,service_id,places,staff,throughput\nF1,S-HC,10,"4,5",100\n',
+            r"staff: '4,5' uses a comma as decimal separator; use a dot",
+        ),
+        (
+            "facility_id,service_id,places,staff,throughput\nF1,S-HC,10,4,5,100\n",
+            "6 fields, the header has 5. A comma used as decimal separator",
+        ),
+        (
+            "facility_id,service_id,places,staff\nF1,S-HC,10,4\n",
+            "header row lacks throughput",
+        ),
+        ("facility_id,service_id,places,staff,throughput\nF1,S-HC,ten,4,100\n", "not a number"),
+    ],
+)
+def test_csv_dialect_is_enforced(tmp_path: Path, content: str, message: str) -> None:
+    pkg = _copy(tmp_path)
+    (pkg / "tables" / "facility_services.csv").write_text(content, encoding="utf-8")
+    _rechecksum(pkg)
+    with pytest.raises(PackageError, match=message):
+        read_package(pkg)
+
+
+def test_csv_in_a_greek_codepage_is_refused_and_a_bom_is_tolerated(tmp_path: Path) -> None:
+    pkg = _copy(tmp_path)
+    groups = pkg / "tables" / "groups.csv"
+    text_ = groups.read_text(encoding="utf-8")
+    groups.write_bytes(text_.replace("(synthetic)", "(συνθετικό)").encode("cp1253"))
+    _rechecksum(pkg)
+    with pytest.raises(PackageError, match=r"not UTF-8.*Windows-1253"):
+        read_package(pkg)
+    groups.write_bytes(b"\xef\xbb\xbf" + text_.encode("utf-8"))
+    _rechecksum(pkg)
+    assert read_package(pkg).version == "1.0.0"

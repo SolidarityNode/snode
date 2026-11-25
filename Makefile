@@ -39,7 +39,7 @@ BACKEND_URL := http://127.0.0.1:$(BACKEND_HOST_PORT)
         lint lint-core lint-backend lint-frontend \
         test test-core test-backend test-frontend \
         fmt stop up down logs ps wait db-shell seed reset uat images licenses labels clean distclean \
-        test-db test-e2e e2e-setup import-package create-admin schemas
+        test-db test-e2e e2e-setup import-package activate-version create-admin schemas
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -213,6 +213,17 @@ import-package: check-engine ## Validate, preview and import a data package (PKG
 	  [ "$$answer" = "yes" ] || { echo "Aborted; nothing imported."; exit 1; }; \
 	fi; \
 	pack | $(COMPOSE) exec -T backend python -m solidaritynode_backend.cli import-package - --yes
+
+activate-version: check-engine ## Make an earlier imported data version active again (VERSION=x.y.z; YES=1 skips the question)
+	@[ -n "$(VERSION)" ] || { echo "Usage: make activate-version VERSION=<x.y.z> [PACKAGE_ID=...]" >&2; exit 1; }
+	@args="$(VERSION)$(if $(PACKAGE_ID), --package-id $(PACKAGE_ID),)"; \
+	rc=0; $(COMPOSE) exec -T backend python -m solidaritynode_backend.cli activate-version $$args || rc=$$?; \
+	[ $$rc -eq 3 ] && exit 0; [ $$rc -eq 0 ] || exit $$rc; \
+	if [ "$(YES)" != "1" ]; then \
+	  read -r -p "Make it active? Type 'yes' to confirm: " answer || answer=""; \
+	  [ "$$answer" = "yes" ] || { echo "Aborted; nothing changed."; exit 1; }; \
+	fi; \
+	$(COMPOSE) exec -T backend python -m solidaritynode_backend.cli activate-version $$args --yes
 
 create-admin: check-engine ## Create the first administrator interactively
 	$(COMPOSE) exec backend python -m solidaritynode_backend.cli create-admin

@@ -93,3 +93,71 @@ def test_package_update_flow(as_admin, as_analyst, worker) -> None:  # type: ign
     cross = as_analyst.get(f"/runs/{new_run['id']}/compare", params={"with": old_run["id"]}).json()
     assert cross["cross_data_version"] is True
     assert "across data versions 1.0.0 → 1.1.0" in cross["label"]
+
+
+WITH_F4 = {
+    "name": "F4 staff +1",
+    "description": "Synthetic test scenario on a facility that exists only in 1.1.0",
+    "visibility": "shared",
+    "body": {
+        "capacity_changes": [
+            {
+                "facility_id": "F4",
+                "service_id": "S-SD",
+                "capacity_input": "staff",
+                "mode": "absolute",
+                "amount": 1,
+            }
+        ]
+    },
+}
+
+
+def test_rollback_makes_an_earlier_version_active_again(as_admin, as_analyst, worker) -> None:  # type: ignore[no-untyped-def]
+    v1 = import_version(as_admin, "1.0.0")["data_version_id"]
+    v2 = import_version(as_admin, "1.1.0")["data_version_id"]
+    worker.run_until_idle()
+    f4 = as_analyst.post("/scenarios", json=WITH_F4)
+    assert f4.status_code == 201, f4.text
+    run_on_v2 = as_analyst.post("/runs", json={"scenario_id": f4.json()["id"]}).json()
+    worker.run_until_idle()
+
+    assert as_analyst.post(f"/data-versions/{v1}/activate").status_code == 403  # admin only
+    response = as_admin.post(f"/data-versions/{v1}/activate")
+    assert response.status_code == 200, response.text
+    outcome = response.json()
+    assert outcome["data_version_id"] == v1
+    active = as_admin.get("/data-versions/active").json()
+    assert (active["id"], active["version"]) == (v1, "1.0.0")
+    assert active["edge_effect_units"] == ["A3", "A6"]  # the warnings of 1.0.0 apply again
+    baseline = as_admin.get(f"/runs/{outcome['baseline_run_id']}").json()
+    assert (baseline["is_baseline"], baseline["data_version_id"]) == (True, v1)
+    assert baseline["status"] == "queued"
+    attention = {r["name"]: r["problems"] for r in outcome["revalidation"]}
+    assert any("F4" in p for p in attention["F4 staff +1"])  # F4 does not exist in 1.0.0
+    # Nothing is deleted: the run on 1.1.0 keeps its data version and results.
+    kept = as_analyst.get(f"/runs/{run_on_v2['id']}").json()
+    assert (kept["data_version_id"], kept["status"]) == (v2, "succeeded")
+
+    again = as_admin.post(f"/data-versions/{v1}/activate")
+    assert again.status_code == 409
+    assert "already active" in again.json()["detail"]
+    assert as_admin.post("/data-versions/999/activate").status_code == 404
+    assert as_admin.post(f"/data-versions/{v2}/activate").status_code == 200  # and forward
+
+
+def test_cli_activate_version_describes_then_activates(as_admin, worker, capsys) -> None:  # type: ignore[no-untyped-def]
+    from solidaritynode_backend.cli import NOTHING_TO_DO, main
+
+    import_version(as_admin, "1.0.0")
+    import_version(as_admin, "1.1.0")
+    assert main(["activate-version", "1.0.0"]) == 0
+    out = capsys.readouterr().out
+    assert "1.0.0" in out
+    assert "will become active again instead of 1.1.0" in out
+    assert as_admin.get("/data-versions/active").json()["version"] == "1.1.0"  # only described
+    assert main(["activate-version", "1.0.0", "--yes"]) == 0
+    assert "is active again" in capsys.readouterr().out
+    assert as_admin.get("/data-versions/active").json()["version"] == "1.0.0"
+    assert main(["activate-version", "1.0.0"]) == NOTHING_TO_DO
+    assert main(["activate-version", "9.9.9"]) == 1

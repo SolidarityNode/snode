@@ -326,7 +326,7 @@
               "missing",
               "open_data",
               "estimated",
-              "verified"
+              "verified_by_municipality"
             ],
             "title": "Status",
             "type": "string"
@@ -383,6 +383,14 @@
             "format": "date-time",
             "title": "Imported At",
             "type": "string"
+          },
+          "layer_licences": {
+            "description": "Licence and attribution per layer (schema 2.0)",
+            "items": {
+              "$ref": "#/components/schemas/LayerLicenceOut"
+            },
+            "title": "Layer Licences",
+            "type": "array"
           },
           "package_id": {
             "title": "Package Id",
@@ -752,6 +760,30 @@
           "total"
         ],
         "title": "LayerDiff",
+        "type": "object"
+      },
+      "LayerLicenceOut": {
+        "description": "Licence and attribution of one layer of a data package (ADR 0013).",
+        "properties": {
+          "attribution": {
+            "title": "Attribution",
+            "type": "string"
+          },
+          "layer": {
+            "title": "Layer",
+            "type": "string"
+          },
+          "licence": {
+            "title": "Licence",
+            "type": "string"
+          }
+        },
+        "required": [
+          "layer",
+          "licence",
+          "attribution"
+        ],
+        "title": "LayerLicenceOut",
         "type": "object"
       },
       "LoginIn": {
@@ -2492,6 +2524,52 @@
           }
         },
         "summary": "Get Data Version",
+        "tags": [
+          "data"
+        ]
+      }
+    },
+    "/data-versions/{data_version_id}/activate": {
+      "post": {
+        "description": "Make an earlier imported data version active again (rollback).\n\nLike an import, this queues a baseline run on that data and revalidates every scenario.",
+        "operationId": "activate_data_version_data_versions__data_version_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "data_version_id",
+            "required": true,
+            "schema": {
+              "title": "Data Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "409": {
+            "description": "The data version is already active"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Activate Data Version",
         "tags": [
           "data"
         ]

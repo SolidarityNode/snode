@@ -1,6 +1,7 @@
 """Read a synthetic demo data package (``data/synthetic/packages/``) into a StudyArea, for tests.
 
-Standard library only; mirrors what the backend loads from the database. Closed facilities
+Standard library only (``sqlite3`` reads the attribute columns of ``layers.gpkg``; geometries are
+not needed); mirrors what the backend loads from the database. Closed facilities
 (``valid_to`` on or before the package date) are left out, as the backend does.
 """
 
@@ -8,6 +9,7 @@ from __future__ import annotations
 
 import csv
 import json
+import sqlite3
 from pathlib import Path
 from typing import Any
 
@@ -32,8 +34,13 @@ PACKAGES = Path(__file__).resolve().parents[3] / "data" / "synthetic" / "package
 
 
 def _features(pkg: Path, layer: str) -> list[dict[str, Any]]:
-    data = json.loads((pkg / "layers" / f"{layer}.geojson").read_text("utf-8"))
-    return [f["properties"] for f in data["features"]]
+    with sqlite3.connect(f"file:{pkg / 'layers.gpkg'}?mode=ro", uri=True) as db:
+        cursor = db.execute(f"SELECT * FROM {layer} ORDER BY fid")
+        names = [c[0] for c in cursor.description]
+        rows = cursor.fetchall()
+    return [
+        {k: v for k, v in zip(names, row, strict=True) if k not in ("fid", "geom")} for row in rows
+    ]
 
 
 def _rows(pkg: Path, name: str) -> list[dict[str, str]]:
@@ -99,7 +106,7 @@ def load(version: str) -> StudyArea:
                     TransportMode.WALK: e["travel_time_walk_min"],
                     TransportMode.CAR: e["travel_time_car_min"],
                 },
-                e["closable"],
+                bool(e["closable"]),  # BOOLEAN is stored as 0/1 in a GeoPackage
             )
             for e in _features(pkg, "network_edges")
         ),

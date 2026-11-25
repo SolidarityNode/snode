@@ -227,6 +227,27 @@ export function StudyAreaPage() {
       <p className="muted">
         {t("study.processing_notes", { notes: dv.processing_notes.join(", ") })}
       </p>
+      {dv.layer_licences && dv.layer_licences.length > 0 && (
+        <table data-testid="layer-licences">
+          <caption>{t("study.licences_title")}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{t("study.layer")}</th>
+              <th scope="col">{t("study.licence")}</th>
+              <th scope="col">{t("study.attribution")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dv.layer_licences.map((l) => (
+              <tr key={l.layer}>
+                <th scope="row">{label(t, "layer", l.layer)}</th>
+                <td>{l.licence}</td>
+                <td>{l.attribution}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </section>
   );
 }

@@ -27,10 +27,11 @@ from sqlalchemy.orm import Session
 
 from solidaritynode_backend.auth import create_user
 from solidaritynode_backend.config import Settings, get_settings
-from solidaritynode_backend.orm import Job, User
+from solidaritynode_backend.orm import DataVersion, Job, User
 from solidaritynode_backend.services.installation import RoleMismatchError, check_role
 from solidaritynode_backend.services.packages import (
     PackageError,
+    activate_version,
     import_package,
     opened_package,
     preview_package,
@@ -120,6 +121,50 @@ def import_command(settings: Settings, path: str, yes: bool, preview_only: bool)
         return 1
 
 
+def activate_command(settings: Settings, version: str, package_id: str | None, yes: bool) -> int:
+    """Make an earlier imported data version active again (rollback).
+
+    Without ``--yes`` it only describes what would happen and exits ``NOTHING_TO_DO`` (3) when
+    that version is already active, so ``make activate-version`` can ask first.
+    """
+    with _session(settings) as db:
+        query = select(DataVersion).where(DataVersion.version == version)
+        if package_id:
+            query = query.where(DataVersion.package_id == package_id)
+        found = list(db.scalars(query))
+        if not found:
+            print(f"activate-version: no imported data version {version}", file=sys.stderr)
+            return 1
+        if len(found) > 1:
+            ids = ", ".join(dv.package_id for dv in found)
+            print(
+                f"activate-version: {version} exists for {ids}; add --package-id", file=sys.stderr
+            )
+            return 1
+        dv = found[0]
+        active = db.scalar(select(DataVersion).where(DataVersion.active))
+        if dv.active:
+            print(f"Data version {dv.package_id} {dv.version} is already active: nothing to do.")
+            return NOTHING_TO_DO
+        print(
+            f"Data version {dv.package_id} {dv.version} (imported {dv.imported_at:%Y-%m-%d}) will "
+            f"become active again instead of {active.version if active else 'none'}. A baseline "
+            "run is queued on it and every scenario is revalidated; nothing is deleted."
+        )
+        if not yes:
+            return 0
+        try:
+            outcome = activate_version(db, settings, dv.id, None)
+        except PackageError as exc:
+            print(f"activate-version: {exc}", file=sys.stderr)
+            return 1
+        db.commit()
+    print(f"Data version {version} is active again. Baseline run: {outcome.baseline_run_id}.")
+    for entry in outcome.revalidation:
+        print(f"  needs attention: {entry['name']}: {'; '.join(entry['problems'])}")
+    return 0
+
+
 def create_admin(settings: Settings) -> int:
     """Create an administrator interactively."""
     username = input("Admin username: ").strip()
@@ -195,6 +240,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help=f"show the preview and stop (exit {NOTHING_TO_DO} if already imported)",
     )
+    act = sub.add_parser("activate-version", help="make an earlier data version active again")
+    act.add_argument("version", help="data package version, for example 1.0.0")
+    act.add_argument("--package-id", help="needed only if several packages have that version")
+    act.add_argument("--yes", action="store_true", help="activate (otherwise only describe)")
     sub.add_parser("create-admin", help="create an administrator interactively")
     sub.add_parser("seed-demo-users", help="create UAT demo users (development only)")
     wait = sub.add_parser("wait-runs", help="wait until no job is pending")
@@ -213,6 +262,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 2
     if args.command == "import-package":
         return import_command(settings, args.path, args.yes, args.preview_only)
+    if args.command == "activate-version":
+        return activate_command(settings, args.version, args.package_id, args.yes)
     if args.command == "create-admin":
         return create_admin(settings)
     if args.command == "seed-demo-users":

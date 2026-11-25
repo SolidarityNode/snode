@@ -144,6 +144,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/data-versions/{data_version_id}/activate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Activate Data Version
+     * @description Make an earlier imported data version active again (rollback).
+     *
+     *     Like an import, this queues a baseline run on that data and revalidates every scenario.
+     */
+    post: operations["activate_data_version_data_versions__data_version_id__activate_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/data-versions/{data_version_id}/catalog": {
     parameters: {
       query?: never;
@@ -823,7 +845,7 @@ export interface components {
        * Status
        * @enum {string}
        */
-      status: "missing" | "open_data" | "estimated" | "verified";
+      status: "missing" | "open_data" | "estimated" | "verified_by_municipality";
     };
     /**
      * DataVersionOut
@@ -852,6 +874,11 @@ export interface components {
        * Format: date-time
        */
       imported_at: string;
+      /**
+       * Layer Licences
+       * @description Licence and attribution per layer (schema 2.0)
+       */
+      layer_licences?: components["schemas"]["LayerLicenceOut"][];
       /** Package Id */
       package_id: string;
       /** Processing Notes */
@@ -994,6 +1021,18 @@ export interface components {
       total: number;
       /** Unchanged */
       unchanged: number;
+    };
+    /**
+     * LayerLicenceOut
+     * @description Licence and attribution of one layer of a data package (ADR 0013).
+     */
+    LayerLicenceOut: {
+      /** Attribution */
+      attribution: string;
+      /** Layer */
+      layer: string;
+      /** Licence */
+      licence: string;
     };
     /**
      * LoginIn
@@ -1772,6 +1811,44 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["DataVersionOut"];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  activate_data_version_data_versions__data_version_id__activate_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        data_version_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImportOut"];
+        };
+      };
+      /** @description The data version is already active */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {

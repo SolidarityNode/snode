@@ -101,8 +101,16 @@ class CoverageOut(BaseModel):
 
     municipality_id: str
     layer: str
-    status: Literal["missing", "open_data", "estimated", "verified"]
+    status: Literal["missing", "open_data", "estimated", "verified_by_municipality"]
     layer_version: str
+
+
+class LayerLicenceOut(BaseModel):
+    """Licence and attribution of one layer of a data package (ADR 0013)."""
+
+    layer: str
+    licence: str
+    attribution: str
 
 
 class DataVersionOut(BaseModel):
@@ -120,6 +128,9 @@ class DataVersionOut(BaseModel):
     changelog: list[dict[str, Any]]
     processing_notes: list[str]
     sources: list[dict[str, Any]]
+    layer_licences: list[LayerLicenceOut] = Field(
+        default_factory=list, description="Licence and attribution per layer (schema 2.0)"
+    )
     coverage: list[CoverageOut]
     edge_effect_units: list[str]
 
