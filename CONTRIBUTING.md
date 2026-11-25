@@ -74,7 +74,7 @@ All configuration comes from `.env` (git-ignored), created by `make setup` from 
 | `SOLIDARITYNODE_SAMPLES_WARN_MB` | backend | `500` | Warn when a run's samples file is estimated, before the run starts, above this many megabytes (ADR 0008); the run is still queued |
 | `SOLIDARITYNODE_JOB_MAX_RUNTIME_SECONDS` | worker | empty (no limit) | Optional maximum runtime per job kind, as `kind=seconds` pairs (for example `run=3600`); a job over it is stopped at its next progress step and marked failed |
 | `SOLIDARITYNODE_TEST_DATABASE_URL` | backend tests | compose `db` on 127.0.0.1:5432 | PostGIS server on which the tests create a throw-away database |
-| `GIT_COMMIT` | image builds | set by `make up` | Build identity shown by `/version` and the footer |
+| `GIT_COMMIT` | image builds | set by `make up` | Build identity shown by `/version` and the footer, recorded on every run; with `APP_ENV=production` it must be known and not end in `-dirty` (backend and worker refuse to start otherwise) |
 | `CONTAINER_ENGINE`, `COMPOSE` | Makefile | `podman`, `podman compose` | Container engine and compose command |
 
 **Adding a setting:** add it to `.env.example` in the same PR with a safe development default (secrets as `change-me`) and a one-line comment, and add a row to this table (AGENTS.md, "Configuration").

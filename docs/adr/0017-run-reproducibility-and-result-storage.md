@@ -22,6 +22,21 @@ Spec 00 §3: a **run** is one **immutable** execution of a scenario and records 
 - Model and parameter versioning for CPTs and priors (with ADR 0004, OQ-27).
 - How background jobs report progress and cancellation (ADR 0006).
 
+### Answers for v0.1
+
+- *Fingerprint and reuse*: the input hash below; a match is reused only when its results file
+  is present and passes its SHA-256 check (see "Cached reuse").
+- *Dirty or unknown code*: refused in production; allowed in development with a visible
+  warning (see "Code version").
+- *Retention, size, backup*: **no automatic deletion** of samples in v0.1; the size of each
+  run's samples file is estimated before it starts (ADR 0008) and the **Admin screen shows the
+  results disk usage** (samples files, runs, free space; `GET /storage`). The **database and
+  the results volume must be backed up together**, at the same point in time, because run rows
+  point to files and record their checksums: a note for the future backup guide (production
+  operations ADR, see ADR 0012).
+- *Parameter versions*: open until models have CPTs and priors (ADR 0004, OQ-27).
+- *Progress and cancellation*: ADR 0006.
+
 ## Decision
 
 **Accepted for v0.1, to be revisited: option 1, run record in PostgreSQL plus Parquet files.**
@@ -34,8 +49,23 @@ Spec 00 §3: a **run** is one **immutable** execution of a scenario and records 
   version and manifest checksum, code version, model id and version, seed and configuration (no
   timestamps). Starting a run whose hash matches a **succeeded** run returns that run unless the
   user forces a rerun; failed or cancelled runs are never reused.
-- A worker built from a different commit refuses a run recorded for another code version (the run
-  fails with a clear message), so results always come from the recorded code.
+- **Code version.** With `APP_ENV=production`, backend and worker refuse to start when
+  `GIT_COMMIT` is unknown or ends in `-dirty` (settings validation, so `make check-config` fails
+  too). In development such runs are allowed and carry a visible warning on the run page
+  (`code_version_dirty`): they are reproducible only on the machine that made them. A worker
+  built from a different commit (or with another model version) refuses a run queued for
+  another one; the run fails with "This run was queued for code …, but the platform now runs
+  code … Start the run again." Starting it again records the new code version.
+- **Seed and draws.** When a run is started without a seed, one is drawn (`secrets`,
+  `[0, 2^31)`) and recorded (`seed_source: drawn`); the number of draws is recorded in the
+  configuration (`n_samples`). The screens always send a seed (default 1), and the baseline run
+  of an import uses seed 1, so their reuse is unchanged. Python, NumPy and platform versions of
+  the worker are recorded on the run and in `metadata.json` (`environment`), **not** in the
+  hash.
+- **Cached reuse.** Among succeeded runs with the same hash (newest first), the first whose
+  samples file is present and passes its SHA-256 check is reused. If none passes, the new run
+  records why (`reuse_refused`, shown on the run page) and computes the results again; from
+  then on it is the run that is reused.
 - **Result summary schema.** Every result value (`run_results`, per unit × group × service ×
   time × indicator) stores its **mean**, its **median** and two **interval quantiles** (`low`,
   `high`). The quantile levels are configurable (`SOLIDARITYNODE_RESULT_INTERVAL_QUANTILES`,
@@ -71,5 +101,13 @@ Spec 00 §3: a **run** is one **immutable** execution of a scenario and records 
 
 ## Consequences
 
-- A dirty working tree gives a `-dirty` commit; such runs are reproducible only on that machine.
+- A dirty working tree gives a `-dirty` commit; such runs are reproducible only on that machine
+  (development only).
 - Parameter versions (CPTs, priors) will join the hash when models have them (ADR 0004, OQ-27).
+- The comparison shows a **difference of medians** (labelled so in the UI, the API field
+  `difference_of_medians` and its description). There is no comparison export yet; the run
+  export has no difference column.
+- **Open, to apply with the first research model:** the uncertainty of a difference should
+  come from **draw-by-draw differences** when both runs share data version, seed and number of
+  draws (common random numbers), as `summarise_total` does for totals; otherwise the screens
+  show the two medians and both intervals, labelled, and no interval for the difference.
