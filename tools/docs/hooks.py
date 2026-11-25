@@ -7,6 +7,11 @@
    outside ``docs/`` (code, ``LICENSE``, ``core/AGENTS.md`` ...) becomes a link to the file
    on GitHub at ``DOCS_GIT_REF`` (default ``main``; the docs workflow sets the release tag).
 3. The platform version from ``VERSION`` is shown in the footer (``extra.platform_version``).
+4. Bilingual site (mkdocs-static-i18n, ``page.md`` English, ``page.el.md`` Greek, served under
+   ``el/``). The plugin rebuilds every file from ``docs/`` once per language, so the root pages
+   of (1) are added after it and made into its kind of file. The language switcher links are
+   made relative to the page: the plugin's links on the home pages are absolute from
+   ``site_url`` and would miss the mike version folder (``/snode/dev/el/``).
 """
 
 from __future__ import annotations
@@ -18,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from mkdocs.config.defaults import MkDocsConfig
+from mkdocs.plugins import event_priority
 from mkdocs.structure.files import File, Files
 from mkdocs.structure.pages import Page
 
@@ -52,13 +58,59 @@ def on_config(config: MkDocsConfig) -> MkDocsConfig:
     return config
 
 
+def _i18n(config: MkDocsConfig) -> Any:
+    """Return the mkdocs-static-i18n plugin instance, or None when it is not configured."""
+    return config.plugins.get("i18n")
+
+
+@event_priority(-110)  # after mkdocs-static-i18n (-100), which rebuilds files from docs/
 def on_files(files: Files, config: MkDocsConfig) -> Files:
-    """Add the root files as generated pages."""
+    """Add the root files as generated pages (in the language being built, see (4))."""
     root = _root(config)
+    i18n = _i18n(config)
     for source, dest in ROOT_PAGES.items():
         content = (root / source).read_text(encoding="utf-8")
-        files.append(File.generated(config, dest, content=content))
+        file = File.generated(config, dest, content=content)
+        if i18n is not None:
+            from mkdocs_static_i18n.suffix import create_i18n_file
+
+            generated_by = file.generated_by
+            file = create_i18n_file(
+                file, i18n.current_language, i18n.default_language, i18n.all_languages, config
+            )
+            file.content_string = content  # the plugin's copy points into docs/; keep the text
+            file.generated_by = generated_by
+        files.append(file)
     return files
+
+
+@event_priority(0)  # after mkdocs-static-i18n sets its own links (50)
+def on_page_context(
+    context: dict[str, Any], page: Page, config: MkDocsConfig, **_: Any
+) -> dict[str, Any]:
+    """Point each language switcher entry at the same page in that language.
+
+    The link is relative to the site root of the version being built; the theme makes it
+    relative to the page. Every page exists in every language (English is the fallback), so
+    the counterpart of ``el/x/`` is ``x/`` and the reverse.
+    """
+    i18n = _i18n(config)
+    alternates = getattr(config.extra, "alternate", None) or config.extra.get("alternate")
+    if i18n is None or not alternates:
+        return context
+    url = page.url
+    current, default = i18n.current_language, i18n.default_language
+    if current != default and url.startswith(f"{current}/"):
+        url = url[len(current) + 1 :]
+    links = []
+    for alternate in alternates:
+        lang = alternate["lang"]
+        target = url if lang == default else f"{lang}/{url}"
+        links.append({**alternate, "link": target or "./"})
+    # The plugin sets ``config.extra.alternate`` as an attribute, which the theme reads first.
+    config.extra["alternate"] = links
+    config.extra.alternate = links
+    return context
 
 
 def _repo_path(page: Page, config: MkDocsConfig) -> str:

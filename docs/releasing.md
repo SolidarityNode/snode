@@ -59,6 +59,6 @@ flowchart LR
 
 ## Documentation versions
 
-The site is versioned with [mike](https://github.com/jimporter/mike): `dev` is built from `main` on every push, and each release tag `vX.Y.Z` publishes `X.Y` (patch releases overwrite their minor version) and moves `latest` to it. The version selector at the top of the site lists them.
+The site is versioned with [mike](https://github.com/jimporter/mike): `dev` is built from `main` on every push, and each release tag `vX.Y.Z` publishes `X.Y` (patch releases overwrite their minor version) and moves `latest` to it. The version selector at the top of the site lists them. Each version holds both languages: the Greek pages are under `el/` (for example `/snode/latest/el/`), and the language switcher keeps the version.
 
 **One-time setup (maintainer):** in the repository settings, **Settings → Pages → Build and deployment → Source: Deploy from a branch**, branch `gh-pages`, folder `/ (root)`. The branch is created by the first run of the `docs` workflow on `main`. The site is then at <https://solidaritynode.github.io/snode/>.

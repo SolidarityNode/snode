@@ -3,7 +3,8 @@
 The platform is used in Greek and English. These are the terms to use in the user interface
 (`frontend/src/i18n/el.json`, `en.json`), in documentation written in Greek and in the papers'
 Greek summaries. **Decided** terms were chosen by the maintainer; **in use** terms are what the
-UI uses today and change only by editing this file first.
+UI uses today and change only by editing this file first; **proposed** terms were added with the
+Greek documentation site and wait for the maintainer's approval.
 
 When a term is missing, add it here in the same pull request that first uses it. Keep a
 concept's term the same everywhere; do not translate one concept two ways.
@@ -34,6 +35,36 @@ concept's term the same everywhere; do not translate one concept two ways.
 | staff / places / throughput | προσωπικό / θέσεις / παραγωγικότητα | in use | capacity inputs |
 | median | διάμεσος | in use | results, comparison |
 | interval | διάστημα | in use | results, comparison |
+| uncertainty | αβεβαιότητα | in use | results, comparison, map layers |
+| indicator | δείκτης | in use | results |
+| capacity | δυναμικότητα | in use | scenario editor, study area |
+| disruption / disruption severity (DS) | διαταραχή / σοβαρότητα διαταραχής | in use | scenario editor |
+| rationing case (OQ-24) | περίπτωση κατανομής ελλείμματος | in use | scenario editor |
+| diagnostic model | διαγνωστικό μοντέλο | in use | diagnostic banner, Greek docs |
+| random seed | σπόρος τυχαιότητας | in use | run page, reproducibility |
+| core unit / buffer unit (buffer) | κεντρική μονάδα / μονάδα ζώνης (ζώνη) | in use | study area, results, legend |
+| hidden need | κρυφή ανάγκη | proposed | README Greek summary, Greek docs |
+| total need | συνολική ανάγκη | proposed | Greek docs (home) |
+| unmet expressed need / met need (OQ-8) | ανικανοποίητη εκφρασμένη ανάγκη / ικανοποιημένη ανάγκη | proposed | Greek docs (home) |
+| demand / recorded (observed) demand | ζήτηση / καταγεγραμμένη ζήτηση | proposed | Greek docs (home, roadmap) |
+| supply | προσφορά | proposed | Greek docs (home, roadmap) |
+| service gap | κενό εξυπηρέτησης | proposed | Greek docs (home, roadmap) |
+| social susceptibility | κοινωνική ευπάθεια (never for vulnerability) | proposed | Greek docs (home) |
+| (group) exposure | έκθεση (της ομάδας) | proposed | Greek docs (home) |
+| service loss | απώλεια υπηρεσίας | proposed | Greek docs (home) |
+| recovery | ανάκαμψη | proposed | Greek docs (home, roadmap) |
+| risk | κίνδυνος | proposed | Greek docs (home) |
+| service units / reference period | μονάδες υπηρεσίας / περίοδος αναφοράς | proposed | Greek docs (home) |
+| two-step floating catchment area (2SFCA) | μέθοδος κινητής περιοχής εξυπηρέτησης δύο βημάτων (2SFCA) | proposed | Greek docs (home) |
+| (Dynamic) Bayesian Network | (δυναμικό) μπεϋζιανό δίκτυο | proposed | Greek docs (home) |
+| sensitivity analysis | ανάλυση ευαισθησίας | proposed | Greek docs (home, roadmap) |
+| expert elicitation | συλλογή της γνώμης ειδικών | proposed | Greek docs (home) |
+| operational support | επιχειρησιακή υποστήριξη | proposed | Greek docs (home) |
+| anonymous request ticket / request logging | ανώνυμο δελτίο αιτήματος / καταγραφή αιτημάτων | proposed | Greek docs (home, FAQ, roadmap) |
+| facility state: normal / under pressure / degraded / critical / recovering | κανονική / υπό πίεση / υποβαθμισμένη / κρίσιμη / σε ανάκαμψη | proposed | Greek docs (home) |
+| Digital Twin | ψηφιακό δίδυμο | proposed | Greek docs (home) |
+| domain model | μοντέλο πεδίου | proposed | Greek docs (links to the English spec) |
+| paper (Papers 1–4) | άρθρο (Άρθρο 1–4) | proposed | Greek docs (home, roadmap) |
 
 ## Platform
 
@@ -48,6 +79,35 @@ concept's term the same everywhere; do not translate one concept two ways.
 | viewer / analyst / administrator | θεατής / αναλυτής / διαχειριστής | in use | roles |
 | database | βάση δεδομένων (never just "βάση", which is the baseline) | in use | Admin storage note |
 | results volume | τόμος αποτελεσμάτων | in use | Admin storage |
+| active data (version) | ενεργά δεδομένα / ενεργή έκδοση δεδομένων | in use | Admin, scenario editor, run page |
+| data quality / data coverage / layer | ποιότητα δεδομένων / κάλυψη δεδομένων / επίπεδο | in use | study area, results |
+| processing note | σημείωση επεξεργασίας | in use | study area |
+| licence / attribution | άδεια / αναφορά πηγής | in use | study area |
+| feature (map) | στοιχείο | in use | study area |
+| owner | κάτοχος (never ιδιοκτήτης) | decided | scenarios, scenario editor, server messages |
+| reproducibility / input hash / samples file | αναπαραγωγιμότητα / αποτύπωμα εισόδων / αρχείο δειγμάτων | in use | run page |
+| worker | υπηρεσία εκτέλεσης | in use | run page messages |
+| run status: queued / running / succeeded / failed / cancelled | σε αναμονή / εκτελείται / ολοκληρώθηκε / απέτυχε / ακυρώθηκε | in use | run page, scenarios |
+| preview / import / export | προεπισκόπηση / εισαγωγή / εξαγωγή | in use | Admin, run page |
+| sign in / sign out | σύνδεση / αποσύνδεση | in use | login, header |
+| hub | κεντρική εγκατάσταση (first use on a page: «κεντρική εγκατάσταση (hub)»; never φορέας, which is an organisation, or κόμβος, which is a network node) | decided | Greek docs (concepts, data updates, roles, FAQ, home, roadmap) |
+| hub onboarding | ένταξη (δήμου) στην κεντρική εγκατάσταση | proposed | Greek docs (home, roadmap) |
+| municipal installation | εγκατάσταση δήμου («η εγκατάσταση του δήμου σας»; never bare «εγκατάσταση» where it could mean the hub) | decided | Greek docs |
+| rollback (make an earlier data version active again) | επαναφορά | proposed | Greek docs (Admin, roadmap) |
+
+## Documentation
+
+Terms of the Greek pages of the documentation site (`docs/**/*.el.md`) that are not in the UI.
+
+| English | Greek | Status | Where used |
+| --- | --- | --- | --- |
+| (link to a page kept in English) | (στα αγγλικά) | decided | Greek docs, after links to English-only pages and on their navigation sections |
+| user guide | οδηγός χρήσης | proposed | Greek docs navigation |
+| concepts | βασικές έννοιες | proposed | Greek docs navigation |
+| roadmap | πορεία ανάπτυξης | proposed | Greek docs navigation |
+| platform foundation (v0.1) | θεμέλια της πλατφόρμας (not βάση, which is the baseline) | decided | Greek docs (home, roadmap) |
+| milestone / GitHub issue | ορόσημο / θέμα (issue) | proposed | Greek docs (roadmap, FAQ) |
+| user acceptance testing (UAT) | δοκιμές αποδοχής (UAT) | proposed | Greek docs navigation, home |
 
 ## Texts from the server
 

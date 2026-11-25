@@ -47,5 +47,6 @@ Closes #
 - [ ] Public API documented (docstrings cite the spec section)
 - [ ] Docs, specs cross-reference and ADRs updated where behaviour or decisions changed
 - [ ] Behaviour changed: a line under **Unreleased** in `CHANGELOG.md` and the affected user guide page (`docs/user-guide/`) updated
+- [ ] Changed an English user-facing page (home, user guide, concepts, roadmap): its Greek page (`*.el.md`) updated and stamped (`make docs-stamp PAGE=…`), or listed here as stale: <!-- pages -->
 - [ ] Diagrams are Mermaid and match the change; `make docs-build` passes when docs changed
 - [ ] Commits follow Conventional Commits and are signed off (`git commit -s`)

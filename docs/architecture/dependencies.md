@@ -43,6 +43,7 @@
 | mkdocs-get-deps | 0.2.2 | MIT | dev only: docs tooling |
 | mkdocs-material | 9.8.2 | MIT | dev only: docs tooling |
 | mkdocs-material-extensions | 1.3.1 | MIT | dev only: docs tooling |
+| mkdocs-static-i18n | 1.3.1 | MIT | dev only: docs tooling |
 | mypy | 2.4.1 | MIT | dev only: backend, core |
 | mypy-extensions | 1.2.0 | MIT | dev only: backend, core |
 | networkx | 3.7 | BSD-3-Clause | backend, core |

@@ -2,7 +2,7 @@
 
 > Describes platform version **0.1.0**. Screenshots come from the UAT walk-through on synthetic data ([UAT 01](../uat/01-platform.md)); a few labels may differ slightly from your screen.
 
-This guide is for the people who use SolidarityNode in a municipality: **analysts** who write scenarios and run them, **viewers** who read shared results, and **administrators** who manage users and data. No technical background is needed. For the ideas behind the screens (data package, scenario, run, data version), read [Concepts](../concepts.md) first.
+This guide is for the people who use SolidarityNode in a municipality: **analysts** who write scenarios and run them, **viewers** who read shared results, and **administrators** who manage users and data. No technical background is needed. For the ideas behind the screens (data package, scenario, run, data version), read [Concepts](../concepts.md) first. This guide is also in Greek: choose **Ελληνικά** in the language menu at the top of this site.
 
 !!! warning "No research results yet"
     Every result in version 0.1.0 comes from the **diagnostic model** (διαγνωστικό μοντέλο), which only checks that the platform works. Every page that shows results says so in a yellow banner. See the [FAQ](faq.md#why-does-every-result-say-diagnostic-model).
