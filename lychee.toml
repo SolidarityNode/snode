@@ -1,0 +1,23 @@
+# Link checker (lychee, Apache-2.0 OR MIT): `make docs-links` and the docs workflow.
+# Checks README.md, CHANGELOG.md, CONTRIBUTING.md and docs/**/*.md, including relative links.
+
+max_retries = 3
+retry_wait_time = 5
+timeout = 30
+# GitHub rate-limits anonymous checks; a 429 means the page exists.
+accept = ["100..=103", "200..=299", "429"]
+
+exclude = [
+  # The Kintsugi project is private until the maintainer makes it public; then remove this line.
+  '^https://github\.com/orgs/SolidarityNode/projects/',
+  # The documentation site exists once GitHub Pages is enabled; then remove this line.
+  '^https://solidaritynode\.github\.io/',
+  # Tag links exist from the first release tag (v0.1.0) on.
+  '^https://github\.com/SolidarityNode/snode/(compare|commits|releases/tag)/v',
+  # Local services, only running during `make up` / `make uat`.
+  '^https?://(127\.0\.0\.1|localhost)',
+  # GitHub edit links of the docs site need a sign-in.
+  '^https://github\.com/SolidarityNode/snode/edit/',
+]
+
+exclude_path = ["docs/schemas", "node_modules", "site"]

@@ -64,3 +64,4 @@ frontend/test-results/
 frontend/playwright-report/
 # Local results (backend on the host)
 backend/var/
+site/

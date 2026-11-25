@@ -1,0 +1,138 @@
+# Documentation site (MkDocs + Material for MkDocs, versioned with mike).
+#   make docs        serve locally with live reload
+#   make docs-build  build with --strict (CI)
+# Built from docs/; CHANGELOG.md, CONTRIBUTING.md and AGENTS.md are added by tools/docs/hooks.py.
+# Diagrams are Mermaid code blocks (AGENTS.md). Navigation below; files are never moved for it.
+
+site_name: SolidarityNode
+site_description: Open-source spatial probabilistic framework for social service accessibility, latent need, vulnerability and resilience.
+site_url: https://solidaritynode.github.io/snode/
+repo_url: https://github.com/SolidarityNode/snode
+repo_name: SolidarityNode/snode
+edit_uri: edit/main/docs/
+docs_dir: docs
+site_dir: site
+strict: true
+
+hooks:
+  - tools/docs/hooks.py
+
+exclude_docs: |
+  schemas/
+  uat/scenarios/
+
+not_in_nav: |
+  adr/0*.md
+  adr/template.md
+  data-processing/TEMPLATE.md
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.action.view
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+  font: false # no requests to external font servers
+
+plugins:
+  - search
+
+extra:
+  version:
+    provider: mike
+    default: [latest, dev]
+  generator: false
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Home: index.md
+  - User guide:
+      - user-guide/index.md
+      - Signing in: user-guide/login.md
+      - Study area: user-guide/study-area.md
+      - Scenarios list: user-guide/scenarios.md
+      - Scenario editor: user-guide/scenario-editor.md
+      - Run: user-guide/run.md
+      - Compare: user-guide/compare.md
+      - Admin: user-guide/admin.md
+      - Data packages and updates: user-guide/data-updates.md
+      - Roles: user-guide/roles.md
+      - FAQ: user-guide/faq.md
+      - Greek–English glossary: i18n/glossary.md
+  - Concepts: concepts.md
+  - Testing (UAT):
+      - uat/README.md
+      - "UAT 00: bootstrap": uat/00-bootstrap.md
+      - "UAT 01: platform": uat/01-platform.md
+  - Method:
+      - Domain model: specs/00-domain-model.md
+      - Specifications index: specs/README.md
+      - Open questions: specs/open-questions.md
+      - Paper revisions: specs/paper-revisions.md
+      - Original paper texts: specs/source/README.md
+      - Data processing notes:
+          - data-processing/README.md
+          - DP-001 synthetic demo dataset: data-processing/DP-001-synthetic-demo-dataset.md
+          - DP-002 synthetic demo packages: data-processing/DP-002-synthetic-demo-packages.md
+      - Data sources: data-sources.md
+  - Architecture:
+      - Overview: architecture.md
+      - Components: architecture/components.md
+      - Lifecycles and data model: architecture/lifecycles.md
+      - Dependencies: architecture/dependencies.md
+  - Decisions: adr/README.md
+  - Contributing:
+      - Contributing guide: contributing/contributing.md
+      - Ticket workflow: contributing/workflow.md
+      - Releasing: releasing.md
+      - Roadmap: roadmap.md
+      - AGENTS.md (rules): contributing/agents.md
+      - Conventions:
+          - conventions/README.md
+          - core: conventions/core.md
+          - backend: conventions/backend.md
+          - frontend: conventions/frontend.md
+          - data-processing: conventions/data-processing.md
+  - Changelog: changelog.md
