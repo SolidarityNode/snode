@@ -20,6 +20,10 @@
       
       
         
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../../el/contributing/agents/" hreflang="el">
+        
       
       
       <link rel="icon" href="../../assets/brand/favicon.svg">
@@ -145,6 +149,32 @@
     
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../el/contributing/agents/" hreflang="el" class="md-select__link">
+              Ελληνικά
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
     
     
       
@@ -2458,7 +2488,7 @@
 <p>Requires <code>uv</code>, Node.js 26 with <code>pnpm</code> 12, and Podman (or Docker). <code>make help</code> lists all targets.</p>
 <ul>
 <li><code>make setup</code> — check that <code>uv</code>, <code>node</code> and <code>pnpm</code> are on PATH (names any missing), create <code>.env</code> from <code>.env.example</code> if missing (warns about missing keys), then install locked dependencies (<code>uv sync --locked</code> in <code>core/</code> and <code>backend/</code>, <code>pnpm install --frozen-lockfile</code> in <code>frontend/</code>)</li>
-<li><code>make lint</code> — ruff check, ruff format --check and mypy (strict) for core and backend; eslint, prettier --check and <code>tsc</code> for frontend; the platform version and the generated docs blocks are current</li>
+<li><code>make lint</code> — ruff check, ruff format --check and mypy (strict) for core and backend; eslint, prettier --check and <code>tsc</code> for frontend; the platform version and the generated docs blocks are current; Greek docs pages exist for the user guide (stale ones are a warning)</li>
 <li><code>make test</code> — fast, no container engine: unit and integration tests only, pytest (core; backend on a throw-away database on an existing PostGIS server: the <code>db</code> service of <code>make up</code> or <code>make test-db</code>, or <code>SOLIDARITYNODE_TEST_DATABASE_URL</code>) and Vitest (frontend)</li>
 <li><code>make test-e2e</code> — the Playwright end-to-end test, also run in CI: a separate throw-away stack (compose project <code>solidaritynode-e2e</code> on ports 18080/18000/15432, seeded with demo package 1.0.0 and removed afterwards); Playwright runs in its official image, <code>E2E_LOCAL=1</code> uses a host browser</li>
 <li><code>make fmt</code> — ruff fix/format, prettier, eslint --fix</li>
@@ -2478,6 +2508,7 @@
 <li><code>make licenses</code> — fail on dependency licences incompatible with AGPL-3.0</li>
 <li><code>make docs</code> / <code>make docs-build</code> — serve the documentation site on http://127.0.0.1:8001 / build it with <code>--strict</code> (CI); <code>make docs-links</code> checks links with lychee</li>
 <li><code>make docs-generate</code> — regenerate the ADR index, the specs index and the open-question counts (never edit those blocks by hand)</li>
+<li><code>make docs-stamp PAGE=docs/&lt;page&gt;.el.md</code> — record that a Greek page matches its English source again (ADR 0019)</li>
 <li><code>make deps-report</code> — regenerate <code>docs/architecture/dependencies.md</code> from the lock files (after <code>make setup</code>); CI fails if it is stale or a licence is not allowed</li>
 <li><code>make version</code> / <code>make version-sync</code> — print the platform version / write <code>VERSION</code> into the manifests and locks (<code>VERSION</code> is the only place to change it; <code>docs/releasing.md</code>)</li>
 <li><code>make labels</code> — create GitHub labels from <code>.github/labels.yml</code> (needs <code>gh auth login</code>)</li>
@@ -2503,6 +2534,7 @@
 <li>Do not copy what lives elsewhere; link to the single source: issues and plans in GitHub (project Kintsugi, milestones), open questions in <code>docs/specs/open-questions.md</code>, decisions in <code>docs/adr/</code>, method in <code>docs/specs/</code>.</li>
 <li>Generated content (ADR index, specs index, open-question counts, <code>docs/architecture/dependencies.md</code>) comes from scripts and is checked in CI; never edit it by hand.</li>
 <li>Do not move a file under <code>docs/</code> that code, tests or <code>AGENTS.md</code> link to; change the site navigation in <code>mkdocs.yml</code> instead.</li>
+<li>The user-facing pages (home, user guide, concepts, roadmap) have a Greek version <code>page.el.md</code> next to <code>page.md</code> (ADR 0019). When you change one of these English pages, update its Greek page (terms from <code>docs/i18n/glossary.md</code>, button names as in the Greek UI) and run <code>make docs-stamp PAGE=&lt;page&gt;.el.md</code>, or say in the PR that the Greek page is stale. <code>make lint</code> warns about stale Greek pages and fails if a user-guide page has no Greek version. Other pages stay in English; Greek pages mark links to them "(στα αγγλικά)".</li>
 </ul>
 <h2 id="data-and-privacy-rules">Data and privacy rules<a class="headerlink" href="#data-and-privacy-rules" title="Permanent link">&para;</a></h2>
 <ul>

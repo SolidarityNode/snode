@@ -1,251 +1,843 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/architecture/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/architecture/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/architecture/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/architecture/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/concepts/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/concepts/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/concepts/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/concepts/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/data-sources/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/data-sources/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/data-sources/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/data-sources/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/releasing/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/releasing/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/releasing/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/releasing/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/roadmap/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/roadmap/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/roadmap/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/roadmap/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0001-monorepo/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0001-monorepo/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0001-monorepo/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0001-monorepo/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0002-license-agpl/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0002-license-agpl/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0002-license-agpl/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0002-license-agpl/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0003-core-data-model/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0003-core-data-model/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0003-core-data-model/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0003-core-data-model/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0004-bn-dbn-library/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0004-bn-dbn-library/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0004-bn-dbn-library/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0004-bn-dbn-library/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0005-inference-and-discretisation/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0005-inference-and-discretisation/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0005-inference-and-discretisation/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0005-inference-and-discretisation/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0006-job-queue/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0006-job-queue/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0006-job-queue/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0006-job-queue/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0007-map-library/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0007-map-library/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0007-map-library/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0007-map-library/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0008-large-array-storage/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0008-large-array-storage/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0008-large-array-storage/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0008-large-array-storage/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0009-geospatial-data-sources/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0009-geospatial-data-sources/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0009-geospatial-data-sources/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0009-geospatial-data-sources/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0010-ticket-privacy/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0010-ticket-privacy/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0010-ticket-privacy/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0010-ticket-privacy/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0011-container-engine/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0011-container-engine/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0011-container-engine/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0011-container-engine/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0012-deployment-model/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0012-deployment-model/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0012-deployment-model/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0012-deployment-model/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0013-data-packages/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0013-data-packages/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0013-data-packages/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0013-data-packages/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0014-upward-data-flow/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0014-upward-data-flow/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0014-upward-data-flow/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0014-upward-data-flow/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0015-authentication-and-roles/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0015-authentication-and-roles/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0015-authentication-and-roles/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0015-authentication-and-roles/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0016-scenario-schema-and-versioning/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0016-scenario-schema-and-versioning/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0016-scenario-schema-and-versioning/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0016-scenario-schema-and-versioning/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0017-run-reproducibility-and-result-storage/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0017-run-reproducibility-and-result-storage/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0017-run-reproducibility-and-result-storage/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0017-run-reproducibility-and-result-storage/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/0018-documentation-site/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0018-documentation-site/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0018-documentation-site/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0018-documentation-site/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/adr/template/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/0019-bilingual-documentation-site/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/0019-bilingual-documentation-site/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/0019-bilingual-documentation-site/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/architecture/components/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/adr/template/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/adr/template/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/adr/template/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/architecture/dependencies/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/architecture/components/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/architecture/components/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/architecture/components/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/architecture/lifecycles/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/architecture/dependencies/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/architecture/dependencies/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/architecture/dependencies/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/contributing/workflow/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/architecture/lifecycles/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/architecture/lifecycles/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/architecture/lifecycles/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/conventions/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/contributing/workflow/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/contributing/workflow/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/contributing/workflow/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/conventions/backend/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/conventions/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/conventions/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/conventions/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/conventions/core/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/conventions/backend/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/conventions/backend/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/conventions/backend/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/conventions/data-processing/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/conventions/core/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/conventions/core/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/conventions/core/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/conventions/frontend/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/conventions/data-processing/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/conventions/data-processing/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/conventions/data-processing/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/data-processing/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/conventions/frontend/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/conventions/frontend/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/conventions/frontend/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/data-processing/DP-001-synthetic-demo-dataset/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/data-processing/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/data-processing/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/data-processing/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/data-processing/DP-002-synthetic-demo-packages/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/data-processing/DP-001-synthetic-demo-dataset/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/data-processing/DP-001-synthetic-demo-dataset/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/data-processing/DP-001-synthetic-demo-dataset/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/data-processing/TEMPLATE/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/data-processing/DP-002-synthetic-demo-packages/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/data-processing/DP-002-synthetic-demo-packages/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/data-processing/DP-002-synthetic-demo-packages/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/i18n/glossary/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/data-processing/TEMPLATE/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/data-processing/TEMPLATE/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/data-processing/TEMPLATE/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/specs/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/i18n/glossary/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/i18n/glossary/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/i18n/glossary/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/specs/00-domain-model/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/specs/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/specs/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/specs/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/specs/open-questions/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/specs/00-domain-model/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/specs/00-domain-model/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/specs/00-domain-model/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/specs/paper-revisions/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/specs/open-questions/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/specs/open-questions/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/specs/open-questions/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/specs/source/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/specs/paper-revisions/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/specs/paper-revisions/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/specs/paper-revisions/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/uat/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/specs/source/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/specs/source/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/specs/source/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/uat/00-bootstrap/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/uat/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/uat/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/uat/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/uat/01-platform/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/uat/00-bootstrap/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/uat/00-bootstrap/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/uat/00-bootstrap/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/user-guide/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/uat/01-platform/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/uat/01-platform/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/uat/01-platform/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/user-guide/admin/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/user-guide/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/user-guide/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/user-guide/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/user-guide/compare/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/user-guide/admin/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/user-guide/admin/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/user-guide/admin/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/user-guide/data-updates/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/user-guide/compare/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/user-guide/compare/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/user-guide/compare/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/user-guide/faq/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/user-guide/data-updates/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/user-guide/data-updates/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/user-guide/data-updates/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/user-guide/login/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/user-guide/faq/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/user-guide/faq/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/user-guide/faq/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/user-guide/roles/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/user-guide/login/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/user-guide/login/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/user-guide/login/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/user-guide/run/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/user-guide/roles/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/user-guide/roles/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/user-guide/roles/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/user-guide/scenario-editor/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/user-guide/run/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/user-guide/run/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/user-guide/run/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/user-guide/scenarios/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/user-guide/scenario-editor/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/user-guide/scenario-editor/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/user-guide/scenario-editor/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/user-guide/study-area/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/user-guide/scenarios/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/user-guide/scenarios/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/user-guide/scenarios/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/changelog/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/user-guide/study-area/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev/user-guide/study-area/"/>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/devel/user-guide/study-area/"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/contributing/contributing/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/el/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/dev"/>
     </url>
     <url>
-         <loc>https://solidaritynode.github.io/snode/dev/contributing/agents/</loc>
-         <lastmod>2026-11-25</lastmod>
+        <loc>https://solidaritynode.github.io/snode/dev/el/architecture/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/architecture/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devarchitecture/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/concepts/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/concepts/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devconcepts/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/data-sources/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/data-sources/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devdata-sources/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/releasing/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/releasing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devreleasing/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/roadmap/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/roadmap/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devroadmap/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0001-monorepo/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0001-monorepo/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0001-monorepo/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0002-license-agpl/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0002-license-agpl/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0002-license-agpl/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0003-core-data-model/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0003-core-data-model/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0003-core-data-model/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0004-bn-dbn-library/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0004-bn-dbn-library/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0004-bn-dbn-library/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0005-inference-and-discretisation/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0005-inference-and-discretisation/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0005-inference-and-discretisation/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0006-job-queue/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0006-job-queue/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0006-job-queue/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0007-map-library/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0007-map-library/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0007-map-library/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0008-large-array-storage/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0008-large-array-storage/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0008-large-array-storage/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0009-geospatial-data-sources/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0009-geospatial-data-sources/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0009-geospatial-data-sources/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0010-ticket-privacy/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0010-ticket-privacy/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0010-ticket-privacy/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0011-container-engine/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0011-container-engine/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0011-container-engine/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0012-deployment-model/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0012-deployment-model/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0012-deployment-model/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0013-data-packages/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0013-data-packages/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0013-data-packages/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0014-upward-data-flow/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0014-upward-data-flow/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0014-upward-data-flow/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0015-authentication-and-roles/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0015-authentication-and-roles/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0015-authentication-and-roles/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0016-scenario-schema-and-versioning/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0016-scenario-schema-and-versioning/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0016-scenario-schema-and-versioning/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0017-run-reproducibility-and-result-storage/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0017-run-reproducibility-and-result-storage/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0017-run-reproducibility-and-result-storage/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0018-documentation-site/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0018-documentation-site/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0018-documentation-site/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/0019-bilingual-documentation-site/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/0019-bilingual-documentation-site/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/0019-bilingual-documentation-site/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/adr/template/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/adr/template/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devadr/template/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/architecture/components/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/architecture/components/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devarchitecture/components/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/architecture/dependencies/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/architecture/dependencies/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devarchitecture/dependencies/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/architecture/lifecycles/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/architecture/lifecycles/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devarchitecture/lifecycles/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/contributing/workflow/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/contributing/workflow/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devcontributing/workflow/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/conventions/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/conventions/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devconventions/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/conventions/backend/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/conventions/backend/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devconventions/backend/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/conventions/core/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/conventions/core/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devconventions/core/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/conventions/data-processing/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/conventions/data-processing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devconventions/data-processing/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/conventions/frontend/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/conventions/frontend/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devconventions/frontend/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/data-processing/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/data-processing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devdata-processing/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/data-processing/DP-001-synthetic-demo-dataset/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/data-processing/DP-001-synthetic-demo-dataset/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devdata-processing/DP-001-synthetic-demo-dataset/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/data-processing/DP-002-synthetic-demo-packages/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/data-processing/DP-002-synthetic-demo-packages/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devdata-processing/DP-002-synthetic-demo-packages/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/data-processing/TEMPLATE/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/data-processing/TEMPLATE/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devdata-processing/TEMPLATE/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/i18n/glossary/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/i18n/glossary/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devi18n/glossary/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/specs/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/specs/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devspecs/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/specs/00-domain-model/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/specs/00-domain-model/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devspecs/00-domain-model/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/specs/open-questions/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/specs/open-questions/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devspecs/open-questions/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/specs/paper-revisions/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/specs/paper-revisions/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devspecs/paper-revisions/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/specs/source/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/specs/source/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devspecs/source/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/uat/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/uat/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuat/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/uat/00-bootstrap/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/uat/00-bootstrap/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuat/00-bootstrap/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/uat/01-platform/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/uat/01-platform/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuat/01-platform/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/user-guide/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/user-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuser-guide/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/user-guide/admin/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/user-guide/admin/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuser-guide/admin/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/user-guide/compare/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/user-guide/compare/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuser-guide/compare/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/user-guide/data-updates/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/user-guide/data-updates/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuser-guide/data-updates/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/user-guide/faq/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/user-guide/faq/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuser-guide/faq/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/user-guide/login/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/user-guide/login/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuser-guide/login/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/user-guide/roles/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/user-guide/roles/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuser-guide/roles/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/user-guide/run/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/user-guide/run/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuser-guide/run/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/user-guide/scenario-editor/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/user-guide/scenario-editor/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuser-guide/scenario-editor/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/user-guide/scenarios/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/user-guide/scenarios/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuser-guide/scenarios/"/>
+    </url>
+    <url>
+        <loc>https://solidaritynode.github.io/snode/dev/el/user-guide/study-area/</loc>
+        <lastmod>2026-11-25</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="el" href="https://solidaritynode.github.io/snode/dev/el/user-guide/study-area/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://solidaritynode.github.io/snode/devuser-guide/study-area/"/>
     </url>
 </urlset>

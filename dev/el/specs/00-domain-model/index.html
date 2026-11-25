@@ -1,0 +1,3096 @@
+
+<!doctype html>
+<html lang="el" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Ανοιχτό χωρικό πιθανοτικό πλαίσιο για την προσβασιμότητα των κοινωνικών υπηρεσιών, την κρυφή ανάγκη, την τρωτότητα και την ανθεκτικότητα.">
+      
+      
+      
+        <link rel="canonical" href="https://solidaritynode.github.io/snode/dev/el/specs/00-domain-model/">
+      
+      
+        <link rel="prev" href="../../uat/01-platform/">
+      
+      
+        <link rel="next" href="../">
+      
+      
+        
+          <link rel="alternate" href="../../../specs/00-domain-model/" hreflang="en">
+        
+          <link rel="alternate" href="./" hreflang="el">
+        
+      
+      
+      <link rel="icon" href="../../../assets/brand/favicon.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
+    
+    
+      
+        <title>Domain model - SolidarityNode</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#domain-model-v0-draft" class="md-skip">
+          Μετάβαση στο περιεχόμενο
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Κεφαλίδα">
+    <a href="../../" title="SolidarityNode" class="md-header__button md-logo" aria-label="SolidarityNode" data-md-component="logo">
+      
+  <img src="../../../assets/brand/favicon.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SolidarityNode
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Domain model
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Επιλογή γλώσσας">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../../specs/00-domain-model/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="el" class="md-select__link">
+              Ελληνικά
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Αναζήτηση" placeholder="Αναζήτηση" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Αναζήτηση">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Καθαρισμός" aria-label="Καθαρισμός" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Αρχικοποίηση αναζήτησης
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SolidarityNode/snode" title="Μετάβαση στο αποθετήριο" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SolidarityNode/snode
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Καρτέλες" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Αρχική
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../user-guide/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Οδηγός χρήσης
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../concepts/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Βασικές έννοιες
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../uat/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Δοκιμές αποδοχής (στα αγγλικά)
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Μέθοδος (στα αγγλικά)
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Αρχιτεκτονική (στα αγγλικά)
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../adr/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Αποφάσεις (στα αγγλικά)
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../contributing/contributing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Συνεισφορά
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../changelog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Ιστορικό αλλαγών (στα αγγλικά)
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Πλοήγηση" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../" title="SolidarityNode" class="md-nav__button md-logo" aria-label="SolidarityNode" data-md-component="logo">
+      
+  <img src="../../../assets/brand/favicon.svg" alt="logo">
+
+    </a>
+    SolidarityNode
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SolidarityNode/snode" title="Μετάβαση στο αποθετήριο" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SolidarityNode/snode
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Αρχική
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../user-guide/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Οδηγός χρήσης
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Οδηγός χρήσης
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/login/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Σύνδεση
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/study-area/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Περιοχή μελέτης
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/scenarios/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Λίστα σεναρίων
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/scenario-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Επεξεργασία σεναρίου
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Εκτέλεση
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/compare/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Σύγκριση
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/admin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Διαχείριση
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/data-updates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Πακέτα δεδομένων και ενημερώσεις
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/roles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ρόλοι
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Συχνές ερωτήσεις
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../i18n/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Γλωσσάριο ελληνικών–αγγλικών (στα αγγλικά)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Βασικές έννοιες
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../uat/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Δοκιμές αποδοχής (στα αγγλικά)
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Δοκιμές αποδοχής (στα αγγλικά)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../uat/00-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UAT 00: bootstrap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../uat/01-platform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UAT 01: platform
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Μέθοδος (στα αγγλικά)
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Μέθοδος (στα αγγλικά)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain model
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Πίνακας περιεχομένων">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Πίνακας περιεχομένων
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-indices-and-unit-of-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Indices and unit of analysis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Entities
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-variable-catalogue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Variable catalogue
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Variable catalogue">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-paper-1-baseline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Paper 1: baseline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-paper-2-hidden-need" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Paper 2: hidden need
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-paper-3-disruption-and-vulnerability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Paper 3: disruption and vulnerability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-paper-4-operations-dynamics-resilience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Paper 4: operations, dynamics, resilience
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cross-cutting-machinery-shared-by-all-papers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cross-cutting machinery (shared by all papers)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-module-map-for-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Module map for core/
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Invariants
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../open-questions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Open questions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../paper-revisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Paper revisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../source/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Original paper texts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../data-processing/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data processing notes
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5_6" id="__nav_5_6_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data processing notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-processing/DP-001-synthetic-demo-dataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DP-001 synthetic demo dataset
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-processing/DP-002-synthetic-demo-packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DP-002 synthetic demo packages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data sources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Αρχιτεκτονική (στα αγγλικά)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Αρχιτεκτονική (στα αγγλικά)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/lifecycles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lifecycles and data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/dependencies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependencies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Αποφάσεις (στα αγγλικά)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Συνεισφορά
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Συνεισφορά
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ticket workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releasing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Πορεία ανάπτυξης
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/agents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AGENTS.md (rules)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../conventions/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conventions
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Conventions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../conventions/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../conventions/backend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    backend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../conventions/frontend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    frontend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../conventions/data-processing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data-processing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ιστορικό αλλαγών (στα αγγλικά)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Πίνακας περιεχομένων">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Πίνακας περιεχομένων
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-indices-and-unit-of-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Indices and unit of analysis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Entities
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-variable-catalogue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Variable catalogue
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Variable catalogue">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-paper-1-baseline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Paper 1: baseline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-paper-2-hidden-need" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Paper 2: hidden need
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-paper-3-disruption-and-vulnerability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Paper 3: disruption and vulnerability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-paper-4-operations-dynamics-resilience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Paper 4: operations, dynamics, resilience
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cross-cutting-machinery-shared-by-all-papers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cross-cutting machinery (shared by all papers)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-module-map-for-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Module map for core/
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Invariants
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+    
+      
+    
+    <a href="https://github.com/SolidarityNode/snode/raw/main/docs/specs/00-domain-model.md" title="Προβολή πηγαίου κώδικα" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
+    </a>
+  
+
+
+<h1 id="domain-model-v0-draft">Domain model (v0 draft)<a class="headerlink" href="#domain-model-v0-draft" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>Status: DRAFT for human review.</strong> This is a digest of Papers 1–4. The original texts will be stored verbatim in <code>docs/specs/source/</code> and as per-paper specs <code>01</code>–<code>04</code>. Where this digest and a paper disagree, the paper wins and this file must be corrected. Anything the papers leave unspecified is listed in <code>open-questions.md</code> as <code>OQ-n</code> and must <strong>not</strong> be resolved in code or in this file.</p>
+</blockquote>
+<h2 id="1-pipeline">1. Pipeline<a class="headerlink" href="#1-pipeline" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart LR
+    P1["Paper 1&lt;br/&gt;Accessibility, capacity,&lt;br/&gt;demand, service gap"] --&gt; P2["Paper 2&lt;br/&gt;Social susceptibility,&lt;br/&gt;hidden need, total need"]
+    P1 --&gt; P3
+    P2 --&gt; P3["Paper 3&lt;br/&gt;Disruption scenarios, exposure,&lt;br/&gt;service loss, vulnerability"]
+    P3 --&gt; P4["Paper 4&lt;br/&gt;Operations, DBN, recovery,&lt;br/&gt;resilience"]
+    OPS[("Anonymous request&lt;br/&gt;tickets (QR)")] --&gt; P4</code></pre>
+<ul>
+<li><strong>Paper 1</strong> builds the baseline: group-specific accessibility, capacity, estimated demand, supply and <strong>Service Gap</strong>, with a BBN, Monte Carlo uncertainty, sensitivity and what-if scenarios.</li>
+<li><strong>Paper 2</strong> splits total need (<code>Population × p</code>) into visible and <strong>hidden need</strong> through a latent non-take-up node with parents Social Susceptibility, need-based gap, access deterrence and alternatives outside the network (OQ-8, OQ-10, OQ-11), giving <strong>Estimated Total Need</strong>.</li>
+<li><strong>Paper 3</strong> runs simulated disruption scenarios and infers <strong>Vulnerability</strong> from Group Exposure, Service Loss and Social Susceptibility. It stops before resilience.</li>
+<li><strong>Paper 4</strong> adds real operational data (anonymous tickets), facility and territorial functional state, a <strong>DBN</strong>, Bayesian updating of vulnerability, recovery trajectories and <strong>Resilience</strong>, plus per-facility operational output.</li>
+</ul>
+<h2 id="2-indices-and-unit-of-analysis">2. Indices and unit of analysis<a class="headerlink" href="#2-indices-and-unit-of-analysis" title="Permanent link">&para;</a></h2>
+<p>Notation decided in OQ-1 (the papers' original symbols differ; see <code>paper-revisions.md</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>i</code></td>
+<td>spatial unit. First application: Local Community, Greek <strong>ΤΚ</strong> (Τοπική Κοινότητα). The code must stay generic. Demand, supply and gap belong to <code>i</code></td>
+</tr>
+<tr>
+<td><code>f</code></td>
+<td>facility; travel time is <code>T_if^{g,m}</code></td>
+</tr>
+<tr>
+<td><code>g</code></td>
+<td>population group</td>
+</tr>
+<tr>
+<td><code>s</code></td>
+<td>service</td>
+</tr>
+<tr>
+<td><code>m</code></td>
+<td>transport mode: walking, public transport, car</td>
+</tr>
+<tr>
+<td><code>c</code></td>
+<td>scenario (counterfactual or disruption)</td>
+</tr>
+<tr>
+<td><code>t</code></td>
+<td>time</td>
+</tr>
+<tr>
+<td><code>l</code></td>
+<td>state of a discrete variable, as in <code>Σ_l P(X = l) …</code></td>
+</tr>
+<tr>
+<td><code>k</code>, <code>p</code>, <code>τ</code></td>
+<td>intensity (OQ-24), need prevalence and take-up (OQ-8)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Unit of analysis (Paper 4 §3): <code>spatial unit × social group × service × time</code>.</strong> The state of one facility is never automatically the state of a spatial unit: a facility can be degraded while the unit stays covered by alternatives.</p>
+<p><strong>Three kinds of need (OQ-8, decided).</strong> <em>Hidden need</em>: need never expressed (Paper 2). <em>Unmet expressed need</em>: requests not fulfilled within the maximum acceptable waiting time (Service Gap, Paper 1; Service Loss, Paper 3). <em>Met need</em>: requests fulfilled. They never overlap, so no unmet need is counted twice.</p>
+<p><strong>Units of measurement (OQ-24, decided).</strong> Need, capacity, supply, gap and loss are measured in <strong>service units per reference period</strong> (visits, appointments or hours, defined per service). Need is <code>people with need × intensity</code>. Quantities of different services are never summed. The reference period is open (OQ-25). A request not fulfilled within the service's maximum acceptable waiting time counts as unmet (OQ-26).</p>
+<h2 id="3-entities">3. Entities<a class="headerlink" href="#3-entities" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>SpatialUnit</strong>: id, geometry, population by group.</li>
+<li><strong>PopulationGroup</strong>: id, definition rule (for example <code>Age ≥ 65</code>, <code>Income &lt; T</code>), and three profiles: demographic (how many people), mobility (how they can travel), demand (how likely they need the service). Examples: Elderly, Mobility-limited, Unemployed, Low-income. Groups may overlap (OQ-6). A group is <strong>not</strong> a measure of need.</li>
+<li><strong>Service</strong>: a type of social service, with its own service unit (visit, appointment, hour) and maximum acceptable waiting time (OQ-24, OQ-26).</li>
+<li><strong>Facility</strong>: location, type, services offered, capacity inputs (places, staff, throughput), operating hours, operational status, availability.</li>
+<li><strong>TransportMode</strong> and per-mode <strong>Network</strong> (road, pedestrian, public transport) plus DEM.</li>
+<li><strong>Scenario</strong>: a set of <strong>changes relative to the baseline</strong> (an overlay, never a copy of the data): what-if interventions (Paper 1 §13, for example capacity +20 %, new facility) and disruptions (Paper 3: facility severities <code>DS ∈ [0,1]</code> with 0 none, 0.25 minor, 0.5 moderate, 0.75 severe, 1 complete; closed network edges), plus rationing case (OQ-24) and a reference-scenario flag (OQ-16). Stored as versioned, schema-validated JSON with an owner and visibility (private, shared).</li>
+<li><strong>Run</strong>: one <strong>immutable</strong> execution of a scenario. Records everything needed to reproduce it: scenario version, data package version, code version (git commit), model and parameter version (CPTs, priors), random seed, configuration. Lifecycle <code>queued → running → succeeded | failed | cancelled</code>, with progress. Identical inputs may reuse results.</li>
+<li><strong>Result</strong>: belongs to one run. Summary values per <code>unit × group × service</code> (probabilities, intervals) in the database for maps; full Monte Carlo samples in Parquet files.</li>
+<li><strong>Study area</strong>: one or more core municipalities plus a buffer of neighbouring units (OQ-28).</li>
+<li><strong>Onboarding</strong>: the hub keeps national raw sources (boundaries, network, population, DEM) as versioned files and <strong>processes them only for onboarded study areas</strong> (clip with buffer, clean, checks, <code>DP-NNN</code> notes). Thematic layers (facilities, services, capacities, transit, susceptibility indicators) are added per municipality, incrementally, through validated imports. Each municipality has an onboarding status and a <strong>coverage matrix</strong> (layer × status: missing, open data, estimated, verified).</li>
+<li><strong>Stable identifiers and history</strong>: every unit, facility, node and edge keeps the same id across packages and installations; features carry <code>municipality_id</code>, <code>role</code> (core | buffer), <code>quality</code> and <code>valid_from</code>/<code>valid_to</code> (closed, never deleted).</li>
+<li><strong>Data package</strong>: a versioned (semantic versioning), checksummed bundle for one study area <strong>plus a buffer</strong>, with layer coverage, changelog and provenance, produced by the hub and imported by an installation after a preview of changes. When a municipality is onboarded or corrected, the hub publishes new versions of the packages of every study area whose buffer includes it.</li>
+<li><strong>Deployment</strong>: the same code runs as a <strong>municipal installation</strong> (it serves one study area of one or more core municipalities: its own users, scenarios, runs and tickets) or as the <strong>hub</strong> (raw sources, onboarding, curated data, packages, optional aggregated indicators shared upwards by municipalities).</li>
+<li><strong>Ticket</strong>: anonymous request (section 4.4).</li>
+<li><strong>RecoveryTrajectory</strong>: time series of service loss or observed consequence per <code>(unit, group, service)</code>.</li>
+</ul>
+<h2 id="4-variable-catalogue">4. Variable catalogue<a class="headerlink" href="#4-variable-catalogue" title="Permanent link">&para;</a></h2>
+<p>Kinds: <code>INPUT</code>, <code>PARAMETER</code> (uncertain input), <code>COMPUTED</code> (simulation, not a BN node), <code>EVIDENCE</code> (computed outside the BN, fed in as evidence), <code>BN-PARENT</code>, <code>BN-TARGET</code>, <code>LATENT</code>, <code>OBSERVED</code>, <code>OUTPUT</code>. Formulas are as stated in the papers unless a decision in <code>open-questions.md</code> replaced them (marked with the <code>OQ-n</code>); open gaps are listed there. Notation follows OQ-1.</p>
+<h3 id="41-paper-1-baseline">4.1 Paper 1: baseline<a class="headerlink" href="#41-paper-1-baseline" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>As stated</th>
+<th>Kind</th>
+<th>Dimensions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Population</td>
+<td>population by unit and group (ELSTAT)</td>
+<td>INPUT</td>
+<td>unit × group</td>
+</tr>
+<tr>
+<td>Demand rate <code>DemandRate^g</code></td>
+<td><strong>visible use</strong>: share of the group that reaches the service in the reference period, conceptually <code>p × τ</code> (OQ-8, OQ-24); from literature, statistics, expert elicitation. Not need prevalence</td>
+<td>PARAMETER</td>
+<td>group × service</td>
+</tr>
+<tr>
+<td>People making requests (Paper 1)</td>
+<td><code>Population × DemandRate</code>, under average conditions. Not people with need, which is <code>Population × p</code> (Paper 2, OQ-8)</td>
+<td>COMPUTED</td>
+<td>unit × group × service</td>
+</tr>
+<tr>
+<td>Intensity <code>k</code></td>
+<td>service units one person needs per reference period (OQ-24)</td>
+<td>PARAMETER</td>
+<td>group × service</td>
+</tr>
+<tr>
+<td>Estimated demand <code>D_{i,g,s}</code></td>
+<td>people making requests <code>× k</code>, in <strong>service units</strong> per reference period (OQ-24, OQ-25). Labelled <strong>Estimated</strong>, never Observed</td>
+<td>COMPUTED</td>
+<td>unit × group × service</td>
+</tr>
+<tr>
+<td>Travel time <code>T_if^{g,m}</code></td>
+<td>access time from unit <code>i</code> to facility <code>f</code> for group <code>g</code>, mode <code>m</code></td>
+<td>COMPUTED</td>
+<td>unit × facility × group × mode</td>
+</tr>
+<tr>
+<td>Access weight <code>w(T)</code></td>
+<td>converts time to a weight (form not given, OQ-3)</td>
+<td>COMPUTED</td>
+<td></td>
+</tr>
+<tr>
+<td>Accessibility <code>Accessibility_i^{g,m}</code></td>
+<td>built from <code>w(T_if^{g,m})</code> (combination of modes: OQ-5)</td>
+<td>COMPUTED</td>
+<td></td>
+</tr>
+<tr>
+<td>Physical capacity <code>C_f^physical</code></td>
+<td>from places, staff, throughput, and so on</td>
+<td>INPUT/PARAMETER</td>
+<td>facility</td>
+</tr>
+<tr>
+<td>Availability</td>
+<td>availability of the facility</td>
+<td>PARAMETER</td>
+<td>facility</td>
+</tr>
+<tr>
+<td>Functional capacity <code>C_f^functional</code></td>
+<td><code>C_f^physical × Availability_f</code></td>
+<td>COMPUTED</td>
+<td>facility</td>
+</tr>
+<tr>
+<td>Effective capacity</td>
+<td>~~<code>C_ij^effective = C_i^functional × w(T_ij)</code>~~ (original notation) replaced by 2SFCA allocation (OQ-2, decided): each facility's functional capacity is shared among the units and groups that reach it, in proportion to access-weighted demand; shares sum to the facility's capacity</td>
+<td>COMPUTED</td>
+<td>facility × unit × group</td>
+</tr>
+<tr>
+<td>Supply <code>S_{i,g,s}</code></td>
+<td>sum of the 2SFCA shares a unit and group receive from all facilities (OQ-2)</td>
+<td>COMPUTED</td>
+<td>unit × group × service</td>
+</tr>
+<tr>
+<td>Service Gap <code>SG_{i,g,s}</code></td>
+<td><code>max(0, D − S)</code>: unmet <strong>expressed</strong> need (OQ-8); ratio <code>SG/D</code>; states LOW / MEDIUM / HIGH with documented thresholds (relation to the BBN: OQ-4)</td>
+<td>COMPUTED + BN node</td>
+<td>unit × group × service</td>
+</tr>
+</tbody>
+</table>
+<p>BBN (Paper 1 §9): Population group → Demand; Accessibility; Infrastructure → Physical capacity → Functional capacity → Effective supply → Service Gap. Supply-related nodes stay <strong>explicit</strong> and are not hidden inside Service Gap, so the network can explain why a gap is high (low capacity, low accessibility or high demand). CPTs are initialised from expert elicitation, literature and deterministic relations of the service model.</p>
+<h3 id="42-paper-2-hidden-need">4.2 Paper 2: hidden need<a class="headerlink" href="#42-paper-2-hidden-need" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>As stated</th>
+<th>Kind</th>
+<th>Dimensions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Group characteristics</td>
+<td>indicators <strong>not</strong> already used in the group definition (household dependency and composition, living alone, employment stability, 80+, mobility indicators)</td>
+<td>INPUT</td>
+<td>unit × group</td>
+</tr>
+<tr>
+<td>Social Susceptibility <code>SS_{i,g,s}</code></td>
+<td>propensity of a group to experience unmet or insufficient provision of a service due to its characteristics, <strong>independently</strong> of current availability, accessibility or capacity. States Low / Medium / High. Indicators may differ by service; group-definition variables never reused (OQ-9, decided)</td>
+<td>BN-PARENT</td>
+<td>unit × group × service</td>
+</tr>
+<tr>
+<td>Need-based gap</td>
+<td><code>max(0, Population × p × k − Supply)</code>: shortfall of Paper 1 supply relative to <strong>total need</strong>, not to current users. Replaces reuse of Paper 1 Service Gap, which would create a loop through take-up (OQ-10, decided)</td>
+<td>EVIDENCE</td>
+<td>unit × group × service</td>
+</tr>
+<tr>
+<td>Access deterrence</td>
+<td>accessibility only as a <strong>direct deterrent to seeking</strong> the service, for example travel time to the nearest facility offering it. Not capacity reaching the unit, which is in the need-based gap (OQ-11, decided)</td>
+<td>EVIDENCE</td>
+<td>unit × group × service</td>
+</tr>
+<tr>
+<td>Alternatives outside the network</td>
+<td>options <strong>not</strong> among modelled facilities (private services, family, NGOs, parishes); expert estimates where no data (OQ-11, decided). Alternative facilities in the network are already in the need-based gap</td>
+<td>EVIDENCE</td>
+<td>unit × group × service</td>
+</tr>
+<tr>
+<td>Need prevalence <code>p</code></td>
+<td>share of the group that needs the service in the reference period; from data if available, otherwise experts (OQ-8)</td>
+<td>PARAMETER</td>
+<td>unit × group × service</td>
+</tr>
+<tr>
+<td>Non-take-up level (the Hidden Need node)</td>
+<td>latent; <code>P(state | SS, need-based gap, access deterrence, outside alternatives)</code>, no edges among the parents (OQ-11); states are ranges of <code>1 − τ</code>, for example Low 0–20 %, Medium 20–50 %, High 50–80 % (OQ-8, OQ-10; edges OQ-11). CPT learned from observed use (parameter learning, pooled across units)</td>
+<td>LATENT</td>
+<td>unit × group × service</td>
+</tr>
+<tr>
+<td>Take-up <code>τ</code></td>
+<td>share of people with need who <strong>express</strong> it (make a request), whether or not they are served; sampled within the posterior state ranges in Monte Carlo (OQ-8)</td>
+<td>COMPUTED</td>
+<td>unit × group × service</td>
+</tr>
+<tr>
+<td>Hidden need (people)</td>
+<td>need never expressed: <code>Population × p × (1 − τ)</code>; share of group <code>= p × (1 − τ)</code>, reported with an interval and with sensitivity to <code>p</code></td>
+<td>OUTPUT</td>
+<td>unit × group × service</td>
+</tr>
+<tr>
+<td>Visible need (people)</td>
+<td><code>Population × p × τ</code>. Used for aggregate calibration where aggregate figures exist; the ratio to Paper 1 demand is a descriptive indicator only (OQ-8)</td>
+<td>COMPUTED</td>
+<td>unit × group × service</td>
+</tr>
+<tr>
+<td>Observed use</td>
+<td>requests from administrative records or tickets; evidence for learning take-up, only from facilities with known recording coverage (OQ-8)</td>
+<td>OBSERVED</td>
+<td>unit × group × service × period</td>
+</tr>
+<tr>
+<td>Estimated Total Need <code>ETN</code></td>
+<td><code>Population × p × k</code> in service units (OQ-8, OQ-24); replaces <code>EstimatedDemand + E(HiddenNeed)</code></td>
+<td>OUTPUT</td>
+<td>unit × group × service</td>
+</tr>
+</tbody>
+</table>
+<p>CPTs come from expert elicitation by comparing scenarios (for example Low SS, Low gap, high accessibility, many alternatives against High SS, Low gap, low accessibility, few alternatives). Counterfactuals here serve uncertainty, sensitivity and robustness, <strong>not</strong> estimation.</p>
+<h3 id="43-paper-3-disruption-and-vulnerability">4.3 Paper 3: disruption and vulnerability<a class="headerlink" href="#43-paper-3-disruption-and-vulnerability" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>As stated</th>
+<th>Kind</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Need Pressure <code>NP</code></td>
+<td><code>ETN / BaselineAvailableService</code>. Descriptive baseline indicator. <strong>Decision:</strong> not a parent of Vulnerability (double counting risk); used for characterisation, sensitivity, optional covariate</td>
+<td>COMPUTED</td>
+</tr>
+<tr>
+<td>Disruption severity <code>DS_{f,c}</code></td>
+<td>scenario parameter in <code>[0,1]</code></td>
+<td>PARAMETER (not a BN node)</td>
+</tr>
+<tr>
+<td>Disrupted capacity</td>
+<td><code>C^D_f = C_f (1 − DS_f)</code></td>
+<td>COMPUTED</td>
+</tr>
+<tr>
+<td>Disrupted network, accessibility</td>
+<td><code>Network^D</code>, then accessibility recomputed from <code>Network^D</code>, DEM, population</td>
+<td>COMPUTED</td>
+</tr>
+<tr>
+<td>Group Exposure <code>GE</code></td>
+<td><code>AffectedPopulation / Population_{i,g}</code> per group (no separate population, infrastructure or network exposure nodes)</td>
+<td>EVIDENCE</td>
+</tr>
+<tr>
+<td>Baseline available service <code>AS⁰</code></td>
+<td>available service without disruption</td>
+<td>COMPUTED</td>
+</tr>
+<tr>
+<td>Disrupted available service <code>ASᴰ</code></td>
+<td><code>f(Capacity^D, Accessibility^D)</code> (OQ-14). No adaptive redistribution or alternative activation here (Paper 4)</td>
+<td>COMPUTED</td>
+</tr>
+<tr>
+<td>Baseline gap <code>PUN⁰</code></td>
+<td><code>max(0, ETN − AS⁰)</code>, need unmet before any disruption (OQ-12)</td>
+<td>COMPUTED</td>
+</tr>
+<tr>
+<td>Potential Unmet Need <code>PUNᴰ</code></td>
+<td><code>max(0, ETN − ASᴰ)</code></td>
+<td>COMPUTED</td>
+</tr>
+<tr>
+<td>Disruption loss <code>ΔPUN</code></td>
+<td><code>PUNᴰ − PUN⁰</code>, always stored in absolute service units (OQ-12, OQ-24)</td>
+<td>COMPUTED / OUTPUT</td>
+</tr>
+<tr>
+<td>Service Loss <code>SL</code></td>
+<td><code>(PUNᴰ − PUN⁰) / ETN</code>, in <code>[0,1]</code>, 0 when nothing changes (OQ-12, decided; replaces the paper's <code>PUN / ETN</code>). Not latent, not Vulnerability, not Resilience</td>
+<td>EVIDENCE</td>
+</tr>
+<tr>
+<td>Relative Service Loss <code>SL′</code></td>
+<td><code>(PUNᴰ − PUN⁰) / min(ETN, AS⁰)</code>, secondary indicator, <strong>not</strong> a BN node (OQ-12)</td>
+<td>OUTPUT</td>
+</tr>
+<tr>
+<td>Rationing</td>
+<td>uniform or concentrated, bounding how shortage is spread among people (OQ-24)</td>
+<td>PARAMETER (scenario)</td>
+</tr>
+<tr>
+<td>Breadth, depth, severity of loss</td>
+<td>per-person loss indicators in the Foster–Greer–Thorbecke style, computed for each rationing case, <strong>not</strong> BN nodes (OQ-24)</td>
+<td>OUTPUT</td>
+</tr>
+<tr>
+<td>Social Susceptibility <code>SS_{i,g,s}</code></td>
+<td>from Paper 2, not recomputed (OQ-9)</td>
+<td>BN-PARENT</td>
+</tr>
+<tr>
+<td>Vulnerability relationship</td>
+<td>the CPT <code>P(V | GE, SL, SS)</code>: how a disruption turns into consequences for a group (OQ-16, decided). States Low / Medium / High (OQ-15). Expert elicitation first; no ad hoc weighted average</td>
+<td>BN-TARGET (CPT)</td>
+</tr>
+<tr>
+<td>Vulnerability at a scenario <code>V_{i,g,s,c}</code></td>
+<td>the relationship evaluated at scenario <code>c</code>; run separately per group. Mapped at <strong>reference scenarios</strong> (minor, moderate, severe) so areas compare at the same intensity</td>
+<td>OUTPUT</td>
+</tr>
+<tr>
+<td>Risk</td>
+<td>vulnerability averaged over scenarios weighted by their probability of occurrence. <strong>Not</strong> vulnerability; produced only if disruption probabilities exist (OQ-16)</td>
+<td>OUTPUT (future)</td>
+</tr>
+</tbody>
+</table>
+<p>Two layers: <strong>Layer 1</strong> is computational (scenario, disruption, simulation, evidence). <strong>Layer 2</strong> is Bayesian inference over the three parents. Monte Carlo samples uncertain parameters, runs the simulation, infers, stores, and yields <code>P(V = High)</code> rather than a score.</p>
+<h3 id="44-paper-4-operations-dynamics-resilience">4.4 Paper 4: operations, dynamics, resilience<a class="headerlink" href="#44-paper-4-operations-dynamics-resilience" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>As stated</th>
+<th>Kind</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ticket</td>
+<td>anonymous request: spatial unit, group (overlap rule: OQ-6), service/need, facility where the request is made or scheduled (OQ-29), request time <code>t_r</code>, scheduled time <code>t_a</code>, service time <code>t_f</code>, expiry <code>t_e</code>, and a flag "first request in this period" (yes/no, no identifier) to count people without identifying them (OQ-8, OQ-21)</td>
+<td>OBSERVED</td>
+</tr>
+<tr>
+<td>Recording coverage</td>
+<td>share of a facility's requests captured by the ticket system, per facility and period; observations are used for learning only where coverage is full or known (OQ-8)</td>
+<td>OBSERVED</td>
+</tr>
+<tr>
+<td>Operational indicators</td>
+<td>demand rate, waiting time, fulfilment delay, appointment adherence, overdue requests, expired requests, service coverage, unfulfilled need</td>
+<td>COMPUTED</td>
+</tr>
+<tr>
+<td>Facility functional state</td>
+<td>Normal → Under Pressure → Degraded → Critical → Recovering → Normal, from operational indicators</td>
+<td>LATENT/STATE</td>
+</tr>
+<tr>
+<td>Need for support, resource mobilisation</td>
+<td>response mechanism, approved and controlled volunteer resources included; <strong>not</strong> an independent "community resilience" measure</td>
+<td>STATE</td>
+</tr>
+<tr>
+<td>Network redundancy, territorial (ΤΚ) service coverage and functional state</td>
+<td>combine facility coverages and redundancy</td>
+<td>STATE</td>
+</tr>
+<tr>
+<td>Observed exposure and loss <code>GE(t)</code>, <code>SL(t)</code></td>
+<td>derived from territorial functional state and tickets, using the same definitions as Paper 3 (OQ-12, OQ-16)</td>
+<td>COMPUTED</td>
+</tr>
+<tr>
+<td>Expected group consequence</td>
+<td>the Paper 3 vulnerability relationship evaluated at observed <code>GE(t)</code>, <code>SL(t)</code> and <code>SS</code>. The disruption enters once (OQ-16)</td>
+<td>COMPUTED</td>
+</tr>
+<tr>
+<td>Observed group consequence</td>
+<td>from total need, covered need, unfulfilled need in tickets; linked to latent <code>V</code> by a measurement node <code>P(ObservedConsequence | V)</code> (OQ-18)</td>
+<td>OBSERVED</td>
+</tr>
+<tr>
+<td>Updated vulnerability relationship</td>
+<td>Bayesian <strong>parameter learning</strong> of the CPT, with the expert CPT as prior (for example Dirichlet per row). Weight of prior against data: OQ-27</td>
+<td>BN update</td>
+</tr>
+<tr>
+<td>Recovery trajectory</td>
+<td><code>ServiceLoss(t)</code> or <code>ObservedGroupConsequence(t)</code></td>
+<td>OBSERVED series</td>
+</tr>
+<tr>
+<td>Resilience <code>P(Resilience_{unit,g,s} | trajectory)</code></td>
+<td>indicators: maximum loss, recovery time, recovery rate, cumulative impact (AUC), final restoration level</td>
+<td>OUTPUT</td>
+</tr>
+<tr>
+<td>Facility operational output</td>
+<td>functional state, coverage, pending requests, resource need by type (for example medical, administrative, transport)</td>
+<td>OUTPUT</td>
+</tr>
+</tbody>
+</table>
+<p>DBN (Paper 4 §12): <code>State(t−1) → FunctionalState(t) → ObservedConsequence(t) → Response(t) → Recovery(t) → State(t+1)</code>, in parallel with <code>Vulnerability → ExpectedConsequence → ObservedConsequence</code>. Since OQ-16, the parallel branch is: observed <code>GE(t)</code>, <code>SL(t)</code> and <code>SS</code> → vulnerability relationship → Expected Consequence, compared with Observed Consequence to learn the relationship's parameters. Exact topology and time slice: OQ-17.</p>
+<h2 id="5-cross-cutting-machinery-shared-by-all-papers">5. Cross-cutting machinery (shared by all papers)<a class="headerlink" href="#5-cross-cutting-machinery-shared-by-all-papers" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Discrete Bayesian modelling</strong>: ordinal variables, CPTs, elicitation from expert scenarios, inference. Engine choice via ADR.</li>
+<li><strong>Monte Carlo uncertainty</strong>: sample uncertain inputs and CPT parameters, run the model, collect <code>P(·)</code> or a distribution (Paper 1 §11, Paper 2 §14, Paper 3 §22).</li>
+<li><strong>Sensitivity</strong>: rank factors by influence (Paper 1 §12, Paper 2 §16, Paper 3 §23).</li>
+<li><strong>Scenarios</strong>: controlled interventions (Paper 1 §13, for example capacity +20 %, staff +1, new facility, accessibility −20 %) and disruption scenarios (Paper 3 §7–10). One shared engine.</li>
+<li><strong>Validation</strong>: expert validation, plausibility and monotonicity checks, sensitivity; later calibration against observed data (Papers 1–3 §14/18/24).</li>
+<li><strong>Alternative allocation models</strong> (future, see OQ-2 notes N-2a, N-2b): 3SFCA as a candidate refinement, and capacity-constrained allocation as an alternative model for sensitivity analysis only. The baseline is 2SFCA. The <code>capacity</code> module should expose allocation behind an interface so these can be added without changing callers.</li>
+</ul>
+<h2 id="6-module-map-for-core">6. Module map for <code>core/</code><a class="headerlink" href="#6-module-map-for-core" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Papers</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>model</code></td>
+<td>all</td>
+<td>entities and the typed unit-of-analysis container</td>
+</tr>
+<tr>
+<td><code>bayes</code></td>
+<td>1–4</td>
+<td>discrete variables, CPTs, elicitation, inference interface</td>
+</tr>
+<tr>
+<td><code>accessibility</code></td>
+<td>1 §5</td>
+<td>travel times, weights, group- and mode-specific accessibility</td>
+</tr>
+<tr>
+<td><code>demand</code></td>
+<td>1 §6</td>
+<td>estimated demand</td>
+</tr>
+<tr>
+<td><code>capacity</code></td>
+<td>1 §7</td>
+<td>physical, functional, effective capacity, supply</td>
+</tr>
+<tr>
+<td><code>service_gap</code></td>
+<td>1 §8–9</td>
+<td>service gap and its BBN</td>
+</tr>
+<tr>
+<td><code>latent_need</code></td>
+<td>2</td>
+<td>social susceptibility, hidden need, total need</td>
+</tr>
+<tr>
+<td><code>scenarios</code></td>
+<td>1 §13, 3 §7–10</td>
+<td>counterfactual and disruption scenarios</td>
+</tr>
+<tr>
+<td><code>vulnerability</code></td>
+<td>3 §11–21</td>
+<td>exposure, service loss, vulnerability BBN</td>
+</tr>
+<tr>
+<td><code>operations</code></td>
+<td>4 §4–5</td>
+<td>tickets, indicators, facility functional state</td>
+</tr>
+<tr>
+<td><code>dynamics</code></td>
+<td>4 §7–9, 12</td>
+<td>territorial state, expected/observed consequence, DBN</td>
+</tr>
+<tr>
+<td><code>resilience</code></td>
+<td>4 §10–13</td>
+<td>Bayesian update of vulnerability, trajectories, resilience</td>
+</tr>
+<tr>
+<td><code>uncertainty</code></td>
+<td>1 §11, 2 §14, 3 §22</td>
+<td>Monte Carlo propagation</td>
+</tr>
+<tr>
+<td><code>sensitivity</code></td>
+<td>1 §12, 2 §16, 3 §23</td>
+<td>sensitivity analysis</td>
+</tr>
+<tr>
+<td><code>validation</code></td>
+<td>1 §14, 2 §18, 3 §24</td>
+<td>validation tools</td>
+</tr>
+</tbody>
+</table>
+<p>Platform machinery has no module of its own (maintainer decision, 2026-11-25, PR #6): the model
+registry lives in <code>model</code> (<code>model/registry.py</code>) and the diagnostic model <code>diagnostic-v0</code>, which
+only checks the platform's mechanics and is not a method, in <code>validation</code>
+(<code>validation/diagnostic.py</code>). The module list above is unchanged.</p>
+<h2 id="7-invariants">7. Invariants<a class="headerlink" href="#7-invariants" title="Permanent link">&para;</a></h2>
+<p>See the root <code>AGENTS.md</code> ("Domain invariants"). The most important: keep BN nodes, computed simulation variables and scenario parameters separate (section 4); never mix vulnerability and resilience; never treat estimated demand as total need.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Επιστροφή στην αρχή
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Υποσέλιδο" >
+        
+          
+          <a href="../../uat/01-platform/" class="md-footer__link md-footer__link--prev" aria-label="Προηγούμενο: UAT 01: platform">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Προηγούμενο
+              </span>
+              <div class="md-ellipsis">
+                UAT 01: platform
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../" class="md-footer__link md-footer__link--next" aria-label="Επόμενο: Specifications index">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Επόμενο
+              </span>
+              <div class="md-ellipsis">
+                Specifications index
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      SolidarityNode 0.1.0 · AGPL-3.0-or-later · synthetic data only in this repository
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "search.highlight", "search.suggest", "content.code.copy", "content.action.view", "toc.follow"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "\u0391\u03bd\u03c4\u03b9\u03b3\u03c1\u03ac\u03c6\u03b7\u03ba\u03b5 \u03c3\u03c4\u03bf \u03c0\u03c1\u03cc\u03c7\u03b5\u03b9\u03c1\u03bf", "clipboard.copy": "\u0391\u03bd\u03c4\u03b9\u03b3\u03c1\u03b1\u03c6\u03ae \u03c3\u03c4\u03bf \u03c0\u03c1\u03cc\u03c7\u03b5\u03b9\u03c1\u03bf", "search.result.more.one": "1 \u03b1\u03ba\u03cc\u03bc\u03b1 \u03c3\u03b5 \u03b1\u03c5\u03c4\u03ae\u03bd \u03c4\u03b7 \u03c3\u03b5\u03bb\u03af\u03b4\u03b1", "search.result.more.other": "# \u03b1\u03ba\u03cc\u03bc\u03b1 \u03c3\u03b5 \u03b1\u03c5\u03c4\u03ae\u03bd \u03c4\u03b7 \u03c3\u03b5\u03bb\u03af\u03b4\u03b1", "search.result.none": "\u03b4\u03b5\u03bd \u03b2\u03c1\u03ae\u03ba\u03b5 \u03ba\u03ac\u03c0\u03bf\u03b9\u03bf \u03ad\u03b3\u03b3\u03c1\u03b1\u03c6\u03bf", "search.result.one": "1 \u03ad\u03b3\u03b3\u03c1\u03b1\u03c6\u03bf \u03c0\u03bf\u03c5 \u03c4\u03b1\u03b9\u03c1\u03b9\u03ac\u03b6\u03b5\u03b9", "search.result.other": "# \u03ad\u03b3\u03b3\u03c1\u03b1\u03c6\u03b1 \u03c0\u03bf\u03c5 \u03c4\u03b1\u03b9\u03c1\u03b9\u03ac\u03b6\u03bf\u03c5\u03bd", "search.result.placeholder": "\u03a0\u03bb\u03b7\u03ba\u03c4\u03c1\u03bf\u03bb\u03bf\u03b3\u03ae\u03c3\u03c4\u03b5 \u03b3\u03b9\u03b1 \u03bd\u03b1 \u03b1\u03c1\u03c7\u03af\u03c3\u03b5\u03b9 \u03b7 \u03b1\u03bd\u03b1\u03b6\u03ae\u03c4\u03b7\u03c3\u03b7", "search.result.term.missing": "\u039b\u03b5\u03af\u03c0\u03b5\u03b9", "select.version": "\u0395\u03c0\u03b9\u03bb\u03bf\u03b3\u03ae \u03ad\u03ba\u03b4\u03bf\u03c3\u03b7\u03c2"}, "version": {"default": ["latest", "dev"], "provider": "mike"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -20,6 +20,10 @@
       
       
         
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../../el/i18n/glossary/" hreflang="el">
+        
       
       
       <link rel="icon" href="../../assets/brand/favicon.svg">
@@ -145,6 +149,32 @@
     
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../el/i18n/glossary/" hreflang="el" class="md-select__link">
+              Ελληνικά
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
     
     
       
@@ -931,6 +961,17 @@
     <span class="md-ellipsis">
       
         Platform
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
       
     </span>
   </a>
@@ -2178,6 +2219,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#texts-from-the-server" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2220,7 +2272,8 @@
 <p>The platform is used in Greek and English. These are the terms to use in the user interface
 (<code>frontend/src/i18n/el.json</code>, <code>en.json</code>), in documentation written in Greek and in the papers'
 Greek summaries. <strong>Decided</strong> terms were chosen by the maintainer; <strong>in use</strong> terms are what the
-UI uses today and change only by editing this file first.</p>
+UI uses today and change only by editing this file first; <strong>proposed</strong> terms were added with the
+Greek documentation site and wait for the maintainer's approval.</p>
 <p>When a term is missing, add it here in the same pull request that first uses it. Keep a
 concept's term the same everywhere; do not translate one concept two ways.</p>
 <h2 id="science-and-domain">Science and domain<a class="headerlink" href="#science-and-domain" title="Permanent link">&para;</a></h2>
@@ -2366,6 +2419,186 @@ concept's term the same everywhere; do not translate one concept two ways.</p>
 <td>in use</td>
 <td>results, comparison</td>
 </tr>
+<tr>
+<td>uncertainty</td>
+<td>αβεβαιότητα</td>
+<td>in use</td>
+<td>results, comparison, map layers</td>
+</tr>
+<tr>
+<td>indicator</td>
+<td>δείκτης</td>
+<td>in use</td>
+<td>results</td>
+</tr>
+<tr>
+<td>capacity</td>
+<td>δυναμικότητα</td>
+<td>in use</td>
+<td>scenario editor, study area</td>
+</tr>
+<tr>
+<td>disruption / disruption severity (DS)</td>
+<td>διαταραχή / σοβαρότητα διαταραχής</td>
+<td>in use</td>
+<td>scenario editor</td>
+</tr>
+<tr>
+<td>rationing case (OQ-24)</td>
+<td>περίπτωση κατανομής ελλείμματος</td>
+<td>in use</td>
+<td>scenario editor</td>
+</tr>
+<tr>
+<td>diagnostic model</td>
+<td>διαγνωστικό μοντέλο</td>
+<td>in use</td>
+<td>diagnostic banner, Greek docs</td>
+</tr>
+<tr>
+<td>random seed</td>
+<td>σπόρος τυχαιότητας</td>
+<td>in use</td>
+<td>run page, reproducibility</td>
+</tr>
+<tr>
+<td>core unit / buffer unit (buffer)</td>
+<td>κεντρική μονάδα / μονάδα ζώνης (ζώνη)</td>
+<td>in use</td>
+<td>study area, results, legend</td>
+</tr>
+<tr>
+<td>hidden need</td>
+<td>κρυφή ανάγκη</td>
+<td>proposed</td>
+<td>README Greek summary, Greek docs</td>
+</tr>
+<tr>
+<td>total need</td>
+<td>συνολική ανάγκη</td>
+<td>proposed</td>
+<td>Greek docs (home)</td>
+</tr>
+<tr>
+<td>unmet expressed need / met need (OQ-8)</td>
+<td>ανικανοποίητη εκφρασμένη ανάγκη / ικανοποιημένη ανάγκη</td>
+<td>proposed</td>
+<td>Greek docs (home)</td>
+</tr>
+<tr>
+<td>demand / recorded (observed) demand</td>
+<td>ζήτηση / καταγεγραμμένη ζήτηση</td>
+<td>proposed</td>
+<td>Greek docs (home, roadmap)</td>
+</tr>
+<tr>
+<td>supply</td>
+<td>προσφορά</td>
+<td>proposed</td>
+<td>Greek docs (home, roadmap)</td>
+</tr>
+<tr>
+<td>service gap</td>
+<td>κενό εξυπηρέτησης</td>
+<td>proposed</td>
+<td>Greek docs (home, roadmap)</td>
+</tr>
+<tr>
+<td>social susceptibility</td>
+<td>κοινωνική ευπάθεια (never for vulnerability)</td>
+<td>proposed</td>
+<td>Greek docs (home)</td>
+</tr>
+<tr>
+<td>(group) exposure</td>
+<td>έκθεση (της ομάδας)</td>
+<td>proposed</td>
+<td>Greek docs (home)</td>
+</tr>
+<tr>
+<td>service loss</td>
+<td>απώλεια υπηρεσίας</td>
+<td>proposed</td>
+<td>Greek docs (home)</td>
+</tr>
+<tr>
+<td>recovery</td>
+<td>ανάκαμψη</td>
+<td>proposed</td>
+<td>Greek docs (home, roadmap)</td>
+</tr>
+<tr>
+<td>risk</td>
+<td>κίνδυνος</td>
+<td>proposed</td>
+<td>Greek docs (home)</td>
+</tr>
+<tr>
+<td>service units / reference period</td>
+<td>μονάδες υπηρεσίας / περίοδος αναφοράς</td>
+<td>proposed</td>
+<td>Greek docs (home)</td>
+</tr>
+<tr>
+<td>two-step floating catchment area (2SFCA)</td>
+<td>μέθοδος κινητής περιοχής εξυπηρέτησης δύο βημάτων (2SFCA)</td>
+<td>proposed</td>
+<td>Greek docs (home)</td>
+</tr>
+<tr>
+<td>(Dynamic) Bayesian Network</td>
+<td>(δυναμικό) μπεϋζιανό δίκτυο</td>
+<td>proposed</td>
+<td>Greek docs (home)</td>
+</tr>
+<tr>
+<td>sensitivity analysis</td>
+<td>ανάλυση ευαισθησίας</td>
+<td>proposed</td>
+<td>Greek docs (home, roadmap)</td>
+</tr>
+<tr>
+<td>expert elicitation</td>
+<td>συλλογή της γνώμης ειδικών</td>
+<td>proposed</td>
+<td>Greek docs (home)</td>
+</tr>
+<tr>
+<td>operational support</td>
+<td>επιχειρησιακή υποστήριξη</td>
+<td>proposed</td>
+<td>Greek docs (home)</td>
+</tr>
+<tr>
+<td>anonymous request ticket / request logging</td>
+<td>ανώνυμο δελτίο αιτήματος / καταγραφή αιτημάτων</td>
+<td>proposed</td>
+<td>Greek docs (home, FAQ, roadmap)</td>
+</tr>
+<tr>
+<td>facility state: normal / under pressure / degraded / critical / recovering</td>
+<td>κανονική / υπό πίεση / υποβαθμισμένη / κρίσιμη / σε ανάκαμψη</td>
+<td>proposed</td>
+<td>Greek docs (home)</td>
+</tr>
+<tr>
+<td>Digital Twin</td>
+<td>ψηφιακό δίδυμο</td>
+<td>proposed</td>
+<td>Greek docs (home)</td>
+</tr>
+<tr>
+<td>domain model</td>
+<td>μοντέλο πεδίου</td>
+<td>proposed</td>
+<td>Greek docs (links to the English spec)</td>
+</tr>
+<tr>
+<td>paper (Papers 1–4)</td>
+<td>άρθρο (Άρθρο 1–4)</td>
+<td>proposed</td>
+<td>Greek docs (home, roadmap)</td>
+</tr>
 </tbody>
 </table>
 <h2 id="platform">Platform<a class="headerlink" href="#platform" title="Permanent link">&para;</a></h2>
@@ -2432,6 +2665,152 @@ concept's term the same everywhere; do not translate one concept two ways.</p>
 <td>τόμος αποτελεσμάτων</td>
 <td>in use</td>
 <td>Admin storage</td>
+</tr>
+<tr>
+<td>active data (version)</td>
+<td>ενεργά δεδομένα / ενεργή έκδοση δεδομένων</td>
+<td>in use</td>
+<td>Admin, scenario editor, run page</td>
+</tr>
+<tr>
+<td>data quality / data coverage / layer</td>
+<td>ποιότητα δεδομένων / κάλυψη δεδομένων / επίπεδο</td>
+<td>in use</td>
+<td>study area, results</td>
+</tr>
+<tr>
+<td>processing note</td>
+<td>σημείωση επεξεργασίας</td>
+<td>in use</td>
+<td>study area</td>
+</tr>
+<tr>
+<td>licence / attribution</td>
+<td>άδεια / αναφορά πηγής</td>
+<td>in use</td>
+<td>study area</td>
+</tr>
+<tr>
+<td>feature (map)</td>
+<td>στοιχείο</td>
+<td>in use</td>
+<td>study area</td>
+</tr>
+<tr>
+<td>owner</td>
+<td>κάτοχος (never ιδιοκτήτης)</td>
+<td>decided</td>
+<td>scenarios, scenario editor, server messages</td>
+</tr>
+<tr>
+<td>reproducibility / input hash / samples file</td>
+<td>αναπαραγωγιμότητα / αποτύπωμα εισόδων / αρχείο δειγμάτων</td>
+<td>in use</td>
+<td>run page</td>
+</tr>
+<tr>
+<td>worker</td>
+<td>υπηρεσία εκτέλεσης</td>
+<td>in use</td>
+<td>run page messages</td>
+</tr>
+<tr>
+<td>run status: queued / running / succeeded / failed / cancelled</td>
+<td>σε αναμονή / εκτελείται / ολοκληρώθηκε / απέτυχε / ακυρώθηκε</td>
+<td>in use</td>
+<td>run page, scenarios</td>
+</tr>
+<tr>
+<td>preview / import / export</td>
+<td>προεπισκόπηση / εισαγωγή / εξαγωγή</td>
+<td>in use</td>
+<td>Admin, run page</td>
+</tr>
+<tr>
+<td>sign in / sign out</td>
+<td>σύνδεση / αποσύνδεση</td>
+<td>in use</td>
+<td>login, header</td>
+</tr>
+<tr>
+<td>hub</td>
+<td>κεντρική εγκατάσταση (first use on a page: «κεντρική εγκατάσταση (hub)»; never φορέας, which is an organisation, or κόμβος, which is a network node)</td>
+<td>decided</td>
+<td>Greek docs (concepts, data updates, roles, FAQ, home, roadmap)</td>
+</tr>
+<tr>
+<td>hub onboarding</td>
+<td>ένταξη (δήμου) στην κεντρική εγκατάσταση</td>
+<td>proposed</td>
+<td>Greek docs (home, roadmap)</td>
+</tr>
+<tr>
+<td>municipal installation</td>
+<td>εγκατάσταση δήμου («η εγκατάσταση του δήμου σας»; never bare «εγκατάσταση» where it could mean the hub)</td>
+<td>decided</td>
+<td>Greek docs</td>
+</tr>
+<tr>
+<td>rollback (make an earlier data version active again)</td>
+<td>επαναφορά</td>
+<td>proposed</td>
+<td>Greek docs (Admin, roadmap)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
+<p>Terms of the Greek pages of the documentation site (<code>docs/**/*.el.md</code>) that are not in the UI.</p>
+<table>
+<thead>
+<tr>
+<th>English</th>
+<th>Greek</th>
+<th>Status</th>
+<th>Where used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(link to a page kept in English)</td>
+<td>(στα αγγλικά)</td>
+<td>decided</td>
+<td>Greek docs, after links to English-only pages and on their navigation sections</td>
+</tr>
+<tr>
+<td>user guide</td>
+<td>οδηγός χρήσης</td>
+<td>proposed</td>
+<td>Greek docs navigation</td>
+</tr>
+<tr>
+<td>concepts</td>
+<td>βασικές έννοιες</td>
+<td>proposed</td>
+<td>Greek docs navigation</td>
+</tr>
+<tr>
+<td>roadmap</td>
+<td>πορεία ανάπτυξης</td>
+<td>proposed</td>
+<td>Greek docs navigation</td>
+</tr>
+<tr>
+<td>platform foundation (v0.1)</td>
+<td>θεμέλια της πλατφόρμας (not βάση, which is the baseline)</td>
+<td>decided</td>
+<td>Greek docs (home, roadmap)</td>
+</tr>
+<tr>
+<td>milestone / GitHub issue</td>
+<td>ορόσημο / θέμα (issue)</td>
+<td>proposed</td>
+<td>Greek docs (roadmap, FAQ)</td>
+</tr>
+<tr>
+<td>user acceptance testing (UAT)</td>
+<td>δοκιμές αποδοχής (UAT)</td>
+<td>proposed</td>
+<td>Greek docs navigation, home</td>
 </tr>
 </tbody>
 </table>

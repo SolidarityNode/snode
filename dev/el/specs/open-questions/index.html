@@ -1,0 +1,2806 @@
+
+<!doctype html>
+<html lang="el" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Ανοιχτό χωρικό πιθανοτικό πλαίσιο για την προσβασιμότητα των κοινωνικών υπηρεσιών, την κρυφή ανάγκη, την τρωτότητα και την ανθεκτικότητα.">
+      
+      
+      
+        <link rel="canonical" href="https://solidaritynode.github.io/snode/dev/el/specs/open-questions/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../paper-revisions/">
+      
+      
+        
+          <link rel="alternate" href="../../../specs/open-questions/" hreflang="en">
+        
+          <link rel="alternate" href="./" hreflang="el">
+        
+      
+      
+      <link rel="icon" href="../../../assets/brand/favicon.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
+    
+    
+      
+        <title>Open questions - SolidarityNode</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#open-questions" class="md-skip">
+          Μετάβαση στο περιεχόμενο
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Κεφαλίδα">
+    <a href="../../" title="SolidarityNode" class="md-header__button md-logo" aria-label="SolidarityNode" data-md-component="logo">
+      
+  <img src="../../../assets/brand/favicon.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SolidarityNode
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Open questions
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Επιλογή γλώσσας">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../../specs/open-questions/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="el" class="md-select__link">
+              Ελληνικά
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Αναζήτηση" placeholder="Αναζήτηση" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Αναζήτηση">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Καθαρισμός" aria-label="Καθαρισμός" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Αρχικοποίηση αναζήτησης
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SolidarityNode/snode" title="Μετάβαση στο αποθετήριο" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SolidarityNode/snode
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Καρτέλες" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Αρχική
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../user-guide/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Οδηγός χρήσης
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../concepts/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Βασικές έννοιες
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../uat/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Δοκιμές αποδοχής (στα αγγλικά)
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../00-domain-model/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Μέθοδος (στα αγγλικά)
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Αρχιτεκτονική (στα αγγλικά)
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../adr/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Αποφάσεις (στα αγγλικά)
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../contributing/contributing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Συνεισφορά
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../changelog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Ιστορικό αλλαγών (στα αγγλικά)
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Πλοήγηση" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../" title="SolidarityNode" class="md-nav__button md-logo" aria-label="SolidarityNode" data-md-component="logo">
+      
+  <img src="../../../assets/brand/favicon.svg" alt="logo">
+
+    </a>
+    SolidarityNode
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SolidarityNode/snode" title="Μετάβαση στο αποθετήριο" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SolidarityNode/snode
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Αρχική
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../user-guide/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Οδηγός χρήσης
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Οδηγός χρήσης
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/login/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Σύνδεση
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/study-area/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Περιοχή μελέτης
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/scenarios/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Λίστα σεναρίων
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/scenario-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Επεξεργασία σεναρίου
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Εκτέλεση
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/compare/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Σύγκριση
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/admin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Διαχείριση
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/data-updates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Πακέτα δεδομένων και ενημερώσεις
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/roles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ρόλοι
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Συχνές ερωτήσεις
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../i18n/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Γλωσσάριο ελληνικών–αγγλικών (στα αγγλικά)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Βασικές έννοιες
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../uat/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Δοκιμές αποδοχής (στα αγγλικά)
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Δοκιμές αποδοχής (στα αγγλικά)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../uat/00-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UAT 00: bootstrap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../uat/01-platform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UAT 01: platform
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Μέθοδος (στα αγγλικά)
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Μέθοδος (στα αγγλικά)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-domain-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Open questions
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Open questions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Πίνακας περιεχομένων">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Πίνακας περιεχομένων
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paper-1-accessibility-capacity-service-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paper 1 (accessibility, capacity, service gap)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paper-2-hidden-need" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paper 2 (hidden need)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paper-3-disruption-vulnerability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paper 3 (disruption, vulnerability)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paper-3-and-paper-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paper 3 and Paper 4
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paper-4-operations-dynamics-resilience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paper 4 (operations, dynamics, resilience)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#general" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../paper-revisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Paper revisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../source/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Original paper texts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../data-processing/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data processing notes
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5_6" id="__nav_5_6_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data processing notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-processing/DP-001-synthetic-demo-dataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DP-001 synthetic demo dataset
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-processing/DP-002-synthetic-demo-packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DP-002 synthetic demo packages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data sources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Αρχιτεκτονική (στα αγγλικά)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Αρχιτεκτονική (στα αγγλικά)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/lifecycles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lifecycles and data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/dependencies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependencies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Αποφάσεις (στα αγγλικά)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Συνεισφορά
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Συνεισφορά
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ticket workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releasing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Πορεία ανάπτυξης
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/agents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AGENTS.md (rules)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../conventions/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conventions
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Conventions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../conventions/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../conventions/backend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    backend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../conventions/frontend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    frontend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../conventions/data-processing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    data-processing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ιστορικό αλλαγών (στα αγγλικά)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Πίνακας περιεχομένων">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Πίνακας περιεχομένων
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paper-1-accessibility-capacity-service-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paper 1 (accessibility, capacity, service gap)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paper-2-hidden-need" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paper 2 (hidden need)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paper-3-disruption-vulnerability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paper 3 (disruption, vulnerability)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paper-3-and-paper-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paper 3 and Paper 4
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paper-4-operations-dynamics-resilience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paper 4 (operations, dynamics, resilience)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#general" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+    
+      
+    
+    <a href="https://github.com/SolidarityNode/snode/raw/main/docs/specs/open-questions.md" title="Προβολή πηγαίου κώδικα" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
+    </a>
+  
+
+
+<h1 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Issues found while turning Papers 1–4 into a model. <strong>None of these may be resolved in code.</strong> Implementation tickets that depend on one are labelled <code>needs-spec</code>. Each question becomes a <code>research-question</code> or <code>adr</code> issue. Reference them in code and docs as <code>OQ-n</code>.</p>
+<p>Status values: <code>open</code>, <code>proposed</code> (a default the platform uses until the spec confirms or replaces it), <code>decided</code> (with link to ADR or spec update).</p>
+</blockquote>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>OQ</th>
+<th>Topic</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OQ-1</td>
+<td>indices, §5–8</td>
+<td>decided (2026-11-23)</td>
+</tr>
+<tr>
+<td>OQ-2</td>
+<td>capacity allocation, §7</td>
+<td>decided (2026-11-23)</td>
+</tr>
+<tr>
+<td>OQ-3</td>
+<td>access weight, §5</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-4</td>
+<td>service gap vs BBN, §8–9</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-5</td>
+<td>modes, §3.4–5</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-6</td>
+<td>groups, §4</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-7</td>
+<td>BN engine and discretisation, §9–10</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-8</td>
+<td>from probability to quantity, §12</td>
+<td>decided (2026-11-23)</td>
+</tr>
+<tr>
+<td>OQ-9</td>
+<td>susceptibility index, §6–7 vs Paper 3 §12</td>
+<td>decided (2026-11-23)</td>
+</tr>
+<tr>
+<td>OQ-10</td>
+<td>possible double counting, §4, §10 and Paper 3</td>
+<td>decided (2026-11-23)</td>
+</tr>
+<tr>
+<td>OQ-11</td>
+<td>diagram vs formula, §8 vs §10</td>
+<td>decided (2026-11-23)</td>
+</tr>
+<tr>
+<td>OQ-12</td>
+<td>baseline gap inside service loss, §14–15</td>
+<td>decided (2026-11-23)</td>
+</tr>
+<tr>
+<td>OQ-13</td>
+<td>affected population, §11</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-14</td>
+<td>disrupted service function, §13</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-15</td>
+<td>vulnerability states and thresholds, §17, §21</td>
+<td>partly decided (2026-11-23)</td>
+</tr>
+<tr>
+<td>OQ-16</td>
+<td>definition of vulnerability, Paper 3 §2, §17 vs Paper 4 §2.1, §10</td>
+<td>decided (2026-11-23)</td>
+</tr>
+<tr>
+<td>OQ-17</td>
+<td>DBN structure, §5, §12</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-18</td>
+<td>observed consequence, §9</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-19</td>
+<td>resilience estimation, §13</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-20</td>
+<td>resource mobilisation, §6</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-21</td>
+<td>re-identification risk, §4.1</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-22</td>
+<td>terminology</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-23</td>
+<td>Digital Twin wording</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-24</td>
+<td>unit of need and depth of loss</td>
+<td>decided (2026-11-23)</td>
+</tr>
+<tr>
+<td>OQ-25</td>
+<td>reference period</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-26</td>
+<td>delay versus loss</td>
+<td>approach decided (2026-11-23), values open</td>
+</tr>
+<tr>
+<td>OQ-27</td>
+<td>weight of expert priors against observed data</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-28</td>
+<td>study-area buffer and cross-border demand</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-29</td>
+<td>facility on anonymous tickets</td>
+<td>decided (2026-11-24)</td>
+</tr>
+<tr>
+<td>OQ-30</td>
+<td>order of applying interventions and disruptions</td>
+<td>proposed (2026-11-25)</td>
+</tr>
+</tbody>
+</table>
+<p>Future-work notes (<code>N-…</code>): N-2a 3SFCA, N-2b constrained allocation for sensitivity, N-2c constrained allocation in Paper 4, N-8a intensity of hidden need, N-8b small area estimation, N-8c direct validation of hidden need, N-24a severity weighting, N-24b breadth as BN parent.</p>
+<h2 id="paper-1-accessibility-capacity-service-gap">Paper 1 (accessibility, capacity, service gap)<a class="headerlink" href="#paper-1-accessibility-capacity-service-gap" title="Permanent link">&para;</a></h2>
+<p><strong>OQ-1 (indices, §5–8).</strong> <code>T_ij</code> uses <code>i</code> as origin and <code>j</code> as facility, but demand and supply (<code>D_j^g</code>, <code>Supply_j^g</code>) are indexed by <code>j</code>, as if <code>j</code> were the demand location. Paper 3 also reuses <code>s</code> for scenario. Define one consistent notation. <strong>Status: decided (2026-11-23).</strong></p>
+<ul>
+<li><strong>Indices:</strong> <code>i</code> spatial unit, <code>f</code> facility, <code>g</code> population group, <code>s</code> service, <code>m</code> transport mode, <code>c</code> scenario, <code>t</code> time, <code>l</code> state of a discrete variable (for example in <code>Σ_l P(X = l) …</code>).</li>
+<li><strong>Placement:</strong> demand, supply and gap belong to the spatial unit <code>i</code>; travel time is <code>T_if^{g,m}</code>.</li>
+<li><strong>Symbols fixed by other decisions:</strong> <code>k</code> intensity (service units per person per period, OQ-24); <code>p</code> need prevalence and <code>τ</code> take-up (OQ-8); <code>P(·)</code> probability. "k-anonymity" is used only as a term in text, never as a symbol.</li>
+<li><strong>Rationale.</strong> Removes the <code>i</code>/<code>j</code> inconsistency of Paper 1 and the double use of <code>s</code> in Paper 3, and avoids collisions created by later decisions (<code>k</code> as intensity and as state index).</li>
+</ul>
+<p><strong>OQ-2 (capacity allocation, §7).</strong> <code>C_ij^effective = C_i^functional × w(T_ij)</code> and <code>Supply_j^g = Σ_i C_ij^effective</code>. A facility's full capacity is counted for every origin, so supply can exceed what the facility can deliver when several areas compete for it. The text does not give an allocation or competition mechanism. <strong>Status: decided (2026-11-23).</strong></p>
+<ul>
+<li><strong>Decision.</strong> Use a two-step floating catchment area (2SFCA) allocation. Each facility's functional capacity is shared among the spatial units (and groups) that can reach it, in proportion to their access-weighted demand. Groups compete for the same facility capacity. The shares a facility gives out sum to its capacity.</li>
+<li><strong>Rationale.</strong></li>
+<li>Removes the over-counting of supply in the original formula, so the Service Gap is not systematically underestimated.</li>
+<li>Does not redistribute demand to alternative facilities after a capacity loss. This matches Paper 3, which explicitly excludes adaptive redistribution and alternative activation (reserved for Paper 4).</li>
+<li>Makes no assumption about how people choose facilities beyond the access weight <code>w(T)</code>.</li>
+<li>Cheap enough to run inside Monte Carlo and easy to explain.</li>
+<li><strong>Known limitations.</strong></li>
+<li>Demand inflation: a unit inside several catchments has its full demand counted in each one.</li>
+<li>A unit can be allocated more supply than its demand while surplus capacity could cover another unit.</li>
+<li><strong>Notes for future work</strong> (tracked as <code>research-question</code> issues, not implemented now):</li>
+<li><strong>N-2a: 3SFCA.</strong> Evaluate a three-step floating catchment area variant (for example Wan, Zou &amp; Sternberg, 2012) that splits each unit's demand among facilities with selection probabilities to correct demand inflation. Compare against 2SFCA on synthetic and real data. Verify references before use.</li>
+<li><strong>N-2b: Constrained allocation (option C) for sensitivity analysis.</strong> Implement a capacity-constrained allocation (linear programming or capacity-constrained gravity model) with flows bounded by facility capacity and by unit demand. Use it only as an alternative model in sensitivity analysis ("how much would the Service Gap change under coordinated allocation?"), never as the baseline. It assumes a behaviour rule and perfect coordination, which understates the real gap, and it redistributes demand after disruptions, which Paper 3 excludes.</li>
+<li><strong>N-2c: Paper 4.</strong> Constrained allocation is a natural candidate for modelling redistribution and resource mobilisation in Paper 4, where redistribution is part of the resilience mechanism.</li>
+<li><strong>Spec impact.</strong> Paper 1 §7 formulas for effective capacity and supply must be rewritten to the 2SFCA form. The access weight <code>w(T)</code> remains open (OQ-3).</li>
+</ul>
+<p><strong>OQ-3 (access weight, §5).</strong> Functional form and parameters of <code>w(T)</code> (decay, cut-offs), and whether they differ by group and mode, are not specified. Status: open.</p>
+<p><strong>OQ-4 (service gap vs BBN, §8–9).</strong> Service Gap is defined by a deterministic formula, then discretised, and also appears as a BBN node. It is unclear whether the BBN reproduces the formula, refines it, or models something beyond it, and how thresholds, CPTs and Monte Carlo interact. Status: open.</p>
+<p><strong>OQ-5 (modes, §3.4–5).</strong> Accessibility is computed per mode, but supply and gap are per group. How modes combine for a group (mode shares, best mode, weighting) is not specified. Status: open.</p>
+<p><strong>OQ-6 (groups, §4).</strong> Group definitions and thresholds, demand rates and their sources are not fixed. Groups can overlap (for example an elderly person with low income), so summing groups may double count population and demand. Overlap handling is not specified. <strong>Also (added 2026-11-23):</strong> tickets record a social group; decide whether a ticket can carry several groups or a priority rule applies, consistently with how population and demand handle overlap. Status: open.</p>
+<p><strong>OQ-7 (BN engine and discretisation, §9–10).</strong> Discretisation of continuous inputs, CPT size for nodes with many parents, the elicitation protocol and the choice of inference engine are open. Decide through ADRs. Status: open.</p>
+<h2 id="paper-2-hidden-need">Paper 2 (hidden need)<a class="headerlink" href="#paper-2-hidden-need" title="Permanent link">&para;</a></h2>
+<p><strong>OQ-8 (from probability to quantity, §12).</strong> <code>P(HN = Low/Medium/High)</code> must become <code>ExpectedHiddenNeed</code> in the same units as demand to compute <code>ETN = EstimatedDemand + ExpectedHiddenNeed</code>. The conversion is not defined. <strong>Status: decided (2026-11-23).</strong></p>
+<ul>
+<li><strong>Goal stated by the author.</strong> The method must support statements of the form "X % of the group has need that is not visible", so hidden need is measured in <strong>people of the group</strong>, not as a share of estimated demand. (Rejected: hidden need as a share of estimated demand, because a group that barely appears in services would then also show almost no hidden need, which may be exactly where hidden need is largest.)</li>
+<li><strong>Decision ("need prevalence × non-take-up").</strong></li>
+<li><code>p_{i,g,s}</code>: <strong>need prevalence</strong>, the share of the group that needs the service in the reference period.</li>
+<li><code>τ_{i,g,s}</code>: <strong>take-up</strong>, the share of people with need who <strong>express</strong> it, that is make a request, <strong>whether or not they are then served</strong>. <code>1 − τ</code> is <strong>non-take-up</strong>: people with need who never make a request because they do not seek the service, cannot access it, are discouraged by cost, distance or expected waiting, or use alternatives (Paper 2 §1.1).</li>
+<li><strong>Separation of concepts (decided 2026-11-23):</strong> <strong>hidden need</strong> is need that is never expressed (Paper 2). <strong>Unmet expressed need</strong> (requests not fulfilled within the maximum acceptable waiting time, or expired) belongs to Service Gap (Paper 1) and Service Loss (Paper 3). Defining <code>τ</code> as "served" instead would make capacity shortages look like low take-up and count the same unmet need twice.</li>
+<li>Visible need (people) <code>= Population × p × τ</code>. <strong>Hidden need (people) <code>= Population × p × (1 − τ)</code></strong>. <strong>Share of the group with hidden need <code>= p × (1 − τ)</code></strong>. Total need (people) <code>= Population × p</code>.</li>
+<li>The Paper 2 BN has four parents: Social Susceptibility, need-based gap (OQ-10), access deterrence and alternatives outside the network (OQ-11). Its target node is interpreted as the <strong>level of non-take-up</strong>, with states defined as ranges of <code>1 − τ</code> (for example Low 0–20 %, Medium 20–50 %, High 50–80 %; exact bounds to be set with experts).</li>
+<li>Expected non-take-up is <code>Σ P(state) × value</code>, with values sampled within each range in Monte Carlo (not fixed midpoints), so results are reported with an interval, for example "7–17 % of the group (90 % interval) has hidden need".</li>
+<li>In service units (OQ-24): <code>ETN = Population × p × k</code>; hidden need in units <code>= Population × p × (1 − τ) × k</code>.</li>
+<li><strong>Source of <code>p</code>.</strong> To be determined during the work: survey or administrative data if available (candidates to check: EU-SILC, EHIS, SHARE for older people; usually national or regional, not per ΤΚ), otherwise expert elicitation. <code>p</code> is an uncertain parameter, configured per group, service and, where data allow, area. Not hard-coded.</li>
+<li><strong>Meaning of Paper 1 demand.</strong> Paper 1's <code>DemandRate</code> is <strong>visible use under average conditions</strong> (typically a national or regional rate), not need prevalence. If a source gives prevalence, it feeds <code>p</code>. This must be stated explicitly in Paper 1 §6.</li>
+<li><strong>Use of observations (revised 2026-11-23; replaces an earlier consistency check).</strong></li>
+<li><em>Rejected:</em> requiring "visible need <code>Population × p × τ</code> ≈ Paper 1 estimated demand". Paper 1 demand applies an average rate and is not a local observation, so local differences are exactly what the method should reveal; and enforcing equality would fix <code>τ = D / (Population × p)</code> arithmetically, leaving the BN nothing to estimate.</li>
+<li><em>Decided:</em><ol>
+<li><strong>Aggregate calibration</strong> where aggregate administrative figures exist (for example people served in the whole municipality): the sum of visible need over all units should be close to them; local differences are allowed.</li>
+<li><strong>Observed use as evidence</strong>: local administrative records now, tickets later (Paper 4), enter the BN as observations and update take-up by Bayesian <strong>parameter learning</strong> of <code>P(non-take-up | parents)</code>, pooling information across units with similar characteristics. Same mechanism as OQ-16; weight of experts against data per OQ-27. Updating per cell (unit × group × service × period) is avoided because counts are small and privacy rules (OQ-21) restrict them.</li>
+<li>Paper 1 demand is kept only as a <strong>descriptive indicator</strong>: the ratio of visible need to <code>D</code> shows where local use departs from the average.</li>
+</ol>
+</li>
+<li><em>Identifiability (limitation to state in Paper 2):</em> use data observe only the product <code>p × τ × k</code> (how many requests), not need and take-up separately. Hidden-need estimates therefore rest on independent information about <code>p</code> (surveys or experts). Mandatory sensitivity analysis of hidden need with respect to <code>p</code>.</li>
+<li><em>Persons versus requests:</em> anonymous tickets count requests, not people. A ticket field "first request in this period" (yes/no, no identifier) allows counting people without identifying them, which separates <code>k</code> from <code>p × τ</code>.</li>
+<li><em>Completeness of recording:</em> if some facilities or channels (phone, walk-in) are not recorded, observed use is too low, <code>τ</code> is underestimated and hidden need overestimated. Recording coverage is tracked per facility and period, and updating uses only data from facilities with full or known coverage.</li>
+<li><em>Change over time:</em> take-up changes when services change; learning the CPT parameters (not a fixed <code>τ</code> per unit) lets <code>τ</code> follow changes in its parents.</li>
+<li><strong>Rationale.</strong></li>
+<li>Answers the author's question directly and bounds hidden need by the population automatically.</li>
+<li>Splits two different questions (how many need, how many do not reach the service), each easier for experts ("out of 100 older people who need care, in an area with low accessibility and few alternatives, how many do not receive it?") and each validated separately.</li>
+<li>Builds on the established non-take-up literature and on possible survey data for prevalence.</li>
+<li>Links to Paper 4: tickets count people who reach services, informing <code>τ</code> once <code>p</code> is known.</li>
+<li>Simplifies OQ-10: total need is <code>Population × p</code>; the BN only splits it into visible and hidden.</li>
+<li>Easy to implement: array multiplications plus the discrete BN already required.</li>
+<li><strong>Notes for future work</strong> (tracked as <code>research-question</code> issues):</li>
+<li><strong>N-8a: Intensity of hidden need.</strong> People with hidden need may need more service units than visible users (for example because need accumulates). Initially the same <code>k</code> is used for both; revisit with data.</li>
+<li><strong>N-8b: Small area estimation.</strong> If regional survey data on unmet need become available, downscale them to spatial units with small area estimation methods using unit covariates, as an independent validation of the Paper 2 BN.</li>
+<li><strong>N-8c: Direct validation of hidden need.</strong> Tickets never show hidden need, by definition. Plan a validation study with direct measurement: outreach in a sample of units (home visits or telephone survey counting people with need who never requested help) and referrals from other actors (doctors, social workers, parishes) of people unknown to the services.</li>
+<li><strong>Spec impact.</strong> Paper 2 §1.1, §2, §10, §12, §17, §19.2 (non-take-up interpretation, people-based outputs, interval reporting), Paper 1 §6 (meaning of <code>DemandRate</code>), Paper 3 §5 (<code>ETN</code> definition).</li>
+</ul>
+<p><strong>OQ-9 (susceptibility index, §6–7 vs Paper 3 §12).</strong> Paper 2 writes <code>SS_{i,g}</code>, Paper 3 writes <code>SS_g</code>. Is susceptibility group-level or unit-and-group-level? <strong>Status: decided (2026-11-23).</strong></p>
+<ul>
+<li><strong>Decision:</strong> <code>SS_{i,g,s}</code>, per spatial unit, group <strong>and service</strong>.</li>
+<li><strong>Rationale.</strong> Indicators such as living alone or household composition vary spatially, and a group is not equally prone to unmet provision for every service (for example older people living alone are highly susceptible for home care, much less for employment services).</li>
+<li><strong>Consequences.</strong></li>
+<li>Indicators, or their weighting, may differ by service; experts define them per group and service. The rule of Paper 2 §7 still applies: an indicator used to define the group is never reused as susceptibility evidence.</li>
+<li>More elicitation effort than a single susceptibility per group; to be organised in the elicitation protocol (with OQ-7).</li>
+<li>Unit-level indicators may be unavailable at fine resolution or based on very small counts; their uncertainty enters Monte Carlo, and small area estimation may be needed (see N-8b).</li>
+<li>Susceptibility still never depends on the service system (availability, accessibility, capacity), as Paper 2 §6.2 requires; spatial variation comes only from social characteristics.</li>
+<li><strong>Spec impact.</strong> Paper 2 §6–7 and Paper 3 §12, §17 (write <code>SS_{i,g,s}</code>).</li>
+</ul>
+<p><strong>OQ-10 (possible double counting, §4, §10 and Paper 3).</strong> Hidden Need is conditioned on Service Gap, which is derived from estimated demand; <code>ETN</code> then adds hidden need to demand, and Paper 3 uses <code>ETN</code> to compute Service Loss. Verify that information is not counted twice (Paper 3 already flags this for Need Pressure). <strong>Status: decided (2026-11-23).</strong></p>
+<ul>
+<li><strong>Original problem resolved by OQ-8.</strong> Total need is <code>Population × p × k</code> and no longer contains Paper 1 estimated demand, so demand is no longer counted both directly in <code>ETN</code> and indirectly through Service Gap.</li>
+<li><strong>Remaining problem found: a loop.</strong> Paper 1 Service Gap is computed from estimated demand, which reflects visible use (<code>p × τ</code>). Using it as a parent of non-take-up means that a group with low take-up shows low demand, hence a small gap, hence the BN infers low non-take-up: the group with the most hidden need would appear to have the least.</li>
+<li><strong>Decision ("option A").</strong> The parent of non-take-up in Paper 2 is a <strong>need-based gap</strong>: <code>max(0, Population × p × k − Supply)</code>, the shortfall of supply (2SFCA, OQ-2) relative to <strong>total need</strong>, not relative to current users. It does not depend on <code>τ</code>, so the loop is broken. Paper 1's demand-based Service Gap is unchanged and keeps answering Paper 1's question.</li>
+<li><strong>Rationale.</strong> People are discouraged by full facilities and long waits relative to everyone who needs the service, not relative to those already using it.</li>
+<li><strong>Rejected.</strong> Supply per inhabitant as parent (ignores how many need the service); keeping Paper 1 Service Gap with sensitivity checks (leaves the loop in place).</li>
+<li><strong>Spec impact.</strong> Paper 2 §9.2 ("Service Gap from Paper 1, not recomputed") must be rewritten: Paper 2 reuses Paper 1 supply but compares it with total need.</li>
+</ul>
+<p><strong>OQ-11 (diagram vs formula, §8 vs §10).</strong> The Paper 2 diagram shows Social Susceptibility feeding Service Gap and Accessibility, while §10 gives <code>P(HN | SS, SG, A, ALT)</code> with all four as parents of Hidden Need, and §6 states susceptibility is independent of service gap and accessibility. Fix the edge set. <strong>Status: decided (2026-11-23).</strong></p>
+<ul>
+<li><strong>Edge set.</strong> Four parents of the non-take-up node, no edges between them: Social Susceptibility, need-based gap (OQ-10), access deterrence, alternatives outside the network. The §8 diagram, where susceptibility feeds Service Gap and Accessibility, is corrected, since §6.2 defines susceptibility as independent of the service system.</li>
+<li><strong>Problem found.</strong> The need-based gap uses 2SFCA supply, which already includes accessibility (through <code>w(T)</code>) and all reachable facilities. With accessibility and alternatives defined as in Paper 2 §9.3–9.4 (travel time, number and capacity of alternative facilities), the same information would enter twice. The three parents would also be derived from the same facilities and network, so experts would be asked about combinations that hardly occur.</li>
+<li><strong>Decision ("option A"): non-overlapping definitions.</strong></li>
+<li><strong>Need-based gap</strong>: how adequate the facility network is for everyone who needs the service. Already includes access and alternative facilities.</li>
+<li><strong>Access deterrence</strong>: accessibility only as a <strong>direct deterrent to seeking</strong> the service (for example travel time to the nearest facility offering it), a different mechanism from how much capacity reaches the unit.</li>
+<li><strong>Alternatives outside the network</strong>: only options <strong>not</strong> among the modelled facilities (private services, family, NGOs, parishes), matching Paper 2 §1.1 ("use alternative solutions"). Where no data exist, start from expert estimates.</li>
+<li><strong>Rejected.</strong> Keeping only susceptibility and the need-based gap: simpler (9 combinations) but loses the "too far to ask" and "covered elsewhere" mechanisms.</li>
+<li><strong>Still to address (with OQ-7).</strong> Four three-state parents give 81 CPT rows. Candidate techniques: intermediate nodes (for example combining access deterrence and outside alternatives) or parametric elicitation such as ranked nodes (Fenton et al.; verify reference). Elicitation should skip or flag implausible combinations.</li>
+<li><strong>Spec impact.</strong> Paper 2 §8 (diagram), §9.3–9.4 (definitions of accessibility and alternatives), §10.</li>
+</ul>
+<h2 id="paper-3-disruption-vulnerability">Paper 3 (disruption, vulnerability)<a class="headerlink" href="#paper-3-disruption-vulnerability" title="Permanent link">&para;</a></h2>
+<p><strong>OQ-12 (baseline gap inside service loss, §14–15).</strong> <code>PUN = max(0, ETN − AvailableService^D)</code> and <code>SL = PUN / ETN</code>. Because baseline supply may already be below <code>ETN</code>, <code>SL</code> mixes the baseline gap with disruption-induced loss. Should loss be measured relative to baseline available service? <strong>Status: decided (2026-11-23).</strong></p>
+<ul>
+<li><strong>Definitions.</strong> For unit <code>i</code>, group <code>g</code>, service <code>s</code>, scenario <code>c</code>:</li>
+<li><code>AS⁰</code>: available service without disruption (baseline); <code>ASᴰ</code>: available service under the scenario.</li>
+<li><code>PUN⁰ = max(0, ETN − AS⁰)</code>: <strong>baseline gap</strong>, need already unmet before any disruption.</li>
+<li><code>PUNᴰ = max(0, ETN − ASᴰ)</code>: unmet need under the scenario.</li>
+<li><strong>Decision.</strong></li>
+<li><strong>Disruption loss</strong> is the counterfactual difference <code>ΔPUN = PUNᴰ − PUN⁰</code> (equivalently, covered need without disruption minus covered need with it). It is always computed and stored in absolute units (see OQ-24).</li>
+<li><strong>Service Loss (BN evidence)</strong> is <code>SL = (PUNᴰ − PUN⁰) / ETN</code> ("option A"), in <code>[0, 1]</code>, equal to 0 when nothing changes.</li>
+<li><strong>Baseline gap</strong> stays outside Service Loss. Its effect is examined through Need Pressure in sensitivity analysis, as Paper 3 §6 already specifies. It becomes an additional BN parent only if sensitivity shows it adds independent information, and only through an ADR.</li>
+<li><strong>Relative Service Loss</strong> <code>SL′ = (PUNᴰ − PUN⁰) / min(ETN, AS⁰)</code> ("option A′", share of the service the group was receiving that is lost) is computed and stored as a secondary indicator for maps and sensitivity analysis. It is <strong>not</strong> a BN node.</li>
+<li><strong>Rationale.</strong></li>
+<li>Each parent of Vulnerability measures only its own aspect: Group Exposure (how much of the group is affected), Service Loss (how much service the event removes), Social Susceptibility (how prone the group is). The pre-existing condition of the group belongs to susceptibility or Need Pressure, not to the loss.</li>
+<li>Passes the logical check that a zero-severity scenario gives zero loss. With the paper's formula the baseline gap would leak into Vulnerability, contradicting Paper 3 §6, which excludes Need Pressure as a parent to avoid double counting.</li>
+<li>Consistent with Paper 4: loss is measured against pre-event performance (as in the resilience literature, for example Bruneau et al., 2003), so <code>ServiceLoss(t)</code> starts at 0 and returns to 0 on full recovery.</li>
+<li>Normalising by <code>ETN</code> keeps the paper's wording ("share of estimated need"), matches the logic of Group Exposure (share of the group), and is stable for small values.</li>
+<li><strong>Known limitation.</strong> <code>SL</code> understates the consequence for groups that already had very little coverage (for example <code>AS⁰</code> 100 → 0 with <code>ETN</code> 800 gives <code>SL = 0.125</code> while <code>SL′ = 1.0</code>). This is why <code>SL′</code> is kept as a secondary indicator.</li>
+<li><strong>Expert elicitation note.</strong> Experts filling the Vulnerability CPT must be told that "Service Loss High" means "the disruption left a large additional share of the group's total need uncovered", not "the group lost most of what it was receiving".</li>
+<li><strong>Spec impact.</strong> Paper 3 §14–15 and §28 must be rewritten with these definitions.</li>
+</ul>
+<p><strong>OQ-13 (affected population, §11).</strong> How <code>AffectedPopulation</code> is derived from dependency and accessibility (Paper 1), disrupted facilities and the disrupted network is described only in outline. Catchment and dependency rules are not specified. Status: open.</p>
+<p><strong>OQ-14 (disrupted service function, §13).</strong> <code>AvailableService^D = f(Capacity^D, Accessibility^D)</code> is unspecified. Is it the Paper 1 supply formula with disrupted inputs? Status: open.</p>
+<p><strong>OQ-15 (vulnerability states and thresholds, §17, §21).</strong> The network uses Low / Medium / High, while the elicitation table contains "Very High". Discretisation thresholds for Group Exposure and Service Loss are not given. <strong>Status: partly decided (2026-11-23).</strong></p>
+<ul>
+<li><strong>Decided:</strong> Vulnerability has three states, Low / Medium / High. "Very High" is removed from the elicitation table of Paper 3 §21.</li>
+<li><strong>Open:</strong> discretisation thresholds for Group Exposure and Service Loss (with OQ-7).</li>
+</ul>
+<p><strong>OQ-24 (unit of need and depth of loss; raised while deciding OQ-12).</strong> In what unit are need, capacity and loss measured, and how is the depth of loss per person described? <strong>Status: decided (2026-11-23).</strong></p>
+<ul>
+<li><strong>Decision: unit of need ("people × intensity").</strong></li>
+<li>Need is described by two quantities: the number of people with need <code>N_{i,g,s}</code> in the reference period, and the intensity <code>k_{g,s}</code>, the service units one person needs in that period (visits, appointments or hours, defined per service).</li>
+<li>Need in service units is <code>N × k</code>. Capacity, 2SFCA allocation, Service Gap, unmet need and Service Loss are computed in <strong>service units</strong>. People are recovered when needed.</li>
+<li>Each service has its own unit. Quantities of <strong>different services are never summed</strong>, consistent with the unit of analysis, which includes the service.</li>
+<li><code>k_{g,s}</code> is an uncertain parameter sampled in Monte Carlo, like the demand rate. People with need are <code>N = Population × p</code> (OQ-8); Paper 1's demand rate is visible use, not need prevalence (corrected by OQ-8).</li>
+<li>Severity weighting across services is <strong>not</strong> applied now (see N-24a).</li>
+<li><strong>Decision: depth of loss ("option B").</strong></li>
+<li>The BN keeps Service Loss in service units (OQ-12); depth per person is not a BN parent.</li>
+<li>How shortage is spread among people (<strong>rationing</strong>) is a scenario parameter with two bounding cases: <strong>uniform</strong> (everyone receives proportionally less) and <strong>concentrated</strong> (some are fully served, others not at all).</li>
+<li>Secondary indicators are computed and stored for both cases, following the Foster–Greer–Thorbecke family of poverty measures (Foster, Greer &amp; Thorbecke, 1984; verify reference): <strong>breadth</strong> (share of people who lose any service), <strong>depth</strong> (mean loss of those affected) and <strong>severity</strong> (loss weighted towards those who lose most, for example squared per-person loss).</li>
+<li>Results report how conclusions change between the two rationing cases.</li>
+<li>In Paper 4 the actual rationing pattern is estimated from tickets (fulfilled, overdue, expired requests per person).</li>
+<li><strong>Rationale.</strong> Capacity data (places, staff, throughput) is naturally in service units, and intensity differs strongly between groups (for example several visits a month for the elderly against one for the unemployed), so counting only people would hide real differences. Counting only units would hide how many people are affected. Rationing is unknown without operational data, so it is bounded by scenarios rather than assumed.</li>
+<li><strong>Notes for future work</strong> (tracked as <code>research-question</code> issues):</li>
+<li><strong>N-24a: Severity weighting.</strong> Weight service units by criticality or time-sensitivity (for example medical against administrative). Candidate for Paper 4, where resource types already appear. Weights require expert justification.</li>
+<li><strong>N-24b: Breadth as BN parent ("option C").</strong> Consider breadth as an extra parent of Vulnerability only if sensitivity analysis shows it matters. It enlarges the expert table and correlates with Group Exposure.</li>
+<li><strong>Spec impact.</strong> Paper 1 §6–8 (demand, capacity and gap expressed in service units with <code>N</code> and <code>k</code>), Paper 2 §12 (hidden need in the same units), Paper 3 §13–15 (loss in units, rationing scenarios, secondary indicators), Paper 4 §4.2, §9 (observed rationing from tickets).</li>
+</ul>
+<p><strong>OQ-25 (reference period).</strong> Need and capacity must be measured over the same period (for example week or month). The choice also relates to the DBN time step in Paper 4 (OQ-17). Status: open.</p>
+<p><strong>OQ-26 (delay versus loss).</strong> When does a late service count as lost? <strong>Status: approach decided (2026-11-23), values open.</strong></p>
+<ul>
+<li><strong>Decision.</strong> Each service has a <strong>maximum acceptable waiting time</strong>. A request not fulfilled within it counts as unmet need. This matches the overdue and expired request indicators of Paper 4 §4.2.</li>
+<li><strong>Open.</strong> The threshold value per service, and whether it differs by group. To be set with domain experts and recorded per service in configuration, not in code.</li>
+</ul>
+<h2 id="paper-3-and-paper-4">Paper 3 and Paper 4<a class="headerlink" href="#paper-3-and-paper-4" title="Permanent link">&para;</a></h2>
+<p><strong>OQ-16 (definition of vulnerability, Paper 3 §2, §17 vs Paper 4 §2.1, §10).</strong> Paper 3 infers <code>V_{i,g,sc}</code> (original notation) per scenario from exposure, service loss and susceptibility. Paper 4 defines vulnerability as a baseline predisposition from demographic and socioeconomic factors and baseline accessibility and capacity, independent of a scenario, and updates it from observations. Reconcile: is vulnerability per scenario, a baseline, or both? <strong>Status: decided (2026-11-23).</strong></p>
+<ul>
+<li><strong>Problem found.</strong> In Paper 4, Expected Consequence combines Vulnerability with the functional state of the system. If Vulnerability is Paper 3's (which already contains the disruption through Group Exposure and Service Loss), the disruption is counted twice. If it is Paper 4's baseline predisposition, it largely duplicates Social Susceptibility (Paper 2) plus the baseline system (Paper 1).</li>
+<li><strong>Decision ("option D"): vulnerability is the relationship, not a number.</strong></li>
+<li>The vulnerability of a group is <strong>how a disruption is turned into consequences for that group</strong>, given its Social Susceptibility. In the BN it is the conditional relationship <code>P(V | GE, SL, SS)</code>, that is the CPT of the Vulnerability node, by analogy with vulnerability or fragility curves in seismic engineering (damage as a function of intensity, not the damage of one event; verify literature, for example the HAZUS methodology, before citing).</li>
+<li><strong>Paper 3</strong> builds the relationship (CPT initialised by expert elicitation) and <strong>evaluates it at scenarios</strong>. <code>V_{i,g,s,c}</code> means "vulnerability evaluated at scenario <code>c</code>". Paper 3 §2 is kept, with wording adjusted to say that the scenario value is an evaluation of the group's vulnerability relationship.</li>
+<li><strong>Paper 4</strong> evaluates the same relationship at <strong>observed</strong> disruptions: tickets give the functional state, from which observed <code>GE(t)</code> and <code>SL(t)</code> are derived, and the relationship gives the Expected Consequence. The disruption enters <strong>once</strong>, through <code>GE</code> and <code>SL</code>, so there is no double counting.</li>
+<li><strong>Bayesian updating in Paper 4</strong> updates the <strong>parameters of the relationship</strong> (the CPT probabilities), not a state: standard parameter learning in Bayesian networks with the expert-elicited CPT as prior (for example Dirichlet distributions per CPT row; Koller &amp; Friedman, 2009). Paper 4's statement that vulnerability is not a static indicator holds: the relationship learns from real operation.</li>
+<li>Paper 4 §2.1 inputs are <strong>not</strong> a separate vulnerability concept: demographic and socioeconomic factors enter through Social Susceptibility; baseline accessibility and capacity enter through the simulation that produces <code>GE</code> and <code>SL</code>, and through Need Pressure.</li>
+<li><strong>Vulnerability is not risk.</strong> Averaging vulnerability over scenarios weighted by their probability of occurrence gives <strong>risk</strong>, which is a separate output. Vulnerability results must never depend on which scenarios happen to be included in a run.</li>
+<li><strong>Rationale.</strong> Keeps Paper 3's definition almost unchanged, removes double counting in Paper 4, avoids overlap with Social Susceptibility, makes results independent of the chosen scenario set, and turns Paper 4's updating into standard, well-documented parameter learning. The earlier proposal (vulnerability as an average over scenarios) was rejected because it conflates vulnerability with risk and depends on the scenario set.</li>
+<li><strong>Additions agreed with this decision.</strong></li>
+<li><strong>Maps at reference scenarios.</strong> Vulnerability is mapped at standardised <strong>reference scenarios</strong> (for example minor, moderate, severe disruption), so that areas and groups are compared at the same intensity. Risk maps are produced separately, only if disruption probabilities become available.</li>
+<li><strong>Weight of experts against data:</strong> new question OQ-27.</li>
+<li><strong>Observation node.</strong> Because Vulnerability is latent, Paper 4 needs a measurement node <code>P(ObservedConsequence | V)</code> stating what is observed for each vulnerability level. To be specified together with OQ-18.</li>
+<li><strong>Spec impact.</strong> Paper 3 §2 and §17 (wording), Paper 3 §25–26 (maps at reference scenarios), Paper 4 §2.1, §8, §10 and the diagram in §15 must be rewritten. The domain invariant 2 (now in the root <code>AGENTS.md</code>) is updated accordingly.</li>
+</ul>
+<h2 id="paper-4-operations-dynamics-resilience">Paper 4 (operations, dynamics, resilience)<a class="headerlink" href="#paper-4-operations-dynamics-resilience" title="Permanent link">&para;</a></h2>
+<p><strong>OQ-17 (DBN structure, §5, §12).</strong> How facility functional state is derived from indicators (rules or learned), their thresholds, the time-slice length and the DBN topology (for example first-order Markov) are not specified. Status: open.</p>
+<p><strong>OQ-18 (observed consequence, §9).</strong> How observed group consequence is computed from tickets, and against which denominator. Tickets observe demand, not hidden need. Since OQ-16, this also includes the measurement node <code>P(ObservedConsequence | V)</code> that links the latent Vulnerability to what tickets show. Status: open.</p>
+<p><strong>OQ-19 (resilience estimation, §13).</strong> How the five trajectory indicators combine, how continuous trajectories map to <code>P(Resilience)</code>, and the baseline reference level are open. The research description states that final selection and weighting of indicators is part of the research. Status: open.</p>
+<p><strong>OQ-20 (resource mobilisation, §6).</strong> Parameters, activation delays and capacity limits of volunteer and other additional resources are not specified, and Paper 3 explicitly excludes adaptive capacity. Status: open.</p>
+<p><strong>OQ-27 (weight of expert priors against observed data; raised with OQ-16).</strong> When the Vulnerability CPT is learned from observed disruptions, the expert-elicited CPT acts as a prior with an equivalent sample size: how many observed disruptions should it take to move the experts' judgement? Options include a fixed equivalent sample size per CPT row, elicited confidence per row, or hierarchical pooling across units and groups. Also open: how to handle the small number of real disruptions and the dependence between observations in the same disruption. Status: open.</p>
+<p><strong>OQ-21 (re-identification risk, §4.1).</strong> Tickets are anonymous, but spatial unit, group and timestamps together can identify people in small units. Decide minimum cell sizes (k-anonymity), retention and aggregation rules before collecting any real data. These rules also limit how finely observations can be used for learning (OQ-8, OQ-16). The ticket field "first request in this period" (OQ-8) must not become an identifier. Status: open.</p>
+<h2 id="general">General<a class="headerlink" href="#general" title="Permanent link">&para;</a></h2>
+<p><strong>OQ-22 (terminology).</strong> "ΤΚ" (Local Community) versus a generic spatial unit; group names (Low-income, Economically vulnerable); language of identifiers and documentation. Status: open.</p>
+<p><strong>OQ-23 (Digital Twin wording).</strong> Paper 1's conclusion calls the result a "probabilistic baseline Digital Twin", while the research description says a Digital Twin is not assumed from the start. Keep wording consistent in README and docs. Status: open.</p>
+<p><strong>OQ-28 (study-area buffer and cross-border demand; raised 2026-11-24 with the deployment model).</strong> People near a municipal boundary use facilities in neighbouring municipalities, and neighbouring residents use facilities inside it. A municipal installation therefore needs its municipality <strong>plus a buffer</strong> of neighbouring units, facilities and network. Open: buffer definition (fixed distance, travel-time threshold, or whole neighbouring municipalities); whether demand from buffer units competes for capacity in the 2SFCA allocation (OQ-2) while results are reported only for the municipality's own units; and how edge effects are tested. <strong>Added:</strong> when a buffer municipality is not yet onboarded (for example <code>facilities: missing</code>), results near that boundary are biased; decide whether to report a warning only (current platform behaviour), widen uncertainty, or use open-data facility estimates for the buffer. Status: open.</p>
+<p><strong>OQ-29 (facility on anonymous tickets; raised 2026-11-24 in the bootstrap PR).</strong> Paper 4 §4.1 and the privacy rule list spatial unit, group, service and timestamps, but not the facility. Facility functional state (Paper 4 §5), facility operational output (§14) and recording coverage (OQ-8) are per facility, so they cannot be computed without it. <strong>Status: decided (2026-11-24).</strong></p>
+<ul>
+<li><strong>Decision.</strong> Every ticket records the <code>facility_id</code> of the facility where the request is made or scheduled (in practice the facility that issues the QR or appointment).</li>
+<li><strong>Rationale.</strong> A facility is not personal data, and it is required for the facility layer of Paper 4. Without it, facility state would need a separate data source and recording coverage could not be measured.</li>
+<li><strong>Privacy constraint.</strong> The combination spatial unit × group × service × facility × time raises re-identification risk in small units. The facility field is subject to the rules decided in OQ-21 / ADR 0010 (minimum cell sizes, aggregation, retention); until those are decided, no ticket is stored (as today).</li>
+<li><strong>Spec impact.</strong> Paper 4 §4.1 (ticket fields), §5 and §14; the privacy rule in AGENTS.md (allowed ticket fields).</li>
+</ul>
+<p><strong>OQ-30 (order of applying interventions and disruptions in one scenario; raised 2026-11-25 with ADR 0016).</strong> A scenario may combine what-if interventions (Paper 1 §13, §15.7: new facilities, capacity, network and population changes) with disruptions (Paper 3 §7–10: facility severities <code>DS_{f,c}</code>, closed edges). The papers do not say in which order they apply, and the order changes results: a disruption can hit a new facility only if the facility exists first, and a relative capacity change gives a different value before or after a severity is applied. This touches the method, so it must be confirmed when the Paper 3 spec is written (and then recorded in <code>paper-revisions.md</code>). <strong>Status: proposed (2026-11-25).</strong></p>
+<ul>
+<li><strong>Proposed default</strong> (used by the platform, <code>core.scenarios.apply_overlay</code>, ADR 0016): interventions first, in the order new facilities, capacity changes, network changes (edge changes, then new edges), population changes; then disruptions (severities, then closed edges), which may also hit the new facilities and new edges of the same scenario.</li>
+<li><strong>Rationale.</strong> A disruption acts on the system as it is after the planned interventions ("what if we add a centre, and then a flood closes the road to it?"); applying disruptions first would make it impossible to disrupt what an intervention adds.</li>
+<li><strong>Open.</strong> Whether some combinations should be refused; whether a severity applies to a facility's capacity before or after a capacity change to the same facility (only recorded today, no behaviour).</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Επιστροφή στην αρχή
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Υποσέλιδο" >
+        
+          
+          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Προηγούμενο: Specifications index">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Προηγούμενο
+              </span>
+              <div class="md-ellipsis">
+                Specifications index
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../paper-revisions/" class="md-footer__link md-footer__link--next" aria-label="Επόμενο: Paper revisions">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Επόμενο
+              </span>
+              <div class="md-ellipsis">
+                Paper revisions
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      SolidarityNode 0.1.0 · AGPL-3.0-or-later · synthetic data only in this repository
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "search.highlight", "search.suggest", "content.code.copy", "content.action.view", "toc.follow"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "\u0391\u03bd\u03c4\u03b9\u03b3\u03c1\u03ac\u03c6\u03b7\u03ba\u03b5 \u03c3\u03c4\u03bf \u03c0\u03c1\u03cc\u03c7\u03b5\u03b9\u03c1\u03bf", "clipboard.copy": "\u0391\u03bd\u03c4\u03b9\u03b3\u03c1\u03b1\u03c6\u03ae \u03c3\u03c4\u03bf \u03c0\u03c1\u03cc\u03c7\u03b5\u03b9\u03c1\u03bf", "search.result.more.one": "1 \u03b1\u03ba\u03cc\u03bc\u03b1 \u03c3\u03b5 \u03b1\u03c5\u03c4\u03ae\u03bd \u03c4\u03b7 \u03c3\u03b5\u03bb\u03af\u03b4\u03b1", "search.result.more.other": "# \u03b1\u03ba\u03cc\u03bc\u03b1 \u03c3\u03b5 \u03b1\u03c5\u03c4\u03ae\u03bd \u03c4\u03b7 \u03c3\u03b5\u03bb\u03af\u03b4\u03b1", "search.result.none": "\u03b4\u03b5\u03bd \u03b2\u03c1\u03ae\u03ba\u03b5 \u03ba\u03ac\u03c0\u03bf\u03b9\u03bf \u03ad\u03b3\u03b3\u03c1\u03b1\u03c6\u03bf", "search.result.one": "1 \u03ad\u03b3\u03b3\u03c1\u03b1\u03c6\u03bf \u03c0\u03bf\u03c5 \u03c4\u03b1\u03b9\u03c1\u03b9\u03ac\u03b6\u03b5\u03b9", "search.result.other": "# \u03ad\u03b3\u03b3\u03c1\u03b1\u03c6\u03b1 \u03c0\u03bf\u03c5 \u03c4\u03b1\u03b9\u03c1\u03b9\u03ac\u03b6\u03bf\u03c5\u03bd", "search.result.placeholder": "\u03a0\u03bb\u03b7\u03ba\u03c4\u03c1\u03bf\u03bb\u03bf\u03b3\u03ae\u03c3\u03c4\u03b5 \u03b3\u03b9\u03b1 \u03bd\u03b1 \u03b1\u03c1\u03c7\u03af\u03c3\u03b5\u03b9 \u03b7 \u03b1\u03bd\u03b1\u03b6\u03ae\u03c4\u03b7\u03c3\u03b7", "search.result.term.missing": "\u039b\u03b5\u03af\u03c0\u03b5\u03b9", "select.version": "\u0395\u03c0\u03b9\u03bb\u03bf\u03b3\u03ae \u03ad\u03ba\u03b4\u03bf\u03c3\u03b7\u03c2"}, "version": {"default": ["latest", "dev"], "provider": "mike"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>
