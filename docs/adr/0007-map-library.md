@@ -35,12 +35,18 @@ licence (Hippocratic-2.1) is not compatible with AGPL-3.0.
 - Styling: core units solid, buffer units grey and dashed; quality shown with SVG patterns
   (hatching = estimated, dots = open data); edge-effect units with an orange outline; results in
   viridis (sequential) and PuOr (diverging), both readable with common colour-vision deficiencies.
-- **Uncertainty on maps** (AGENTS.md invariant 6). Results maps are coloured by the central value
-  the backend reports (`value`; the median where a model reports one). An **Uncertainty** toggle
+- **Uncertainty on maps** (AGENTS.md invariant 6). Results maps and per-unit tables show the
+  **median** and its interval (ADR 0017); the mean is stored and exported, not mapped. **Every
+  displayed value names its statistic**: column headings "Median (90 % interval)", tooltips
+  "Unit A3, median (90 % interval): 0.42 (0.31–0.55)", legend titles "…, median (min)" and the
+  note under each map. The interval name comes from the run's quantile levels ("90 % interval"
+  for 0.05/0.95, "10–95 % quantile interval" for asymmetric levels, "interval (levels not
+  recorded)" for older runs); comparison headings name each run's interval. Differences are
+  "Difference of medians A − B". An **Uncertainty** toggle
   (off by default) adds a second map of the interval width (`high − low`) in its own palette
   (Blues), next to the value map; on comparison screens it switches maps A and B to the width.
   Hatching and dots are **never** used for uncertainty: they mean data quality. Tooltips and
-  tables always show the interval with the value, for example `0.42 (0.31–0.55)`; deterministic
+  tables always show the interval with the median, for example `0.42 (0.31–0.55)`; deterministic
   values say so. Probability outputs (indicator unit `probability`) use a **fixed 0–1 scale**
   (classes of 0.2) labelled as a probability, never a range stretched to the data.
 - **Comparison screens** (baseline vs scenario, and the same scenario across data versions) build

@@ -29,7 +29,7 @@ Results are indexed by `unit × group × service × time` plus scenario and Mont
 - Per-sample values: `<results_dir>/runs/<run_id>/samples.parquet`, columns `unit_id, group_id,
   service_id, time_label, indicator, sample, value`; `results_dir` is the `results` volume
   (`/data/results` in compose). The run row stores the path.
-- Summary values per `unit × group × service × time` (central value and interval) in table
+- Summary values per `unit × group × service × time` (mean, median and interval quantiles, ADR 0017) in table
   `run_results`; model tables (`travel_times`, `unit_changes`) as JSON in `run_tables`.
 - Files are written to a temporary name and renamed, so a crash never leaves a partial file
   referenced by a run.

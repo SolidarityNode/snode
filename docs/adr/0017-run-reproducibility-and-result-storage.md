@@ -36,6 +36,28 @@ Spec 00 §3: a **run** is one **immutable** execution of a scenario and records 
   user forces a rerun; failed or cancelled runs are never reused.
 - A worker built from a different commit refuses a run recorded for another code version (the run
   fails with a clear message), so results always come from the recorded code.
+- **Result summary schema.** Every result value (`run_results`, per unit × group × service ×
+  time × indicator) stores its **mean**, its **median** and two **interval quantiles** (`low`,
+  `high`). The quantile levels are configurable (`SOLIDARITYNODE_RESULT_INTERVAL_QUANTILES`,
+  default `0.05,0.95`, a 90 % interval, `0 < low < 0.5 < high < 1`), recorded in the run
+  configuration as `interval_quantiles` and therefore part of the input hash. The statistics are
+  computed from the model's samples by `solidaritynode_core.uncertainty.summarise_result` (linear
+  interpolation); deterministic values have mean = median = low = high. A non-deterministic
+  indicator without samples is refused. The per-sample values stay in Parquet (ADR 0008).
+- **diagnostic-v0** is unchanged (same outputs, so its version stays `0.1.0`): its mean and its
+  own 5 %/95 % bounds equal the stored mean and default quantiles, and the median is computed
+  from its existing samples (core test `test_diagnostic_summary_matches_its_samples_…`).
+- **Totals** across units or groups are computed from the stored samples, draw by draw
+  (`summarise_total`: draw *i* of the total is the sum of draw *i* of each part), then
+  summarised. Medians and interval bounds are never added. No screen shows totals yet; any that
+  is added must use this.
+- Comparison differences are differences of **medians**; the two intervals are shown next to
+  them, not combined.
+- Export: CSV and GeoPackage columns `median`, `low`, `high`, `mean`; `metadata.json` states the
+  quantile levels and what each column is.
+- Runs stored before migration 0005: `value` became `mean`; deterministic rows got `median =
+  mean`; sampled rows have no median ("not available") and no recorded levels, because runs are
+  immutable and their samples are not re-read. Start such a run again to get them.
 - Results: see ADR 0008. Comparison is allowed between runs on the same data version (default:
   the baseline run created on import) or between two runs of the same scenario on different data
   versions (labelled); otherwise it is refused. Export: CSV or GeoPackage zipped with
