@@ -28,6 +28,8 @@ from solidaritynode_core.model import ModelResult, ModelSpec
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from solidaritynode_backend.messages import msg
+
 __all__ = [
     "META_PREFIX",
     "RESULTS_SCHEMA_VERSION",
@@ -144,17 +146,14 @@ def verify_samples(path: str | Path, sha256: str | None, run_id: str) -> None:
     """Check a run's samples file without loading it (see :func:`read_samples`)."""
     file = Path(path)
     if not file.is_file():
-        raise SamplesIntegrityError(f"samples file of run {run_id} is missing: {file}")
+        raise SamplesIntegrityError(msg("error.samples_missing", run=run_id, file=file))
     if sha256 is not None and file_sha256(file) != sha256:
-        raise SamplesIntegrityError(
-            f"samples file of run {run_id} does not match its recorded SHA-256: it was "
-            "damaged or changed after the run"
-        )
+        raise SamplesIntegrityError(msg("error.samples_mismatch", run=run_id))
     meta = pq.read_schema(file).metadata or {}
     recorded = meta.get(f"{META_PREFIX}run_id".encode())
     if recorded is not None and recorded.decode() != run_id:
         raise SamplesIntegrityError(
-            f"samples file {file} belongs to run {recorded.decode()}, not {run_id}"
+            msg("error.samples_other_run", file=file, other=recorded.decode(), run=run_id)
         )
 
 

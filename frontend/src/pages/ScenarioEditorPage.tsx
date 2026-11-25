@@ -5,8 +5,10 @@ import { Link, useNavigate, useParams } from "react-router";
 import { api, getCatalog, getLayer, unwrap, type Schemas } from "../api/client";
 import { canEdit, useSession } from "../app/session";
 import { ErrorMessage } from "../components/ErrorMessage";
+import { LatestRun } from "../components/LatestRun";
 import { label } from "../components/labels";
 import { useT } from "../i18n/context";
+import { serverText } from "../i18n/server";
 import { MapView, type MapLayer } from "../map/MapView";
 import { edgeStyle, facilityPoint } from "../map/styles";
 
@@ -249,13 +251,18 @@ export function ScenarioEditorPage() {
           <Link to="/scenarios">{t("editor.back")}</Link>
         </p>
       )}
+      {scenario && (
+        <p data-testid="scenario-latest-run">
+          {t("scenarios.latest_run")}: <LatestRun item={scenario} user={user} />
+        </p>
+      )}
       {!editable && <p role="note">{t("editor.read_only")}</p>}
       {scenario && scenario.problems.length > 0 && (
         <div className="banner banner--warning" role="note">
           <p>{t("editor.revalidation", { data: dv?.version ?? "" })}</p>
           <ul>
             {scenario.problems.map((p) => (
-              <li key={p}>{p}</li>
+              <li key={p}>{serverText(t, p)}</li>
             ))}
           </ul>
         </div>
@@ -294,6 +301,11 @@ export function ScenarioEditorPage() {
             <option value="shared">{label(t, "visibility", "shared")}</option>
           </select>
         </label>
+        <p className="muted" data-testid="visibility-hint">
+          {draft.visibility === "private"
+            ? t("editor.visibility_private_hint")
+            : t("editor.visibility_shared_hint")}
+        </p>
         <label>
           {t("editor.rationing")}
           <select
@@ -464,7 +476,7 @@ export function ScenarioEditorPage() {
               </li>
             ))}
             {validation.problems.map((p) => (
-              <li key={p}>{p}</li>
+              <li key={p}>{serverText(t, p)}</li>
             ))}
           </ul>
         )}
@@ -479,6 +491,14 @@ export function ScenarioEditorPage() {
           </button>
           {scenario && (
             <>
+              {dv && dv.id !== scenario.current.data_version.id && (
+                <span className="note" data-testid="data-differs">
+                  {t("editor.data_differs", {
+                    created: scenario.current.data_version.version,
+                    active: dv.version,
+                  })}
+                </span>
+              )}
               <label>
                 {t("editor.seed")}
                 <input

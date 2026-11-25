@@ -44,6 +44,7 @@ from solidaritynode_core.model.entities import (
     TransportMode,
 )
 from solidaritynode_core.model.ids import FacilityId, ServiceId, UnitId
+from solidaritynode_core.model.messages import message
 from solidaritynode_core.model.study_area import NetworkEdge, StudyArea
 
 __all__ = [
@@ -123,9 +124,15 @@ def check_references(area: StudyArea, scenario: Scenario) -> list[str]:
         if isinstance(intervention, NewFacility):
             fid = intervention.facility.id
             if fid in facilities or fid in new_ids:
-                problems.append(f"new facility {fid}: id already exists")
+                problems.append(message("scenario.new_facility_exists", facility=fid))
             if intervention.node_id is None or intervention.node_id not in nodes:
-                problems.append(f"new facility {fid}: network node {intervention.node_id} missing")
+                problems.append(
+                    message(
+                        "scenario.new_facility_node_missing",
+                        facility=fid,
+                        node=intervention.node_id,
+                    )
+                )
             new_ids.add(fid)
     for intervention in scenario.interventions:
         if isinstance(intervention, CapacityChange):
@@ -134,10 +141,12 @@ def check_references(area: StudyArea, scenario: Scenario) -> list[str]:
     for intervention in scenario.interventions:
         if isinstance(intervention, NewEdge):
             if intervention.id in edges or intervention.id in new_edges:
-                problems.append(f"new edge {intervention.id}: id already exists")
+                problems.append(message("scenario.new_edge_exists", edge=intervention.id))
             for node in (intervention.from_node, intervention.to_node):
                 if node not in nodes:
-                    problems.append(f"new edge {intervention.id}: network node {node} missing")
+                    problems.append(
+                        message("scenario.new_edge_node_missing", edge=intervention.id, node=node)
+                    )
             new_edges[intervention.id] = intervention
     for intervention in scenario.interventions:
         if isinstance(intervention, EdgeChange):
@@ -147,7 +156,9 @@ def check_references(area: StudyArea, scenario: Scenario) -> list[str]:
     # Disruptions come after the interventions, so they may hit new facilities and new edges.
     for fid in scenario.facility_severities:
         if fid not in facilities and fid not in new_ids:
-            problems.append(f"facility {fid}: closed or missing in data {area.package_version}")
+            problems.append(
+                message("scenario.facility_missing_in", facility=fid, version=area.package_version)
+            )
     if scenario.network_disruption is not None:
         for eid in sorted(scenario.network_disruption.affected_link_ids):
             closable = (
@@ -158,9 +169,11 @@ def check_references(area: StudyArea, scenario: Scenario) -> list[str]:
                 else None
             )
             if closable is None:
-                problems.append(f"edge {eid}: closed or missing in data {area.package_version}")
+                problems.append(
+                    message("scenario.edge_missing_in", edge=eid, version=area.package_version)
+                )
             elif not closable:
-                problems.append(f"edge {eid}: cannot be closed (closable = false)")
+                problems.append(message("scenario.edge_not_closable", edge=eid))
     return problems
 
 
@@ -175,18 +188,15 @@ def _edge_problems(
         else None
     )
     if times is None:
-        return [f"edge {change.edge}: closed or missing in data {version}"]
+        return [message("scenario.edge_missing_in", edge=change.edge, version=version)]
     if change.mode not in times:
-        return [f"edge {change.edge}: has no {change.mode} travel time to change"]
+        return [message("scenario.edge_mode_missing", edge=change.edge, mode=change.mode)]
     if (
         change.quantity is EdgeQuantity.TRAVEL_TIME
         and change.change is ChangeMode.ABSOLUTE
         and times[change.mode] + change.amount <= 0
     ):
-        return [
-            f"edge {change.edge}: {change.mode} travel time would not stay positive; "
-            "to close a road use closed edges"
-        ]
+        return [message("scenario.edge_time_not_positive", edge=change.edge, mode=change.mode)]
     # An absolute speed change cannot be checked here: edges carry travel times, not speeds.
     return []
 
@@ -195,9 +205,11 @@ def _population_problems(area: StudyArea, change: PopulationChange) -> list[str]
     units = {u.id: u for u in area.units}
     unit = units.get(change.unit)
     if unit is None:
-        return [f"unit {change.unit}: missing in data {area.package_version}"]
+        return [message("scenario.unit_missing_in", unit=change.unit, version=area.package_version)]
     if change.group not in {g.id for g in area.groups}:
-        return [f"group {change.group}: missing in data {area.package_version}"]
+        return [
+            message("scenario.group_missing_in", group=change.group, version=area.package_version)
+        ]
     current = unit.population_by_group.get(change.group, 0.0)
     after = (
         current * (1.0 + change.amount / 100.0)
@@ -205,44 +217,70 @@ def _population_problems(area: StudyArea, change: PopulationChange) -> list[str]
         else current + change.amount
     )
     if after < 0:
-        return [f"unit {change.unit}, group {change.group}: population would become negative"]
+        return [message("scenario.population_negative", unit=change.unit, group=change.group)]
     return []
 
 
 def _recorded(intervention: EdgeChange | NewEdge | PopulationChange) -> str:
-    def amount(change: ChangeMode, value: float, unit: str) -> str:
-        return f"{value:+g} %" if change is ChangeMode.RELATIVE else f"{value:+g} {unit}"
-
     if isinstance(intervention, EdgeChange):
-        unit = "min" if intervention.quantity is EdgeQuantity.TRAVEL_TIME else "km/h"
-        return (
-            f"edge {intervention.edge} {intervention.mode} {intervention.quantity} "
-            f"{amount(intervention.change, intervention.amount, unit)} (recorded only)"
+        relative = intervention.change is ChangeMode.RELATIVE
+        return message(
+            "recorded.edge_change_relative" if relative else "recorded.edge_change_absolute",
+            edge=intervention.edge,
+            mode=intervention.mode,
+            quantity=intervention.quantity,
+            amount=f"{intervention.amount:+g}",
+            unit="min" if intervention.quantity is EdgeQuantity.TRAVEL_TIME else "km/h",
         )
     if isinstance(intervention, NewEdge):
-        times = ", ".join(f"{m} {t:g} min" for m, t in sorted(intervention.travel_time_min.items()))
-        return (
-            f"new edge {intervention.id} {intervention.from_node}-{intervention.to_node} "
-            f"({times}) (recorded only)"
+        times = ", ".join(
+            message("recorded.travel_time", mode=m, minutes=t)
+            for m, t in sorted(intervention.travel_time_min.items())
         )
-    return (
-        f"unit {intervention.unit} group {intervention.group} population "
-        f"{amount(intervention.change, intervention.amount, 'persons')} (recorded only)"
+        return message(
+            "recorded.new_edge",
+            edge=intervention.id,
+            nodes=f"{intervention.from_node}-{intervention.to_node}",
+            times=times,
+        )
+    return message(
+        "recorded.population_relative"
+        if intervention.change is ChangeMode.RELATIVE
+        else "recorded.population_absolute",
+        unit=intervention.unit,
+        group=intervention.group,
+        amount=f"{intervention.amount:+g}",
     )
 
 
 def _capacity_problems(facilities: dict[FacilityId, Facility], change: CapacityChange) -> list[str]:
     facility = facilities.get(change.facility)
     if facility is None:
-        return [f"facility {change.facility}: closed or missing in the data version"]
+        return [message("scenario.facility_missing", facility=change.facility)]
     inputs = facility.capacity.get(change.service)
     if inputs is None:
-        return [f"facility {change.facility}: does not offer service {change.service}"]
+        return [
+            message(
+                "scenario.service_not_offered", facility=change.facility, service=change.service
+            )
+        ]
     current = getattr(inputs, change.capacity_input)
     if current is None:
-        return [f"facility {change.facility}: {change.capacity_input} is not set"]
+        return [
+            message(
+                "scenario.input_not_set",
+                facility=change.facility,
+                capacity_input=change.capacity_input,
+            )
+        ]
     if _changed(current, change) < 0:
-        return [f"facility {change.facility}: {change.capacity_input} would become negative"]
+        return [
+            message(
+                "scenario.input_negative",
+                facility=change.facility,
+                capacity_input=change.capacity_input,
+            )
+        ]
     return []
 
 
@@ -282,7 +320,11 @@ def apply_overlay(area: StudyArea, scenario: Scenario) -> OverlayResult:
             facility_units[new.id] = area.node_units[node]
             changes.append(
                 FacilityChange(
-                    new.id, facility_units[new.id], "new", f"new at {node}", new.services
+                    new.id,
+                    facility_units[new.id],
+                    "new",
+                    message("change.new_facility", node=node),
+                    new.services,
                 )
             )
     for intervention in scenario.interventions:
@@ -295,7 +337,13 @@ def apply_overlay(area: StudyArea, scenario: Scenario) -> OverlayResult:
             capacity: dict[ServiceId, CapacityInputs] = dict(facility.capacity)
             capacity[intervention.service] = new_inputs
             facilities[facility.id] = dataclasses.replace(facility, capacity=capacity)
-            detail = f"{intervention.service} {intervention.capacity_input} {before:g} -> {after:g}"
+            detail = message(
+                "change.capacity",
+                service=intervention.service,
+                capacity_input=intervention.capacity_input,
+                before=before,
+                after=after,
+            )
             changes.append(
                 FacilityChange(
                     facility.id,
@@ -311,7 +359,7 @@ def apply_overlay(area: StudyArea, scenario: Scenario) -> OverlayResult:
                 fid,
                 facility_units.get(fid),
                 "severity",
-                f"DS = {severity:g} (recorded only)",
+                message("change.severity", severity=severity),
                 facilities[fid].services,
             )
         )
@@ -326,10 +374,7 @@ def apply_overlay(area: StudyArea, scenario: Scenario) -> OverlayResult:
     for eid in sorted(set(disruption.affected_link_ids) & new_edges if disruption else ()):
         # Interventions before disruptions (OQ-30): the edge is added, then closed. Reported so
         # it is never ignored silently.
-        recorded.append(
-            f"new edge {eid} is closed by the same scenario: added, then closed, "
-            "so no net effect (OQ-30)"
-        )
+        recorded.append(message("recorded.new_edge_closed", edge=eid))
     changed = dataclasses.replace(
         area,
         facilities=tuple(facilities.values()),

@@ -126,6 +126,112 @@ def test_attempted_usernames_and_addresses_are_stored_only_as_hashes(
     assert "testclient" not in stored
 
 
+NGINX = ("10.89.0.6", 40000)  # the bundled proxy on the compose network
+
+
+def _via_proxy(app: Any) -> TestClient:
+    return TestClient(app, client=NGINX)
+
+
+def _proxied(client: TestClient, username: str, password: str, browser: str) -> Any:
+    return client.post(
+        "/auth/login",
+        json={"username": username, "password": password},
+        headers={"X-Real-IP": browser, "X-Forwarded-For": browser},
+    )
+
+
+@pytest.mark.parametrize(
+    ("peer", "real_ip", "forwarded", "expected"),
+    [
+        ("203.0.113.9", "198.51.100.1", None, "203.0.113.9"),  # direct client: headers ignored
+        ("10.89.0.6", "198.51.100.1", None, "198.51.100.1"),  # trusted proxy: X-Real-IP
+        ("10.89.0.6", None, "198.51.100.7, 10.0.0.3", "198.51.100.7"),  # nearest untrusted hop
+        ("10.89.0.6", "10.89.0.6", None, None),  # proxy reports itself: unknown (rootless Podman)
+        ("10.89.0.6", None, None, None),  # trusted proxy without headers: unknown
+        ("10.89.0.6", "not-an-address", None, None),
+        (None, None, None, None),
+    ],
+)
+def test_client_address_only_from_trusted_proxies(
+    peer: str | None, real_ip: str | None, forwarded: str | None, expected: str | None
+) -> None:
+    from solidaritynode_backend.config import Settings
+    from solidaritynode_backend.services.throttle import client_address
+
+    trusted = Settings().trusted_networks()
+    assert client_address(peer, real_ip, forwarded, trusted) == expected
+
+
+def test_step_4a_through_a_proxy_that_hides_client_addresses(settings: Any, users: Any) -> None:
+    """UAT 4a behind rootless Podman: nginx reports its own address for every browser.
+
+    Counting that address would lock out everyone; it is treated as unknown, so a wrong username
+    tried six times never blocks another user, even with a tiny address limit.
+    """
+    app = _app(settings, login_max_failures_account=5, login_max_failures_address=2)
+    client = _via_proxy(app)
+    answers = [_proxied(client, "uat-nobody", "wrong-password-1", NGINX[0]) for _ in range(6)]
+    assert [a.status_code for a in answers] == [401] * 5 + [429]
+    assert _proxied(client, "analyst", PASSWORDS["analyst"], NGINX[0]).status_code == 200
+
+
+def test_proxy_forwarded_addresses_are_throttled_separately(settings: Any, users: Any) -> None:
+    app = _app(settings, login_max_failures_account=100, login_max_failures_address=3)
+    client = _via_proxy(app)
+    for name in ("c1", "c2", "c3"):
+        assert _proxied(client, name, "wrong-password-1", "198.51.100.1").status_code == 401
+    assert _proxied(client, "admin", PASSWORDS["admin"], "198.51.100.1").status_code == 429
+    # Another browser behind the same proxy is not affected.
+    assert _proxied(client, "admin", PASSWORDS["admin"], "198.51.100.2").status_code == 200
+
+
+def test_client_cannot_spoof_its_address(settings: Any, users: Any) -> None:
+    """A client that is not a trusted proxy cannot pick a fresh address per attempt."""
+    app = _app(settings, login_max_failures_account=100, login_max_failures_address=2)
+    client = TestClient(app, client=("203.0.113.9", 5000))
+    for i in range(2):
+        assert _proxied(client, f"d{i}", "wrong-password-1", f"198.51.100.{i}").status_code == 401
+    assert _proxied(client, "admin", PASSWORDS["admin"], "198.51.100.99").status_code == 429
+
+
+def test_refused_attempts_do_not_extend_the_lock(settings: Any, users: Any, engine: Any) -> None:
+    app = _app(settings, login_max_failures_account=2, login_delay_base_s=0)
+    client = TestClient(app)
+    for _ in range(2):
+        _try(client, "analyst", "wrong-password-1")
+    query = text("SELECT kind, failures, locked_until, next_allowed_at FROM login_throttle")
+    with engine.connect() as conn:
+        before = sorted(conn.execute(query).all())
+    for _ in range(5):  # refused while locked: neither counted nor extending the lock
+        assert _try(client, "analyst", "wrong-password-1").status_code == 429
+    with engine.connect() as conn:
+        assert sorted(conn.execute(query).all()) == before
+    account = next(row for row in before if row.kind == "account")
+    minutes = (account.locked_until - account.next_allowed_at).total_seconds() / 60
+    assert round(minutes) == settings.login_lock_minutes  # the stated 15 minutes
+
+
+def test_clear_login_locks_command(
+    settings: Any, users: Any, engine: Any, monkeypatch: Any, capsys: Any
+) -> None:
+    from solidaritynode_backend import cli
+
+    app = _app(settings, login_max_failures_account=1)
+    client = TestClient(app)
+    _try(client, "analyst", "wrong-password-1")
+    _try(client, "viewer", "wrong-password-1")
+    assert _try(client, "analyst", PASSWORDS["analyst"]).status_code == 429
+    monkeypatch.setattr(cli, "get_settings", lambda: settings)
+    monkeypatch.setattr(cli, "check_role", lambda *_: None)
+    assert cli.main(["clear-login-locks", "--username", "Analyst"]) == 0
+    assert "Cleared 1 " in capsys.readouterr().out
+    assert _try(client, "viewer", PASSWORDS["viewer"]).status_code == 429  # still locked
+    assert cli.main(["clear-login-locks", "--all"]) == 0
+    assert _try(client, "viewer", PASSWORDS["viewer"]).status_code == 200
+    assert _try(client, "analyst", PASSWORDS["analyst"]).status_code == 200
+
+
 # --- 2. Secure cookie in production -----------------------------------------------------------
 
 

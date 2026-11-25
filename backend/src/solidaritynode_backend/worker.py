@@ -34,6 +34,7 @@ from sqlalchemy import Engine, create_engine, text
 
 from solidaritynode_backend.config import Settings, get_settings
 from solidaritynode_backend.jobs import JobCancelledError, JobContext, JobStatus, JobTimedOutError
+from solidaritynode_backend.messages import BACKEND_MESSAGES, msg
 from solidaritynode_backend.services.installation import RoleMismatchError, check_role
 from solidaritynode_backend.services.runs import RUN_JOB_KIND, execute_run
 
@@ -43,14 +44,8 @@ log = logging.getLogger("solidaritynode.worker")
 
 type Handler = Callable[[JobContext, Mapping[str, Any]], None]
 
-INTERRUPTED = (
-    "Interrupted: the worker ({worker}) stopped while this run was running ({when}). "
-    "No results were stored. Start the run again."
-)
-TIMED_OUT = (
-    "Stopped: the job ran longer than the maximum runtime of {limit:g} s set for '{kind}' jobs "
-    "(SOLIDARITYNODE_JOB_MAX_RUNTIME_SECONDS). No results were stored."
-)
+INTERRUPTED = BACKEND_MESSAGES["run.interrupted"]
+TIMED_OUT = BACKEND_MESSAGES["run.timed_out"]
 
 
 def _utc(moment: datetime | None = None) -> str:
@@ -184,7 +179,11 @@ class Worker:
                 {"stale": self.stale_s},
             ).all()
             for row in rows:
-                when = f"no heartbeat since {_utc(row.beat)}" if row.beat else "never started"
+                when = (
+                    msg("run.no_heartbeat", time=_utc(row.beat))
+                    if row.beat
+                    else msg("run.never_started")
+                )
                 conn.execute(
                     text(
                         "UPDATE jobs SET status = 'failed', error = :e, finished_at = now() "
@@ -244,7 +243,7 @@ class Worker:
             self._finish(job_id, JobStatus.FAILED, message)
             log.warning("job %s stopped: over the maximum runtime of %g s", job_id, exc.limit_s)
         except JobCancelledError:
-            self._finish(job_id, JobStatus.CANCELLED, "Cancelled by a user while running.")
+            self._finish(job_id, JobStatus.CANCELLED, msg("run.cancelled_running"))
             log.info("job %s cancelled", job_id)
         except WorkerStoppedError:
             self._finish(
@@ -254,7 +253,11 @@ class Worker:
             raise
         except Exception as exc:
             log.exception("job %s failed", job_id)
-            self._finish(job_id, JobStatus.FAILED, f"{type(exc).__name__}: {exc}")
+            self._finish(
+                job_id,
+                JobStatus.FAILED,
+                msg("run.failed_exception", type=type(exc).__name__, detail=exc),
+            )
         else:
             self._finish(job_id, JobStatus.SUCCEEDED, None)
             log.info("job %s succeeded", job_id)

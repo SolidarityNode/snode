@@ -6,6 +6,7 @@ import { useSession } from "../app/session";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { label } from "../components/labels";
 import { useT } from "../i18n/context";
+import { serverText } from "../i18n/server";
 
 type Role = Schemas["UserOut"]["role"];
 
@@ -399,7 +400,7 @@ function Packages() {
                 {outcome.revalidation.map((r) => (
                   <li key={r.scenario_id}>
                     <Link to={`/scenarios/${r.scenario_id}`}>{r.name}</Link>:{" "}
-                    {r.problems.join("; ")}
+                    {r.problems.map((x) => serverText(t, x)).join("; ")}
                   </li>
                 ))}
               </ul>
@@ -480,6 +481,11 @@ function PreviewView({
           </li>
         ))}
       </ul>
+      {(preview.warnings.length > 0 || preview.problems.length > 0) && (
+        <p className="muted" data-testid="package-check-note">
+          {t("admin.package_check_english")}
+        </p>
+      )}
       {preview.warnings.map((w) => (
         <p key={w} className="warning" role="note">
           {w}

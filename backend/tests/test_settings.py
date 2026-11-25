@@ -93,3 +93,49 @@ def test_production_refuses_unknown_or_dirty_code(
         Settings()
     monkeypatch.setenv("APP_ENV", "development")
     assert Settings().git_commit == commit  # allowed in development (runs carry a warning)
+
+
+def test_check_config_lists_every_problem_without_secrets(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """make check-config: all problems at once, one per line, exit 1, no traceback or secret."""
+    from solidaritynode_backend.cli import main
+
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("GIT_COMMIT", "0123456789ab-dirty")
+    monkeypatch.setenv("SOLIDARITYNODE_DATABASE_URL", PLACEHOLDER_URL)
+    monkeypatch.setenv("SOLIDARITYNODE_SESSION_COOKIE_SECURE", "false")
+    monkeypatch.setenv("SOLIDARITYNODE_TRUSTED_PROXIES", "10.0.0.0/8,nonsense")
+    monkeypatch.setenv("SOLIDARITYNODE_SESSION_HOURS", "-1")
+    assert main(["check-config"]) == 1
+    err = capsys.readouterr().err
+    lines = err.splitlines()
+    assert lines[0] == "configuration INVALID (APP_ENV=production): 1 problem(s)"
+    problems = [line for line in lines if line.startswith("  - ")]
+    assert len(problems) == 1  # field errors come first; the rest after they are fixed
+    assert "session_hours" in problems[0]
+    assert "Traceback" not in err
+    assert "-1" not in err  # values are never echoed
+    monkeypatch.setenv("SOLIDARITYNODE_SESSION_HOURS", "12")
+    assert main(["check-config"]) == 1
+    err = capsys.readouterr().err
+    assert err.splitlines()[0] == "configuration INVALID (APP_ENV=production): 4 problem(s)"
+    for expected in (
+        "clean code version",
+        "SESSION_COOKIE_SECURE=true",
+        "placeholder secrets",
+        "trusted_proxies",
+    ):
+        assert expected in err
+    assert "change-me" not in err.replace("start with ``change-me``", "")
+    assert "u:change-me" not in err
+
+
+def test_check_config_ok(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from solidaritynode_backend.cli import main
+
+    monkeypatch.setenv("APP_ENV", "development")
+    assert main(["check-config"]) == 0
+    assert capsys.readouterr().out == "configuration OK (APP_ENV=development)\n"

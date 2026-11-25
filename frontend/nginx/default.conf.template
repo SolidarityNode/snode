@@ -22,7 +22,11 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
         # The browser's address, for sign-in throttling per client address (ADR 0015). nginx is
-        # the edge, so it overwrites (never appends to) any X-Forwarded-For a client sends.
+        # the edge, so it overwrites (never appends to) any X-Real-IP / X-Forwarded-For a client
+        # sends. The backend trusts them only from SOLIDARITYNODE_TRUSTED_PROXIES. Behind
+        # rootless Podman's port forwarder $remote_addr is nginx's own address; the backend then
+        # treats the client address as unknown and throttles per username only.
+        proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $remote_addr;
     }
 

@@ -309,3 +309,24 @@ def test_an_edge_added_and_closed_by_the_same_scenario_is_reported(
         "new edge E-NEW is closed by the same scenario: added, then closed, so no net effect "
         "(OQ-30)"
     )
+
+
+def test_private_means_hidden_from_other_analysts_and_viewers_not_admins(  # type: ignore[no-untyped-def]
+    app, as_admin, as_analyst, as_viewer
+) -> None:
+    """ADR 0015: admins see every scenario, with its owner, so the UI can label it."""
+    from tests.conftest import login
+
+    import_version(as_admin, "1.0.0")
+    sid = as_analyst.post("/scenarios", json={**CLOSE_E02, "visibility": "private"}).json()["id"]
+
+    def listed(client):  # type: ignore[no-untyped-def]
+        return {s["id"]: s for s in client.get("/scenarios").json()}
+
+    seen = listed(as_admin)[sid]
+    assert (seen["visibility"], seen["owner"], seen["can_edit"]) == ("private", "analyst", True)
+    assert as_admin.get(f"/scenarios/{sid}").status_code == 200
+    assert sid in listed(as_analyst)
+    for other in (login(app, "analyst2"), as_viewer):
+        assert sid not in listed(other)
+        assert other.get(f"/scenarios/{sid}").status_code == 404

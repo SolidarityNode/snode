@@ -10,23 +10,91 @@ or locked, credentials are **not checked** and the answer is the same generic 42
 and unknown usernames, so throttling reveals nothing about which accounts exist. A successful
 sign-in clears the username and the address.
 
-Keys are stored as SHA-256 hashes (migration 0009). The client address is the peer address
-the API sees; behind the bundled nginx it is the browser's address (nginx overwrites
-``X-Forwarded-For``, and uvicorn trusts it only from the addresses in ``FORWARDED_ALLOW_IPS``).
+Keys are stored as SHA-256 hashes (migration 0009). A refused (429) attempt is not a failure:
+it neither counts nor extends a delay or lock, so a lock ends at the stated time.
+
+**Client address** (:func:`client_address`): the peer address of the connection, unless the
+peer is a trusted proxy (``SOLIDARITYNODE_TRUSTED_PROXIES``); then ``X-Real-IP`` (or the
+nearest untrusted ``X-Forwarded-For`` entry) set by that proxy. If what the proxy reports is
+itself a proxy address, the proxy could not see the client: behind rootless Podman's port
+forwarder every browser reaches nginx from nginx's own address. Counting those together would
+let one person's typos lock out everyone, so the address is then **unknown** and only the
+per-username limit applies (a warning is logged once).
 """
 
 from __future__ import annotations
 
 import hashlib
+import logging
 import math
+from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
+from ipaddress import IPv4Network, IPv6Network, ip_address
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from solidaritynode_backend.config import Settings
 
-__all__ = ["Throttle", "throttle_keys"]
+__all__ = ["Throttle", "client_address", "throttle_keys"]
+
+_log = logging.getLogger(__name__)
+_warned = False
+
+
+def _trusted(address: str, networks: Sequence[IPv4Network | IPv6Network]) -> bool | None:
+    """Whether ``address`` is in ``networks``; ``None`` if it is not an IP address."""
+    try:
+        ip = ip_address(address.strip())
+    except ValueError:
+        return None
+    return any(ip in network for network in networks)
+
+
+def client_address(
+    peer: str | None,
+    x_real_ip: str | None,
+    x_forwarded_for: str | None,
+    trusted: Sequence[IPv4Network | IPv6Network],
+) -> str | None:
+    """Return the client address for per-address throttling, or ``None`` if it is unknown.
+
+    Args:
+        peer: Address of the TCP peer (``request.client.host``).
+        x_real_ip: ``X-Real-IP`` header, used only when ``peer`` is a trusted proxy.
+        x_forwarded_for: ``X-Forwarded-For`` header, used only when ``peer`` is a trusted proxy
+            and ``X-Real-IP`` is absent (its nearest entry that is not a trusted proxy).
+        trusted: Networks of the trusted reverse proxies (``Settings.trusted_networks``).
+
+    Returns:
+        The client's address; ``None`` when there is no peer, when a trusted proxy sends no
+        usable header, or when the address it reports is itself a proxy address (it could not
+        see the client).
+    """
+    global _warned
+    if peer is None:
+        return None
+    if not _trusted(peer, trusted):
+        return peer  # a direct client: its headers are never trusted
+    candidate: str | None = None
+    if x_real_ip and x_real_ip.strip():
+        candidate = x_real_ip.strip()
+    elif x_forwarded_for:
+        for hop in reversed([h.strip() for h in x_forwarded_for.split(",") if h.strip()]):
+            candidate = hop
+            if not _trusted(hop, trusted):
+                break
+    if candidate is None or _trusted(candidate, trusted) is not False:
+        if candidate is not None and not _warned:
+            _warned = True
+            _log.warning(
+                "sign-in throttling: the proxy reports client address %s, itself a trusted "
+                "proxy address, so client addresses are not visible (for example behind "
+                "rootless Podman's port forwarder); only per-username limits apply (ADR 0015)",
+                candidate,
+            )
+        return None
+    return candidate
 
 
 def _hash(value: str) -> str:

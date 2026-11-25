@@ -4,8 +4,10 @@ import { Link, useNavigate } from "react-router";
 import { api, unwrap, type Schemas } from "../api/client";
 import { canEdit, useSession } from "../app/session";
 import { ErrorMessage } from "../components/ErrorMessage";
-import { label, num } from "../components/labels";
+import { LatestRun } from "../components/LatestRun";
+import { label } from "../components/labels";
 import { useT } from "../i18n/context";
+import { serverText } from "../i18n/server";
 
 type Item = Schemas["ScenarioListItem"];
 
@@ -32,7 +34,16 @@ export function ScenariosPage() {
   }
 
   const mine = items?.filter((s) => s.owner_id === user?.id) ?? [];
-  const shared = items?.filter((s) => s.owner_id !== user?.id) ?? [];
+  const others = items?.filter((s) => s.owner_id !== user?.id) ?? [];
+  const shared = others.filter((s) => s.visibility === "shared");
+  // Only administrators receive other users' private scenarios (ADR 0015).
+  const othersPrivate = others.filter((s) => s.visibility === "private");
+
+  function visibility(s: Item): string {
+    return s.visibility === "private" && s.owner_id !== user?.id
+      ? t("scenarios.private_owner", { owner: s.owner ?? t("scenarios.system") })
+      : label(t, "visibility", s.visibility);
+  }
 
   function table(rows: Item[], caption: string, empty: string) {
     if (rows.length === 0) return <p>{empty}</p>;
@@ -57,26 +68,18 @@ export function ScenariosPage() {
                 <Link to={`/scenarios/${s.id}`}>{s.name}</Link>
                 {s.problems.length > 0 && (
                   <p className="warning" role="note">
-                    {t("scenarios.needs_attention", { problems: s.problems.join("; ") })}
+                    {t("scenarios.needs_attention", {
+                      problems: s.problems.map((p) => serverText(t, p)).join("; "),
+                    })}
                   </p>
                 )}
               </th>
               <td>{s.latest_version}</td>
               <td>{s.data_version.version}</td>
-              <td>{label(t, "visibility", s.visibility)}</td>
+              <td>{visibility(s)}</td>
               <td>{s.owner ?? t("scenarios.system")}</td>
               <td>
-                {s.latest_run ? (
-                  <Link to={`/runs/${s.latest_run.id}`}>
-                    <span className={`badge badge--${s.latest_run.status}`}>
-                      {label(t, "status", s.latest_run.status)}
-                    </span>{" "}
-                    {s.latest_run.status === "running" && `${num(s.latest_run.progress, "en")} %`}{" "}
-                    <span className="muted">({s.latest_run.package_version})</span>
-                  </Link>
-                ) : (
-                  <span className="muted">{t("scenarios.no_runs")}</span>
-                )}
+                <LatestRun item={s} user={user} />
               </td>
               <td className="actions">
                 {(s.can_edit || (s.is_baseline && canEdit(user))) && s.problems.length === 0 && (
@@ -151,6 +154,7 @@ export function ScenariosPage() {
         <>
           {table(mine, t("scenarios.mine"), t("scenarios.none_mine"))}
           {table(shared, t("scenarios.shared"), t("scenarios.none_shared"))}
+          {othersPrivate.length > 0 && table(othersPrivate, t("scenarios.others_private"), "")}
         </>
       )}
     </section>

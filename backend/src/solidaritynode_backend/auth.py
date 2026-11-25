@@ -32,6 +32,7 @@ from sqlalchemy.orm import Session as DbSession
 
 from solidaritynode_backend.config import Settings, get_settings
 from solidaritynode_backend.db import get_session
+from solidaritynode_backend.messages import msg
 from solidaritynode_backend.orm import Session, User
 
 __all__ = [
@@ -84,11 +85,9 @@ def check_password(password: str) -> None:
         PasswordPolicyError: If it is shorter than 12 characters or a common password.
     """
     if len(password) < MIN_PASSWORD_LENGTH:
-        raise PasswordPolicyError(f"password must have at least {MIN_PASSWORD_LENGTH} characters")
+        raise PasswordPolicyError(msg("error.password_short", length=MIN_PASSWORD_LENGTH))
     if password.strip().casefold() in _common_passwords():
-        raise PasswordPolicyError(
-            "this password is on the list of commonly used passwords; choose another one"
-        )
+        raise PasswordPolicyError(msg("error.password_common"))
 
 
 def hash_password(password: str) -> str:
@@ -210,7 +209,7 @@ def current_user(
     """FastAPI dependency: the logged-in user, or 401."""
     principal = idp.resolve(db, request.cookies.get(COOKIE_NAME))
     if principal is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "login required")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, msg("error.login_required"))
     return principal
 
 
@@ -222,7 +221,9 @@ def require_role(*roles: Role) -> Callable[[Principal], Principal]:
 
     def check(user: CurrentUser) -> Principal:
         if user.role not in roles:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, f"requires role {' or '.join(roles)}")
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN, msg("error.requires_role", roles=" or ".join(roles))
+            )
         return user
 
     return check
@@ -236,9 +237,9 @@ def create_user(db: DbSession, username: str, password: str, role: Role) -> User
         PasswordPolicyError: If the password does not meet the policy.
     """
     if role not in ROLES:
-        raise ValueError(f"unknown role {role!r}")
+        raise ValueError(msg("error.unknown_role", role=role))
     if db.scalar(select(User.id).where(User.username == username)) is not None:
-        raise ValueError(f"user {username!r} already exists")
+        raise ValueError(msg("error.user_exists", username=username))
     user = User(username=username, password_hash=hash_password(password), role=role, active=True)
     db.add(user)
     db.flush()
@@ -264,4 +265,4 @@ def ensure_not_last_admin(
         select(User.id).where(User.role == "admin", User.active).with_for_update()
     ).all()
     if not set(admins) - {user.id}:
-        raise ValueError("the last active administrator cannot be disabled or demoted")
+        raise ValueError(msg("error.last_admin"))

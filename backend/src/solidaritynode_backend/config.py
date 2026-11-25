@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from ipaddress import IPv4Network, IPv6Network, ip_network
 from pathlib import Path
 from typing import Literal, Self
 
@@ -16,6 +17,9 @@ __all__ = ["PLACEHOLDER_PREFIX", "AppEnv", "Basemap", "DeploymentMode", "Setting
 AppEnv = Literal["development", "test", "production"]
 DeploymentMode = Literal["municipality", "hub"]
 Basemap = Literal["osm", "blank"]
+
+PROBLEM_SEPARATOR = "\n  - "
+"""Joins configuration problems in one validation error (one problem per line)."""
 
 PLACEHOLDER_PREFIX = "change-me"
 """Secrets starting with this prefix are placeholders from ``.env.example``."""
@@ -57,6 +61,12 @@ class Settings(BaseSettings):
             ``base × 2^(n-1)`` seconds (capped by ``login_delay_max_s``); a client address is
             delayed the same way from half its lock limit on.
         login_delay_max_s: Upper bound of that delay.
+        trusted_proxies: Comma-separated addresses or networks (CIDR) of the reverse proxies
+            whose ``X-Real-IP`` / ``X-Forwarded-For`` give the client address (ADR 0015).
+            Headers from any other peer are ignored. When the address a proxy reports is itself
+            a proxy address (the proxy could not see the client, as behind rootless Podman's
+            port forwarder), the client address is unknown and only per-username throttling
+            applies.
         diagnostic_step_delay_s: Pause after each progress step of a run, so progress and
             cancellation can be followed by hand. Part of the run configuration (and its hash).
         worker_name: Name of this worker process, for logs and the ``jobs.worker`` column only.
@@ -106,6 +116,7 @@ class Settings(BaseSettings):
     login_lock_minutes: float = Field(default=15.0, gt=0)
     login_delay_base_s: float = Field(default=1.0, ge=0)
     login_delay_max_s: float = Field(default=30.0, ge=0)
+    trusted_proxies: str = "127.0.0.1/32,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
     diagnostic_step_delay_s: float = Field(default=0.5, ge=0, le=60)
     worker_name: str = "worker"
     worker_poll_s: float = Field(default=1.0, gt=0)
@@ -138,6 +149,19 @@ class Settings(BaseSettings):
             limits[kind.strip()] = seconds
         return limits
 
+    def trusted_networks(self) -> tuple[IPv4Network | IPv6Network, ...]:
+        """Return the networks of :attr:`trusted_proxies`."""
+        networks: list[IPv4Network | IPv6Network] = []
+        for item in self.trusted_proxies.split(","):
+            if item.strip():
+                try:
+                    networks.append(ip_network(item.strip(), strict=False))
+                except ValueError:
+                    raise ValueError(
+                        f"trusted_proxies: {item.strip()!r} is not an address or network"
+                    ) from None
+        return tuple(networks)
+
     def placeholder_secrets(self) -> list[str]:
         """Return the names of secrets whose value starts with ``change-me``."""
         found: list[str] = []
@@ -146,47 +170,50 @@ class Settings(BaseSettings):
             found.append("database_url (password)")
         return found
 
-    @model_validator(mode="after")
-    def _known_clean_code_in_production(self) -> Self:
-        if self.app_env == "production" and (
-            self.git_commit in ("", "unknown") or self.git_commit.endswith("-dirty")
+    def problems(self) -> list[str]:
+        """Return every configuration problem, without secret values (empty: valid).
+
+        Checked together so ``make check-config`` can list them all at once: production needs a
+        known, clean code version (ADR 0017) and a Secure session cookie (ADR 0015); outside
+        development and test no secret may start with ``change-me``; job timing, interval
+        quantiles, runtime limits and trusted proxies must parse.
+        """
+        found: list[str] = []
+        if self.app_env == "production":
+            if self.git_commit in ("", "unknown") or self.git_commit.endswith("-dirty"):
+                found.append(
+                    f"APP_ENV=production needs a known, clean code version, got GIT_COMMIT="
+                    f"{self.git_commit!r}: build the images from a committed tree (make up sets "
+                    "GIT_COMMIT) so every run records reproducible code (ADR 0017)"
+                )
+            if not self.session_cookie_secure:
+                found.append(
+                    "APP_ENV=production needs SOLIDARITYNODE_SESSION_COOKIE_SECURE=true: the "
+                    "session cookie must only travel over HTTPS (ADR 0015)"
+                )
+        if self.app_env not in _ENVS_ALLOWING_PLACEHOLDERS and (
+            secrets := self.placeholder_secrets()
         ):
-            raise ValueError(
-                f"APP_ENV=production needs a known, clean code version, got GIT_COMMIT="
-                f"{self.git_commit!r}: build the images from a committed tree (make up sets "
-                "GIT_COMMIT) so every run records reproducible code (ADR 0017)"
+            found.append(
+                f"APP_ENV={self.app_env}: placeholder secrets must be replaced before "
+                f"starting: {', '.join(secrets)}"
             )
-        return self
-
-    @model_validator(mode="after")
-    def _secure_cookie_in_production(self) -> Self:
-        if self.app_env == "production" and not self.session_cookie_secure:
-            raise ValueError(
-                "APP_ENV=production needs SOLIDARITYNODE_SESSION_COOKIE_SECURE=true: the session "
-                "cookie must only travel over HTTPS (ADR 0015)"
-            )
-        return self
-
-    @model_validator(mode="after")
-    def _check_job_timing(self) -> Self:
         if self.job_stale_seconds < 2 * self.job_heartbeat_seconds:
-            raise ValueError(
+            found.append(
                 "job_stale_seconds must be at least twice job_heartbeat_seconds, or healthy "
                 "jobs would be failed as stale"
             )
-        self.max_runtimes()
-        self.interval_quantiles()
-        return self
+        for check in (self.max_runtimes, self.interval_quantiles, self.trusted_networks):
+            try:
+                check()
+            except ValueError as exc:
+                found.append(str(exc))
+        return found
 
     @model_validator(mode="after")
-    def _refuse_placeholder_secrets(self) -> Self:
-        if self.app_env in _ENVS_ALLOWING_PLACEHOLDERS:
-            return self
-        if found := self.placeholder_secrets():
-            raise ValueError(
-                f"APP_ENV={self.app_env}: placeholder secrets must be replaced before "
-                f"starting: {', '.join(found)}"
-            )
+    def _check(self) -> Self:
+        if found := self.problems():
+            raise ValueError(PROBLEM_SEPARATOR.join(found))
         return self
 
 

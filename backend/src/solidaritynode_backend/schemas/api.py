@@ -266,11 +266,12 @@ class DataVersionRef(BaseModel):
 
 
 class RunSummary(BaseModel):
-    """Status of a scenario's latest run."""
+    """Status of one run of a scenario (an existing run: its id can always be opened)."""
 
     id: uuid.UUID
     status: RunStatus
     progress: float
+    data_version_id: int
     package_version: str
     created_at: datetime
 
@@ -288,7 +289,13 @@ class ScenarioListItem(BaseModel):
     latest_version: int
     data_version: DataVersionRef
     updated_at: datetime
-    latest_run: RunSummary | None
+    latest_run: RunSummary | None = Field(
+        description="Newest run on the active data version; null if there is none"
+    )
+    latest_run_other_data: RunSummary | None = Field(
+        description="Newest run on any other data version, only when there is no run on the "
+        "active one (the list then says 'Latest run on data X')"
+    )
     problems: list[str]
     can_edit: bool
 

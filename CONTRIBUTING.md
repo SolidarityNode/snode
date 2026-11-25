@@ -64,7 +64,7 @@ All configuration comes from `.env` (git-ignored), created by `make setup` from 
 | `SOLIDARITYNODE_LOGIN_MAX_FAILURES_ADDRESS` | backend | `20` | Failed sign-ins from one client address before it is locked |
 | `SOLIDARITYNODE_LOGIN_LOCK_MINUTES` | backend | `15` | Lock duration; failures older than this are forgotten |
 | `SOLIDARITYNODE_LOGIN_DELAY_BASE_S`, `SOLIDARITYNODE_LOGIN_DELAY_MAX_S` | backend | `1`, `30` | After failure n the next attempt for that username waits base × 2^(n-1) seconds, at most the maximum; an address is delayed the same way from half its limit on |
-| `FORWARDED_ALLOW_IPS` | backend (uvicorn) | loopback and private networks | Peers whose `X-Forwarded-For` gives the client address; the bundled nginx overwrites that header |
+| `SOLIDARITYNODE_TRUSTED_PROXIES` | backend | loopback and private networks | Reverse proxies whose `X-Real-IP` / `X-Forwarded-For` give the client address for sign-in throttling (the bundled nginx overwrites both); other peers' headers are ignored. A proxy address reported as client means the address is unknown: per-username limits only |
 | `SOLIDARITYNODE_RESULTS_DIR` | backend, worker on the host | `var/results` (`/data/results` volume in compose) | Per-sample Parquet results and package uploads |
 | `SOLIDARITYNODE_PACKAGES_DIR` | backend | `data/synthetic/packages` | Data packages offered for import on the Admin screen |
 | `SOLIDARITYNODE_WORKER_NAME` | worker | `worker` | Worker name, for logs and the job row only |

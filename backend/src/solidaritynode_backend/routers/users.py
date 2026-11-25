@@ -17,6 +17,7 @@ from solidaritynode_backend.auth import (
     require_role,
 )
 from solidaritynode_backend.db import get_session
+from solidaritynode_backend.messages import msg
 from solidaritynode_backend.orm import Session, User
 from solidaritynode_backend.schemas.api import UserIn, UserOut, UserPatch
 
@@ -58,9 +59,9 @@ def change_user(user_id: int, body: UserPatch, admin: Admin, db: Db) -> UserOut:
     """
     user = db.get(User, user_id)
     if user is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "user not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, msg("error.user_not_found"))
     if user.id == admin.id and (body.active is False or (body.role and body.role != "admin")):
-        raise HTTPException(status.HTTP_409_CONFLICT, "you cannot demote or disable yourself")
+        raise HTTPException(status.HTTP_409_CONFLICT, msg("error.self_demote"))
     try:
         ensure_not_last_admin(db, user, body.role, body.active)
     except ValueError as exc:

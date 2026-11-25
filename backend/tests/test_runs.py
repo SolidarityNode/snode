@@ -291,3 +291,69 @@ def test_settings_refuse_bad_interval_quantiles() -> None:
     for bad in ("0.5,0.95", "0.05", "a,b", "0.95,0.05"):
         with pytest.raises(ValueError, match="interval"):
             Settings(result_interval_quantiles=bad)
+
+
+_ROLES = ("admin", "analyst", "analyst2", "viewer")
+_EXPECTED = {
+    # who may open runs (run page, results, tables, exports) of a scenario owned by "analyst"
+    "shared": {"admin": 200, "analyst": 200, "analyst2": 200, "viewer": 200},
+    # private means hidden from other analysts and viewers, not from admins (ADR 0015)
+    "private": {"admin": 200, "analyst": 200, "analyst2": 404, "viewer": 404},
+}
+
+
+@pytest.mark.parametrize("visibility", ["shared", "private"])
+def test_opening_runs_per_role(app, as_admin, as_analyst, worker, visibility) -> None:  # type: ignore[no-untyped-def]
+    from tests.conftest import login
+
+    _ready(as_admin, worker)
+    sid = as_analyst.post("/scenarios", json={**CLOSE_E02, "visibility": visibility}).json()["id"]
+    run = as_analyst.post("/runs", json={"scenario_id": sid}).json()["id"]
+    worker.run_until_idle()
+    for role in _ROLES:
+        client = login(app, role)
+        expected = _EXPECTED[visibility][role]
+        for path in (
+            f"/runs/{run}",
+            f"/runs/{run}/results",
+            f"/runs/{run}/tables/unit_changes",
+            f"/runs/{run}/export?format=csv",
+        ):
+            assert client.get(path).status_code == expected, (visibility, role, path)
+        listed = {r["id"] for r in client.get("/runs", params={"scenario_id": sid}).json()}
+        assert (run in listed) == (expected == 200), (visibility, role)
+
+
+def test_missing_run_is_404_with_a_message(as_viewer) -> None:  # type: ignore[no-untyped-def]
+    missing = as_viewer.get("/runs/00000000-0000-0000-0000-000000000000")
+    assert missing.status_code == 404
+    assert missing.json()["detail"] == "run not found"
+
+
+def test_scenario_list_never_links_to_a_missing_run(
+    as_admin, as_analyst, as_viewer, worker
+) -> None:  # type: ignore[no-untyped-def]
+    """Not run yet; run only on another data version; run on the active data version."""
+    _ready(as_admin, worker)
+    sid = as_analyst.post("/scenarios", json=CLOSE_E02).json()["id"]
+
+    def item(client):  # type: ignore[no-untyped-def]
+        return next(s for s in client.get("/scenarios").json() if s["id"] == sid)
+
+    fresh = item(as_viewer)
+    assert (fresh["latest_run"], fresh["latest_run_other_data"]) == (None, None)
+    run = as_analyst.post("/runs", json={"scenario_id": sid}).json()["id"]
+    worker.run_until_idle()
+    on_active = item(as_viewer)
+    assert on_active["latest_run"]["id"] == run
+    assert on_active["latest_run_other_data"] is None
+    import_version(as_admin, "1.1.0")
+    worker.run_until_idle()
+    moved = item(as_viewer)
+    assert moved["latest_run"] is None
+    assert (
+        moved["latest_run_other_data"]["id"],
+        moved["latest_run_other_data"]["package_version"],
+    ) == (run, "1.0.0")
+    for summary in (on_active["latest_run"], moved["latest_run_other_data"]):
+        assert as_viewer.get(f"/runs/{summary['id']}").status_code == 200  # the link opens

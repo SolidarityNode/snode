@@ -17,12 +17,13 @@ from solidaritynode_backend.auth import (
 )
 from solidaritynode_backend.config import Settings, get_settings
 from solidaritynode_backend.db import get_session
+from solidaritynode_backend.messages import msg
 from solidaritynode_backend.orm import User
 from solidaritynode_backend.schemas.api import AppConfigOut, LoginIn, UserOut
-from solidaritynode_backend.services.throttle import Throttle, throttle_keys
+from solidaritynode_backend.services.throttle import Throttle, client_address, throttle_keys
 
-GENERIC_FAILURE = "wrong username or password"
-TOO_MANY = "too many failed sign-in attempts; try again later"
+GENERIC_FAILURE = msg("error.wrong_credentials")
+TOO_MANY = msg("error.too_many_attempts")
 
 router = APIRouter(tags=["auth"])
 
@@ -61,10 +62,19 @@ def login(
 
     Throttled per username and per client address (ADR 0015): while delayed or locked the answer
     is a generic 429 with ``Retry-After``, whether or not the user exists, and the password is
-    not checked. Failures answer the same 401 for unknown users and wrong passwords.
+    not checked; a 429 is not counted and does not extend the delay or lock. Failures answer the
+    same 401 for unknown users and wrong passwords. The client address comes from a trusted
+    proxy's headers only (``SOLIDARITYNODE_TRUSTED_PROXIES``); when it is unknown, only the
+    per-username limit applies.
     """
     throttle = Throttle(settings)
-    keys = throttle_keys(body.username, request.client.host if request.client else None)
+    address = client_address(
+        request.client.host if request.client else None,
+        request.headers.get("x-real-ip"),
+        request.headers.get("x-forwarded-for"),
+        settings.trusted_networks(),
+    )
+    keys = throttle_keys(body.username, address)
     wait = throttle.retry_after(db, keys)
     if wait:
         db.commit()

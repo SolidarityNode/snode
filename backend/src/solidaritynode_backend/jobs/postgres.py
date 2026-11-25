@@ -17,6 +17,7 @@ from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from solidaritynode_backend.jobs.base import JobInfo, JobStatus
+from solidaritynode_backend.messages import msg
 from solidaritynode_backend.orm import Job
 
 __all__ = ["PostgresJobRunner", "job_info"]
@@ -67,7 +68,7 @@ class PostgresJobRunner:
             .where(Job.id == jid, Job.status == JobStatus.QUEUED)
             .values(
                 status=JobStatus.CANCELLED,
-                error="Cancelled before it started.",
+                error=msg("run.cancelled_queued"),
                 finished_at=datetime.now(UTC),
             )
         )

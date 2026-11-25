@@ -2,7 +2,15 @@ import type { Feature, FeatureCollection } from "geojson";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
-import { api, exportUrl, getCatalog, getLayer, unwrap, type Schemas } from "../api/client";
+import {
+  ApiError,
+  api,
+  exportUrl,
+  getCatalog,
+  getLayer,
+  unwrap,
+  type Schemas,
+} from "../api/client";
 import { canEdit, useSession } from "../app/session";
 import { DiagnosticBanner } from "../components/DiagnosticBanner";
 import { ErrorMessage } from "../components/ErrorMessage";
@@ -14,6 +22,7 @@ import { defaultSelection, type Selection } from "../components/selection";
 import { ScaleLegend } from "../components/ScaleLegend";
 import { intervalLabel, intervalText, isProbability, label, num } from "../components/labels";
 import { useT } from "../i18n/context";
+import { serverText } from "../i18n/server";
 import { MapView, type MapLayer } from "../map/MapView";
 import {
   intervalWidth,
@@ -203,6 +212,20 @@ export function RunPage() {
     };
   }, [units, visible, scale, wScale, options.quality, unitOfMeasure, interval, statistic, lang, t]);
 
+  if (!run && error instanceof ApiError && error.status === 404) {
+    return (
+      <section aria-labelledby="run-missing-title" data-testid="run-not-found">
+        <h2 id="run-missing-title">{t("run.not_found_title")}</h2>
+        <p>{t("run.not_found_body")}</p>
+        <p>
+          <Link className="button" to="/scenarios">
+            {t("run.back_to_scenarios")}
+          </Link>
+        </p>
+      </section>
+    );
+  }
+
   if (!run) {
     return (
       <section>
@@ -216,8 +239,22 @@ export function RunPage() {
   // (ADR 0016, OQ-30): listed so nothing is ignored silently.
   const recordedOnly = (run.diagnostics?.recorded_only as string[] | undefined) ?? [];
   const handCheck = run.diagnostics?.hand_check as
-    | Record<"baseline" | "scenario", { available: boolean; checked: number; passed: number }>
+    | Record<
+        "baseline" | "scenario",
+        {
+          available: boolean;
+          checked: number;
+          passed: number;
+          by_mode?: Record<string, number>; // diagnostic-v0 0.2.1 and later
+        }
+      >
     | undefined;
+  const modesChecked = Object.entries(handCheck?.scenario.by_mode ?? {});
+  const checkedModes = modesChecked.filter(([, n]) => n > 0).map(([m]) => label(t, "mode", m));
+  const uncheckedModes = modesChecked.filter(([, n]) => n === 0).map(([m]) => label(t, "mode", m));
+  const changedUnits = changes.filter((c) => (c.details as string[]).length > 0);
+  const groupName = catalog?.groups.find((g) => g.group_id === selection?.group)?.name;
+  const serviceName = catalog?.services.find((s) => s.service_id === selection?.service)?.name;
 
   return (
     <section aria-labelledby="run-title">
@@ -234,7 +271,7 @@ export function RunPage() {
       )}
       {run.reuse_refused && (
         <p className="banner banner--warning" role="note" data-testid="reuse-refused">
-          {t("run.reuse_refused")} <span className="muted">{run.reuse_refused}</span>
+          {t("run.reuse_refused")} <span className="muted">{serverText(t, run.reuse_refused)}</span>
         </p>
       )}
       {run.samples_estimate_bytes != null &&
@@ -340,8 +377,8 @@ export function RunPage() {
             <caption>
               {t("results.table_caption", {
                 indicator: label(t, "indicator", selection.indicator),
-                group: selection.group,
-                service: selection.service,
+                group: groupName ?? selection.group,
+                service: serviceName ?? selection.service,
               })}
             </caption>
             <thead>
@@ -400,11 +437,25 @@ export function RunPage() {
                 checked: handCheck.baseline.checked,
               })}{" "}
               {handCheck.scenario.available
-                ? t("run.hand_check_scenario", {
-                    passed: handCheck.scenario.passed,
-                    checked: handCheck.scenario.checked,
-                  })
+                ? checkedModes.length > 0
+                  ? t("run.hand_check_scenario_modes", {
+                      passed: handCheck.scenario.passed,
+                      checked: handCheck.scenario.checked,
+                      modes: checkedModes.join(", "),
+                    })
+                  : t("run.hand_check_scenario", {
+                      passed: handCheck.scenario.passed,
+                      checked: handCheck.scenario.checked,
+                    })
                 : t("run.hand_check_none")}
+              {uncheckedModes.length > 0 && (
+                <>
+                  {" "}
+                  <span data-testid="hand-check-unchecked">
+                    {t("run.hand_check_unchecked", { modes: uncheckedModes.join(", ") })}
+                  </span>
+                </>
+              )}
             </p>
           )}
           {recordedOnly.length > 0 && (
@@ -412,21 +463,24 @@ export function RunPage() {
               <h3>{t("run.recorded_only_title")}</h3>
               <ul data-testid="recorded-only">
                 {recordedOnly.map((line) => (
-                  <li key={line}>{line}</li>
+                  <li key={line}>{serverText(t, line)}</li>
                 ))}
               </ul>
             </>
           )}
           <h3>{t("run.changes_title")}</h3>
-          <ul>
-            {changes
-              .filter((c) => (c.details as string[]).length > 0)
-              .map((c) => (
+          {changedUnits.length === 0 ? (
+            <p data-testid="no-changes">{t("run.no_changes")}</p>
+          ) : (
+            <ul data-testid="unit-changes">
+              {changedUnits.map((c) => (
                 <li key={String(c.unit_id)}>
-                  <strong>{String(c.unit_id)}</strong>: {(c.details as string[]).join("; ")}
+                  <strong>{String(c.unit_id)}</strong>:{" "}
+                  {(c.details as string[]).map((d) => serverText(t, d)).join("; ")}
                 </li>
               ))}
-          </ul>
+            </ul>
+          )}
         </>
       )}
 

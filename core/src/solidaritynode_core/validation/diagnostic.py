@@ -21,7 +21,9 @@ as accessibility, need, vulnerability or resilience. It does three things:
    cell is standard normal; any two cells have correlation 0.5, so totals across cells must be
    computed from the same sample index. All draws come from ``numpy.random.default_rng(seed)``.
 
-Version 0.2.0: joint draws (0.1.0 drew every cell independently).
+Version 0.2.0: joint draws (0.1.0 drew every cell independently). Version 0.2.1: the hand-check
+result also says, per mode, how many pairs were checked, and which modes could not be checked
+because the package has no expected times for that mode's set of closed edges (values unchanged).
 """
 
 from __future__ import annotations
@@ -34,6 +36,7 @@ import numpy as np
 
 from solidaritynode_core.model.entities import Scenario, ScenarioKind, TransportMode
 from solidaritynode_core.model.ids import FacilityId, GroupId, ScenarioId, ServiceId, UnitId
+from solidaritynode_core.model.messages import message
 from solidaritynode_core.model.registry import (
     STATIC_TIME,
     CellSamples,
@@ -57,7 +60,7 @@ __all__ = [
 ]
 
 DIAGNOSTIC_MODEL_ID = "diagnostic-v0"
-DIAGNOSTIC_MODEL_VERSION = "0.2.0"
+DIAGNOSTIC_MODEL_VERSION = "0.2.1"
 DIAGNOSTIC_LABEL = "Diagnostic model: not a research result"
 MODES: tuple[TransportMode, ...] = (TransportMode.WALK, TransportMode.CAR)
 _TOLERANCE = 1e-6
@@ -133,6 +136,12 @@ def _check(
     expected: Mapping[tuple[str, str, str], float],
     computed: Mapping[TransportMode, Mapping[tuple[UnitId, FacilityId], float]],
 ) -> dict[str, Any]:
+    """Compare ``expected`` hand-check times with ``computed`` ones.
+
+    Returns ``available``, ``checked``, ``passed``, ``mismatches`` and ``by_mode``: pairs checked
+    per mode, with 0 for a mode the package has no expected times for (so the run page can say
+    which modes were not checked).
+    """
     mismatches = []
     for (mode, unit, facility), minutes in sorted(expected.items()):
         got = computed[TransportMode(mode)].get((UnitId(unit), FacilityId(facility)))
@@ -145,6 +154,9 @@ def _check(
         "checked": len(expected),
         "passed": len(expected) - len(mismatches),
         "mismatches": mismatches,
+        "by_mode": {
+            mode.value: sum(1 for (m, _, _) in expected if m == mode.value) for mode in MODES
+        },
     }
 
 
@@ -257,8 +269,11 @@ def run_diagnostic(
                 "facilities_affected": len({c.facility for c in changes}),
                 "capacity_changes": sum(1 for c in changes if c.kind == "capacity"),
                 "closed_edges": len(closed_touching.get(unit.id, [])),
-                "details": [f"{c.facility}: {c.detail}" for c in changes]
-                + [f"edge {e} closed" for e in closed_touching.get(unit.id, [])],
+                "details": [
+                    message("change.facility", facility=c.facility, detail=c.detail)
+                    for c in changes
+                ]
+                + [message("change.edge_closed", edge=e) for e in closed_touching.get(unit.id, [])],
             }
         )
     progress(0.7)

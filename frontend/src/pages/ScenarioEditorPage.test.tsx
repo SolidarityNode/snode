@@ -133,6 +133,7 @@ describe("ScenarioEditorPage placeholders", () => {
         owner_id: 1,
         created_at: "2026-11-25T00:00:00Z",
         latest_run: null,
+        latest_run_other_data: null,
         data_version: { id: 1, package_id: "demo-study-area-a", version: "1.0.0" },
         current: {
           version: 1,
@@ -165,5 +166,67 @@ describe("ScenarioEditorPage placeholders", () => {
       expect(sent.body.network_changes).toEqual(network);
       expect(sent.body.population_changes).toEqual(population);
     });
+  });
+});
+
+describe("ScenarioEditorPage visibility and data version", () => {
+  it("says who sees a private scenario and when it was made on other data", async () => {
+    const scenario = {
+      id: "s2",
+      can_edit: true,
+      visibility: "private",
+      is_baseline: false,
+      latest_version: 1,
+      problems: [],
+      name: "Old data",
+      description: "",
+      owner: "analyst",
+      owner_id: 1,
+      created_at: "2026-11-25T00:00:00Z",
+      updated_at: "2026-11-25T00:00:00Z",
+      latest_run: null,
+      latest_run_other_data: {
+        id: "r-old",
+        status: "succeeded",
+        progress: 100,
+        data_version_id: 1,
+        package_version: "1.0.0",
+        created_at: "2026-11-25T00:00:00Z",
+      },
+      data_version: { id: 1, package_id: "demo-study-area-a", version: "1.0.0", active: false },
+      versions: [1],
+      current: {
+        scenario_id: "s2",
+        version: 1,
+        name: "Old data",
+        description: "",
+        schema_version: "1.0",
+        created_at: "2026-11-25T00:00:00Z",
+        created_by: "analyst",
+        data_version: { id: 1, package_id: "demo-study-area-a", version: "1.0.0", active: false },
+        body: { schema_version: "1.0" },
+      },
+    };
+    stubApi({
+      "GET /scenarios/s2": () => scenario,
+      "GET /data-versions/2/layers/.*": () => EMPTY,
+      "GET /data-versions/2/catalog": () => ({ groups: [], services: [] }),
+      "POST /scenarios/validate": () => ({ valid: true, errors: [], problems: [] }),
+    });
+    renderWithSession(<ScenarioEditorPage />, {
+      path: "/scenarios/s2",
+      route: "/scenarios/:scenarioId",
+      session: { activeDataVersion: { ...DV, id: 2, version: "1.1.0" } },
+    });
+    expect(await screen.findByTestId("data-differs")).toHaveTextContent(
+      "Created against data 1.0.0; active data is 1.1.0.",
+    );
+    expect(screen.getByTestId("visibility-hint")).toHaveTextContent(
+      "Private: visible to you and to administrators.",
+    );
+    expect(screen.getByRole("link", { name: /Latest run on data 1.0.0/ })).toHaveAttribute(
+      "href",
+      "/runs/r-old",
+    );
   });
 });

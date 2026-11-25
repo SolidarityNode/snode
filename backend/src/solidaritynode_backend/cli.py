@@ -8,6 +8,8 @@
     python -m solidaritynode_backend.cli seed-demo-users             # APP_ENV=development only
     python -m solidaritynode_backend.cli wait-runs [--timeout 120]   # until no job is pending
     python -m solidaritynode_backend.cli export-schemas DIR          # JSON Schema and OpenAPI
+    python -m solidaritynode_backend.cli check-config                # list every settings problem
+    python -m solidaritynode_backend.cli clear-login-locks [--all | --username NAME]
 """
 
 from __future__ import annotations
@@ -15,6 +17,7 @@ from __future__ import annotations
 import argparse
 import getpass
 import json
+import os
 import sys
 import tempfile
 import time
@@ -22,11 +25,13 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import create_engine, func, select
+from pydantic import ValidationError
+from sqlalchemy import create_engine, func, select, text
 from sqlalchemy.orm import Session
 
 from solidaritynode_backend.auth import create_user
-from solidaritynode_backend.config import Settings, get_settings
+from solidaritynode_backend.config import PROBLEM_SEPARATOR, Settings, get_settings
+from solidaritynode_backend.messages import messages_json
 from solidaritynode_backend.orm import DataVersion, Job, User
 from solidaritynode_backend.services.installation import RoleMismatchError, check_role
 from solidaritynode_backend.services.packages import (
@@ -37,8 +42,9 @@ from solidaritynode_backend.services.packages import (
     preview_package,
     read_package,
 )
+from solidaritynode_backend.services.throttle import throttle_keys
 
-__all__ = ["DEMO_USERS", "NOTHING_TO_DO", "main"]
+__all__ = ["DEMO_USERS", "NOTHING_TO_DO", "config_problems", "main"]
 
 #: Exit code of ``import-package --preview-only`` when the version is already imported.
 NOTHING_TO_DO = 3
@@ -216,7 +222,7 @@ def wait_runs(settings: Settings, timeout: float) -> int:
 
 
 def export_schemas(directory: Path) -> int:
-    """Write ``scenario.schema.json`` and ``openapi.json`` to ``directory``."""
+    """Write ``scenario.schema.json``, ``openapi.json`` and ``messages.json`` to ``directory``."""
     from solidaritynode_backend.main import create_app
     from solidaritynode_backend.schemas.scenario import export_json_schema
 
@@ -224,7 +230,60 @@ def export_schemas(directory: Path) -> int:
     export_json_schema(directory / "scenario.schema.json")
     openapi = create_app().openapi()
     (directory / "openapi.json").write_text(json.dumps(openapi, indent=2, sort_keys=True) + "\n")
-    print(f"wrote {directory}/scenario.schema.json and openapi.json")
+    (directory / "messages.json").write_text(messages_json())
+    print(f"wrote {directory}/scenario.schema.json, openapi.json and messages.json")
+    return 0
+
+
+def config_problems(error: ValidationError) -> list[str]:
+    """Return the problems of a settings validation error, one line each, without values.
+
+    Field errors name the setting and what is wrong, never the input (it may be a secret); the
+    whole-configuration check (:meth:`Settings.problems`) contributes one line per problem.
+    """
+    found: list[str] = []
+    for item in error.errors(include_input=False, include_url=False):
+        loc = ".".join(str(part) for part in item["loc"])
+        message = str(item["msg"]).removeprefix("Value error, ")
+        if loc:
+            found.append(f"{loc}: {message}")
+        else:
+            found.extend(message.split(PROBLEM_SEPARATOR))
+    return found
+
+
+def check_config() -> int:
+    """Validate the settings and print every problem at once (exit 1), or OK (exit 0)."""
+    app_env = os.environ.get("APP_ENV", "development")
+    try:
+        settings = Settings()
+    except ValidationError as exc:
+        problems = config_problems(exc)
+        print(
+            f"configuration INVALID (APP_ENV={app_env}): {len(problems)} problem(s)",
+            file=sys.stderr,
+        )
+        for problem in problems:
+            print(f"  - {problem}", file=sys.stderr)
+        return 1
+    print(f"configuration OK (APP_ENV={settings.app_env})")
+    return 0
+
+
+def clear_login_locks(settings: Settings, username: str | None) -> int:
+    """Clear sign-in delays and locks (ADR 0015): of one username, or all of them."""
+    with _session(settings) as db:
+        if username is None:
+            deleted = db.execute(text("DELETE FROM login_throttle RETURNING 1")).all()
+        else:
+            kind, key = throttle_keys(username, None)[0]
+            deleted = db.execute(
+                text("DELETE FROM login_throttle WHERE kind = :k AND key_hash = :h RETURNING 1"),
+                {"k": kind, "h": key},
+            ).all()
+        db.commit()
+    who = "all usernames and addresses" if username is None else f"username {username!r}"
+    print(f"Cleared {len(deleted)} sign-in delay/lock record(s) for {who}.")
     return 0
 
 
@@ -250,7 +309,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     wait.add_argument("--timeout", type=float, default=180)
     exp = sub.add_parser("export-schemas", help="write the scenario JSON Schema and OpenAPI")
     exp.add_argument("directory", type=Path)
+    sub.add_parser("check-config", help="validate the settings and list every problem")
+    clear = sub.add_parser("clear-login-locks", help="clear sign-in delays and locks")
+    which = clear.add_mutually_exclusive_group(required=True)
+    which.add_argument("--all", action="store_true", help="every username and address")
+    which.add_argument("--username", help="only this username")
     args = parser.parse_args(argv)
+    if args.command == "check-config":
+        return check_config()
     settings = get_settings()
     if args.command != "export-schemas":
         try:
@@ -270,6 +336,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return seed_demo_users(settings)
     if args.command == "wait-runs":
         return wait_runs(settings, args.timeout)
+    if args.command == "clear-login-locks":
+        return clear_login_locks(settings, args.username)
     return export_schemas(args.directory)
 
 

@@ -1,5 +1,6 @@
 import type { Schemas } from "../api/client";
 import { useT } from "../i18n/context";
+import { serverText } from "../i18n/server";
 import { label, num } from "./labels";
 
 interface Props {
@@ -35,10 +36,12 @@ export function RunStatus({ run, onCancel, cancelling = false }: Props) {
       )}
       {run.status === "failed" && run.error && (
         <p role="alert" className="error">
-          {t("run.failed_with", { error: run.error })}
+          {t("run.failed_with", { error: serverText(t, run.error) })}
         </p>
       )}
-      {run.status === "cancelled" && <p role="status">{run.error ?? t("run.cancelled")}</p>}
+      {run.status === "cancelled" && (
+        <p role="status">{run.error ? serverText(t, run.error) : t("run.cancelled")}</p>
+      )}
       {active && run.can_cancel && onCancel && (
         <button type="button" onClick={onCancel} disabled={cancelling}>
           {cancelling ? t("run.cancelling") : t("run.cancel")}

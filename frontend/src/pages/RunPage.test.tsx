@@ -126,7 +126,95 @@ describe("RunPage recorded-only interventions", () => {
     renderWithSession(<RunPage />, { path: "/runs/r1", route: "/runs/:runId" });
     expect(await screen.findByRole("heading", { name: /Recorded, no effect yet/ })).toBeVisible();
     const items = screen.getByTestId("recorded-only").querySelectorAll("li");
-    expect([...items].map((li) => li.textContent)).toEqual(lines);
+    expect([...items].map((li) => li.textContent)).toEqual([
+      "new edge E-NEW N-A1-N-A5 (walking 10 min) (recorded only)",
+      lines[1],
+    ]);
+  });
+
+  it("translates the recorded lines and changes per unit into Greek", async () => {
+    localStorage.setItem("sn-lang", "el");
+    const lines = [
+      "edge E01 walk travel_time -20 % (recorded only)",
+      "unit A1 group G-OLD population +50 persons (recorded only)",
+    ];
+    const withPlaceholders = { ...RUN, diagnostics: { recorded_only: lines } };
+    stubApi({
+      "GET /runs/r1": () => withPlaceholders,
+      "GET /runs": () => [withPlaceholders],
+      "GET /data-versions/1/layers/spatial_units": () => UNITS,
+      "GET /data-versions/1/catalog": () => CATALOG,
+      "GET /runs/r1/results": () => [],
+      "GET /runs/r1/tables/unit_changes": () => [
+        { unit_id: "A2", details: ["F3: S-HC staff 4 -> 5", "edge E02 closed"] },
+      ],
+    });
+    try {
+      renderWithSession(<RunPage />, { path: "/runs/r1", route: "/runs/:runId" });
+      const list = await screen.findByTestId("recorded-only");
+      expect([...list.querySelectorAll("li")].map((li) => li.textContent)).toEqual([
+        "τμήμα E01, πεζή: χρόνος διαδρομής -20 % (καταγράφεται μόνο)",
+        "μονάδα A1, ομάδα G-OLD: πληθυσμός +50 άτομα (καταγράφεται μόνο)",
+      ]);
+      expect(screen.getByTestId("unit-changes")).toHaveTextContent(
+        "A2: F3: S-HC προσωπικό 4 → 5; κλειστό τμήμα E02",
+      );
+    } finally {
+      localStorage.removeItem("sn-lang");
+    }
+  });
+});
+
+describe("RunPage details", () => {
+  it("says when nothing changed and which modes the hand-check skipped", async () => {
+    const checked = {
+      ...RUN,
+      diagnostics: {
+        hand_check: {
+          baseline: { available: true, checked: 48, passed: 48 },
+          scenario: { available: true, checked: 24, passed: 24, by_mode: { walk: 0, car: 24 } },
+        },
+      },
+    };
+    stubApi({
+      "GET /runs/r1": () => checked,
+      "GET /runs": () => [checked],
+      "GET /data-versions/1/layers/spatial_units": () => UNITS,
+      "GET /data-versions/1/catalog": () => CATALOG,
+      "GET /runs/r1/results": () => [],
+      "GET /runs/r1/tables/unit_changes": () => [{ unit_id: "U1", details: [] }],
+    });
+    renderWithSession(<RunPage />, { path: "/runs/r1", route: "/runs/:runId" });
+    expect(await screen.findByTestId("no-changes")).toHaveTextContent("No changes");
+    expect(screen.getByTestId("hand-check")).toHaveTextContent(
+      "With the scenario: 24 of 24 match (car).",
+    );
+    expect(screen.getByTestId("hand-check-unchecked")).toHaveTextContent(
+      "Not checked with the scenario: walking.",
+    );
+    expect(screen.getByTestId("results-table")).toHaveTextContent("Group 1");
+    expect(screen.getByTestId("results-table")).toHaveTextContent("Service 1");
+  });
+
+  it("shows a translated page with a way back when the run does not exist", async () => {
+    localStorage.setItem("sn-lang", "el");
+    stubApi({
+      "GET /runs/missing": () =>
+        new Response(JSON.stringify({ detail: "run not found" }), { status: 404 }),
+    });
+    try {
+      renderWithSession(<RunPage />, { path: "/runs/missing", route: "/runs/:runId" });
+      expect(await screen.findByTestId("run-not-found")).toHaveTextContent(
+        "Η εκτέλεση δεν βρέθηκε",
+      );
+      expect(screen.getByRole("link", { name: "Πίσω στα Σενάρια" })).toHaveAttribute(
+        "href",
+        "/scenarios",
+      );
+      expect(screen.queryByText("run not found")).toBeNull();
+    } finally {
+      localStorage.removeItem("sn-lang");
+    }
   });
 });
 

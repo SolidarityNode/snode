@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import dataclasses
+
 import numpy as np
 import pytest
 
@@ -11,6 +13,7 @@ from solidaritynode_core.model import (
     Facility,
     FacilityId,
     NetworkDisruption,
+    NewEdge,
     NewFacility,
     Rationing,
     Scenario,
@@ -92,6 +95,7 @@ def test_closing_e02_changes_exactly_the_expected_times() -> None:
     assert expected_changed  # the demo is built so that some times change
     result = run_diagnostic(area, close_e02(), {"n_samples": 10}, 1, _noop)
     assert result.diagnostics["hand_check"]["scenario"]["checked"] == 48
+    assert result.diagnostics["hand_check"]["scenario"]["by_mode"] == {"walk": 24, "car": 24}
     assert result.diagnostics["hand_check"]["scenario"]["mismatches"] == []
     changed = {
         (TransportMode(r["mode"]), r["unit_id"], r["facility_id"])
@@ -210,7 +214,7 @@ def test_registry_holds_only_the_diagnostic_model() -> None:
     assert registry.ids() == ("diagnostic-v0",)
     spec = registry.get("diagnostic-v0")
     assert spec.diagnostic is True
-    assert spec.version == "0.2.0"
+    assert spec.version == "0.2.1"
     with pytest.raises(KeyError):
         registry.get("vulnerability")
 
@@ -241,3 +245,28 @@ def test_samples_are_joint_draws_so_totals_across_units_use_the_same_index() -> 
     summary = summarise_total(parts)
     assert summary.median == pytest.approx(float(np.median(total)))
     assert summary.high - summary.low > summarise(shuffled).high - summarise(shuffled).low
+
+
+def test_hand_check_says_which_modes_were_not_checked() -> None:
+    """UAT placeholders run: E02 and a new edge closed for walking, so walking is unchecked.
+
+    The package ships expected times for "no closure" and "E02 closed" only. Car (nothing
+    closed) is checked against "no closure"; walking ({E02, E-NEW} closed) has no expected
+    times, so only 24 of the 48 pairs are checked and ``by_mode`` says which.
+    """
+    area = packages.load("1.0.0")
+    base = close_e02()
+    assert base.network_disruption is not None
+    scenario = dataclasses.replace(
+        base,
+        interventions=(NewEdge("E-NEW", "N-A1", "N-A5", {TransportMode.WALK: 10.0}),),
+        network_disruption=dataclasses.replace(
+            base.network_disruption,
+            affected_link_ids=frozenset({"E02", "E-NEW"}),
+            modes=frozenset({TransportMode.WALK}),
+        ),
+    )
+    result = run_diagnostic(area, scenario, {"n_samples": 10}, 1, _noop)
+    check = result.diagnostics["hand_check"]["scenario"]
+    assert check["by_mode"] == {"walk": 0, "car": 24}
+    assert (check["checked"], check["passed"]) == (24, 24)

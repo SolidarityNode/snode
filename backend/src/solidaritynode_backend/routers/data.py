@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from solidaritynode_backend.auth import CurrentUser, Principal, require_role
 from solidaritynode_backend.config import Settings, get_settings
 from solidaritynode_backend.db import get_session
+from solidaritynode_backend.messages import msg
 from solidaritynode_backend.orm import DataVersion
 from solidaritynode_backend.schemas.api import (
     AvailablePackage,
@@ -104,7 +105,7 @@ def data_version_out(db: Session, dv: DataVersion) -> DataVersionOut:
 def _get_dv(db: Session, data_version_id: int) -> DataVersion:
     dv = db.get(DataVersion, data_version_id)
     if dv is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "data version not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, msg("error.data_version_not_found"))
     return dv
 
 
@@ -124,7 +125,7 @@ def active_data_version(_: CurrentUser, db: Db) -> DataVersionOut:
     """Return the active data version."""
     dv = db.scalar(select(DataVersion).where(DataVersion.active))
     if dv is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "no data package imported yet")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, msg("error.no_data"))
     return data_version_out(db, dv)
 
 
@@ -160,7 +161,7 @@ def layer_geojson(data_version_id: int, layer: str, _: CurrentUser, db: Db) -> d
     ``closed``; spatial units also carry ``edge_effect_warning`` and its details (OQ-28).
     """
     if layer not in FEATURE_LAYERS:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, f"unknown layer {layer!r}")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, msg("error.unknown_layer", layer=layer))
     dv = _get_dv(db, data_version_id)
     warnings: dict[str, list[str]] = {}
     for unit, detail in db.execute(
@@ -249,9 +250,9 @@ async def preview_upload(request: Request, _: Admin, db: Db, settings: Config) -
     """Upload a package archive (``.zip`` or ``.tar.gz`` body), validate it and preview it."""
     data = await request.body()
     if not data:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "empty upload")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, msg("error.empty_upload"))
     if len(data) > MAX_UPLOAD_BYTES:
-        raise HTTPException(status.HTTP_413_CONTENT_TOO_LARGE, "package larger than 64 MB")
+        raise HTTPException(status.HTTP_413_CONTENT_TOO_LARGE, msg("error.upload_too_large"))
     staging_id = stage_upload(settings, data)
     path = staged_path(settings, staging_id)
     return await run_in_threadpool(_preview, db, path, "upload", staging_id)
@@ -297,7 +298,9 @@ def activate_data_version(
     try:
         outcome = activate_version(db, settings, data_version_id, admin.id)
     except KeyError:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "data version not found") from None
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, msg("error.data_version_not_found")
+        ) from None
     except PackageError as exc:
         db.rollback()
         raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from None

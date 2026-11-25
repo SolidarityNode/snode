@@ -20,6 +20,7 @@ from solidaritynode_backend.auth import CurrentUser, Principal
 from solidaritynode_backend.config import Settings, get_settings
 from solidaritynode_backend.db import get_session
 from solidaritynode_backend.jobs import JobStatus, PostgresJobRunner
+from solidaritynode_backend.messages import msg
 from solidaritynode_backend.orm import DataVersion, Job, Run, Scenario, ScenarioVersion, User
 from solidaritynode_backend.routers.scenarios import can_edit, can_view, get_visible
 from solidaritynode_backend.schemas.api import (
@@ -110,10 +111,10 @@ def get_visible_run(db: Session, run_id: uuid.UUID, user: Principal) -> Run:
     """Return a run whose scenario the user may see, or raise 404."""
     run = db.get(Run, run_id)
     if run is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "run not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, msg("error.run_not_found"))
     scenario = db.get(Scenario, run.scenario_id)
     if scenario is None or not (can_view(scenario, user) or (user.is_admin)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "run not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, msg("error.run_not_found"))
     return run
 
 
@@ -135,18 +136,18 @@ def start_run(
     """
     scenario = get_visible(db, body.scenario_id, user)
     if not (can_edit(scenario, user) or (scenario.is_baseline and user.can_edit)):
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "only the owner or an admin can run it")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, msg("error.only_owner_run"))
     version = db.get(
         ScenarioVersion, (scenario.id, body.scenario_version or scenario.latest_version)
     )
     if version is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "scenario version not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, msg("error.scenario_version_not_found"))
     if body.data_version_id is not None:
         dv = db.get(DataVersion, body.data_version_id)
     else:
         dv = db.scalar(select(DataVersion).where(DataVersion.active))
     if dv is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "data version not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, msg("error.data_version_not_found"))
     config = body.config.model_dump(exclude_none=True)
     try:
         created = create_run(
@@ -164,7 +165,7 @@ def start_run(
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_CONTENT,
             {
-                "message": f"the scenario does not match data {dv.version}",
+                "message": msg("error.scenario_mismatch_in", version=dv.version),
                 "problems": exc.problems,
             },
         ) from None
@@ -209,7 +210,7 @@ def cancel_run(run_id: uuid.UUID, user: CurrentUser, db: Db) -> RunOut:
     """Cancel a queued run at once, or a running one at its next progress step."""
     run = get_visible_run(db, run_id, user)
     if not (user.is_admin or (user.can_edit and run.created_by == user.id)):
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "only who started the run or an admin")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, msg("error.only_starter_cancel"))
     PostgresJobRunner(db).cancel(str(run.job_id))
     db.commit()
     return run_out(db, run, user)
@@ -218,7 +219,7 @@ def cancel_run(run_id: uuid.UUID, user: CurrentUser, db: Db) -> RunOut:
 def _require_succeeded(db: Session, run: Run) -> None:
     job = db.get(Job, run.job_id)
     if job is None or job.status != JobStatus.SUCCEEDED:
-        raise HTTPException(status.HTTP_409_CONFLICT, "the run has no results (not succeeded)")
+        raise HTTPException(status.HTTP_409_CONFLICT, msg("error.no_results"))
 
 
 def _results(
@@ -312,7 +313,7 @@ def compare_runs(
         if b is None:
             raise HTTPException(
                 status.HTTP_409_CONFLICT,
-                f"no succeeded baseline run on data {a.package_version} yet",
+                msg("error.no_baseline", version=a.package_version),
             )
     else:
         b = get_visible_run(db, other, user)
@@ -321,9 +322,7 @@ def compare_runs(
     if cross and a.scenario_id != b.scenario_id:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
-            f"the runs use different data versions ({a.package_version} and "
-            f"{b.package_version}); compare runs on the same data version, or two runs of "
-            "the same scenario",
+            msg("error.compare_data_versions", a=a.package_version, b=b.package_version),
         )
     rows_b = {(r.unit_id, r.group_id, r.service_id, r.indicator): r for r in _results(db, b)}
     rows = []

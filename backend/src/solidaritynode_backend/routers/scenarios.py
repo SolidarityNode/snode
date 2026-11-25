@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 
 from solidaritynode_backend.auth import CurrentUser, Principal
 from solidaritynode_backend.db import get_session
+from solidaritynode_backend.messages import msg
 from solidaritynode_backend.orm import DataVersion, Job, Run, Scenario, ScenarioVersion, User
 from solidaritynode_backend.schemas.api import (
     DataVersionRef,
@@ -58,19 +59,19 @@ def get_visible(db: Session, scenario_id: uuid.UUID, user: Principal) -> Scenari
     """Return a scenario the user may see, or raise 404."""
     scenario = db.get(Scenario, scenario_id)
     if scenario is None or not can_view(scenario, user):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "scenario not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, msg("error.scenario_not_found"))
     return scenario
 
 
 def _require_editor(user: Principal) -> None:
     if not user.can_edit:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "requires role analyst or admin")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, msg("error.requires_editor"))
 
 
 def _active_dv(db: Session) -> DataVersion:
     dv = db.scalar(select(DataVersion).where(DataVersion.active))
     if dv is None:
-        raise HTTPException(status.HTTP_409_CONFLICT, "no data package imported yet")
+        raise HTTPException(status.HTTP_409_CONFLICT, msg("error.no_data"))
     return dv
 
 
@@ -95,14 +96,17 @@ def _usernames(db: Session) -> dict[int, str]:
     return {u.id: u.username for u in db.scalars(select(User))}
 
 
-def _latest_run(db: Session, scenario_id: uuid.UUID) -> RunSummary | None:
-    row = db.execute(
-        select(Run, Job)
-        .join(Job, Job.id == Run.job_id)
-        .where(Run.scenario_id == scenario_id)
-        .order_by(Run.created_at.desc())
-        .limit(1)
-    ).first()
+def _latest_run(
+    db: Session, scenario_id: uuid.UUID, data_version_id: int | None, *, on: bool
+) -> RunSummary | None:
+    """Newest existing run of the scenario on (``on``) or off the given data version."""
+    query = select(Run, Job).join(Job, Job.id == Run.job_id).where(Run.scenario_id == scenario_id)
+    if data_version_id is not None:
+        same = Run.data_version_id == data_version_id
+        query = query.where(same if on else ~same)
+    elif on:
+        return None
+    row = db.execute(query.order_by(Run.created_at.desc()).limit(1)).first()
     if row is None:
         return None
     run, job = row
@@ -110,6 +114,7 @@ def _latest_run(db: Session, scenario_id: uuid.UUID) -> RunSummary | None:
         id=run.id,
         status=job.status,
         progress=job.progress,
+        data_version_id=run.data_version_id,
         package_version=run.package_version,
         created_at=run.created_at,
     )
@@ -145,6 +150,7 @@ def _item(
     dv = db.get(DataVersion, version.data_version_id)
     assert dv is not None
     body = ScenarioBody.model_validate(version.body)
+    active_id = active.id if active else None
     return {
         "id": scenario.id,
         "name": version.name,
@@ -156,7 +162,10 @@ def _item(
         "latest_version": scenario.latest_version,
         "data_version": _dv_ref(dv),
         "updated_at": scenario.updated_at,
-        "latest_run": _latest_run(db, scenario.id),
+        "latest_run": (latest := _latest_run(db, scenario.id, active_id, on=True)),
+        "latest_run_other_data": None
+        if latest
+        else _latest_run(db, scenario.id, active_id, on=False),
         "problems": areas.problems(body, active.id) if active and not scenario.is_baseline else [],
         "can_edit": can_edit(scenario, user),
     }
@@ -235,7 +244,7 @@ def validate_scenario(
         ]
         return ValidationOut(valid=False, errors=errors, problems=[])
     dv = db.scalar(select(DataVersion).where(DataVersion.active))
-    problems = _Areas(db).problems(parsed.body, dv.id) if dv else ["no data package imported yet"]
+    problems = _Areas(db).problems(parsed.body, dv.id) if dv else [msg("error.no_data")]
     return ValidationOut(valid=not problems, errors=[], problems=problems)
 
 
@@ -243,7 +252,7 @@ def _check_or_422(db: Session, body: ScenarioBody, dv: DataVersion) -> None:
     if problems := _Areas(db).problems(body, dv.id):
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_CONTENT,
-            {"message": "the scenario does not match the data", "problems": problems},
+            {"message": msg("error.scenario_mismatch"), "problems": problems},
         )
 
 
@@ -288,7 +297,7 @@ def get_version(
     get_visible(db, scenario_id, user)
     row = db.get(ScenarioVersion, (scenario_id, version))
     if row is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "version not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, msg("error.version_not_found"))
     return _version_out(db, row, _usernames(db))
 
 
@@ -303,7 +312,7 @@ def check_scenario(
     scenario = get_visible(db, scenario_id, user)
     dv = db.get(DataVersion, data_version_id) if data_version_id else _active_dv(db)
     if dv is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "data version not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, msg("error.data_version_not_found"))
     body = ScenarioBody.model_validate(_latest(db, scenario).body)
     problems = _Areas(db).problems(body, dv.id)
     return ValidationOut(valid=not problems, errors=[], problems=problems)
@@ -316,7 +325,7 @@ def update_scenario(
     """Save a new version (against the active data version); earlier versions stay."""
     scenario = get_visible(db, scenario_id, user)
     if not can_edit(scenario, user):
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "only the owner or an admin can edit")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, msg("error.only_owner_edit"))
     dv = _active_dv(db)
     _check_or_422(db, body.body, dv)
     scenario.latest_version += 1
@@ -380,7 +389,7 @@ def delete_scenario(
     """Soft-delete a scenario (runs keep it). ``hard=true`` deletes it only if it has no runs."""
     scenario = get_visible(db, scenario_id, user)
     if not can_edit(scenario, user):
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "only the owner or an admin can delete")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, msg("error.only_owner_delete"))
     if hard:
         runs = db.scalar(
             select(func.count()).select_from(Run).where(Run.scenario_id == scenario.id)
@@ -388,7 +397,7 @@ def delete_scenario(
         if runs:
             raise HTTPException(
                 status.HTTP_409_CONFLICT,
-                f"the scenario has {runs} run(s); it can only be deleted softly",
+                msg("error.hard_delete_has_runs", runs=runs),
             )
         db.execute(delete(ScenarioVersion).where(ScenarioVersion.scenario_id == scenario.id))
         db.delete(scenario)

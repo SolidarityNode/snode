@@ -19,7 +19,10 @@ export interface paths {
      *
      *     Throttled per username and per client address (ADR 0015): while delayed or locked the answer
      *     is a generic 429 with ``Retry-After``, whether or not the user exists, and the password is
-     *     not checked. Failures answer the same 401 for unknown users and wrong passwords.
+     *     not checked; a 429 is not counted and does not extend the delay or lock. Failures answer the
+     *     same 401 for unknown users and wrong passwords. The client address comes from a trusted
+     *     proxy's headers only (``SOLIDARITYNODE_TRUSTED_PROXIES``); when it is unknown, only the
+     *     per-username limit applies.
      */
     post: operations["login_auth_login_post"];
     delete?: never;
@@ -1462,7 +1465,7 @@ export interface components {
     };
     /**
      * RunSummary
-     * @description Status of a scenario's latest run.
+     * @description Status of one run of a scenario (an existing run: its id can always be opened).
      */
     RunSummary: {
       /**
@@ -1470,6 +1473,8 @@ export interface components {
        * Format: date-time
        */
       created_at: string;
+      /** Data Version Id */
+      data_version_id: number;
       /**
        * Id
        * Format: uuid
@@ -1555,7 +1560,10 @@ export interface components {
       id: string;
       /** Is Baseline */
       is_baseline: boolean;
+      /** @description Newest run on the active data version; null if there is none */
       latest_run: components["schemas"]["RunSummary"] | null;
+      /** @description Newest run on any other data version, only when there is no run on the active one (the list then says 'Latest run on data X') */
+      latest_run_other_data: components["schemas"]["RunSummary"] | null;
       /** Latest Version */
       latest_version: number;
       /** Name */
@@ -1600,7 +1608,10 @@ export interface components {
       id: string;
       /** Is Baseline */
       is_baseline: boolean;
+      /** @description Newest run on the active data version; null if there is none */
       latest_run: components["schemas"]["RunSummary"] | null;
+      /** @description Newest run on any other data version, only when there is no run on the active one (the list then says 'Latest run on data X') */
+      latest_run_other_data: components["schemas"]["RunSummary"] | null;
       /** Latest Version */
       latest_version: number;
       /** Name */

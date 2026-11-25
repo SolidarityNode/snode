@@ -1752,12 +1752,16 @@
         "type": "object"
       },
       "RunSummary": {
-        "description": "Status of a scenario's latest run.",
+        "description": "Status of one run of a scenario (an existing run: its id can always be opened).",
         "properties": {
           "created_at": {
             "format": "date-time",
             "title": "Created At",
             "type": "string"
+          },
+          "data_version_id": {
+            "title": "Data Version Id",
+            "type": "integer"
           },
           "id": {
             "format": "uuid",
@@ -1788,6 +1792,7 @@
           "id",
           "status",
           "progress",
+          "data_version_id",
           "package_version",
           "created_at"
         ],
@@ -1946,7 +1951,19 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Newest run on the active data version; null if there is none"
+          },
+          "latest_run_other_data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Newest run on any other data version, only when there is no run on the active one (the list then says 'Latest run on data X')"
           },
           "latest_version": {
             "title": "Latest Version",
@@ -2011,6 +2028,7 @@
           "data_version",
           "updated_at",
           "latest_run",
+          "latest_run_other_data",
           "problems",
           "can_edit"
         ],
@@ -2056,7 +2074,19 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Newest run on the active data version; null if there is none"
+          },
+          "latest_run_other_data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Newest run on any other data version, only when there is no run on the active one (the list then says 'Latest run on data X')"
           },
           "latest_version": {
             "title": "Latest Version",
@@ -2128,6 +2158,7 @@
           "data_version",
           "updated_at",
           "latest_run",
+          "latest_run_other_data",
           "problems",
           "can_edit",
           "current",
@@ -2621,7 +2652,7 @@
   "paths": {
     "/auth/login": {
       "post": {
-        "description": "Check credentials and set the session cookie (HttpOnly, SameSite=Strict).\n\nThrottled per username and per client address (ADR 0015): while delayed or locked the answer\nis a generic 429 with ``Retry-After``, whether or not the user exists, and the password is\nnot checked. Failures answer the same 401 for unknown users and wrong passwords.",
+        "description": "Check credentials and set the session cookie (HttpOnly, SameSite=Strict).\n\nThrottled per username and per client address (ADR 0015): while delayed or locked the answer\nis a generic 429 with ``Retry-After``, whether or not the user exists, and the password is\nnot checked; a 429 is not counted and does not extend the delay or lock. Failures answer the\nsame 401 for unknown users and wrong passwords. The client address comes from a trusted\nproxy's headers only (``SOLIDARITYNODE_TRUSTED_PROXIES``); when it is unknown, only the\nper-username limit applies.",
         "operationId": "login_auth_login_post",
         "requestBody": {
           "content": {

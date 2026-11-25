@@ -39,7 +39,8 @@ BACKEND_URL := http://127.0.0.1:$(BACKEND_HOST_PORT)
         lint lint-core lint-backend lint-frontend \
         test test-core test-backend test-frontend \
         fmt stop up down logs ps wait db-shell seed reset uat images licenses labels clean distclean \
-        test-db test-e2e e2e-setup import-package activate-version create-admin schemas
+        test-db test-e2e e2e-setup import-package activate-version create-admin schemas \
+        clear-login-locks
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -68,8 +69,8 @@ env: ## Create .env from .env.example if missing; warn about missing keys
 	@scripts/ensure-env.sh .env.example .env
 
 check-config: check-engine ## Validate backend settings in a one-off container (e.g. APP_ENV=production)
-	$(COMPOSE) run --rm --no-deps -e APP_ENV=$(APP_ENV) backend \
-	  python -c "from solidaritynode_backend.config import Settings; s = Settings(); print(f'configuration OK (APP_ENV={s.app_env})')"
+	@$(COMPOSE) run --rm --no-deps -e APP_ENV=$(APP_ENV) backend \
+	  python -m solidaritynode_backend.cli check-config
 
 setup-core:
 	cd core && $(UV) sync --locked
@@ -225,11 +226,16 @@ activate-version: check-engine ## Make an earlier imported data version active a
 	fi; \
 	$(COMPOSE) exec -T backend python -m solidaritynode_backend.cli activate-version $$args --yes
 
+clear-login-locks: check-engine ## Clear sign-in locks: USERNAME=<name>, or all when not set
+	$(COMPOSE) exec -T backend python -m solidaritynode_backend.cli clear-login-locks \
+	  $(if $(USERNAME),--username "$(USERNAME)",--all)
+
 create-admin: check-engine ## Create the first administrator interactively
 	$(COMPOSE) exec backend python -m solidaritynode_backend.cli create-admin
 
-schemas: ## Export the scenario JSON Schema and OpenAPI to docs/schemas; regenerate frontend API types
+schemas: ## Export the scenario JSON Schema, OpenAPI and message templates; regenerate frontend API types
 	cd backend && $(UV_RUN) python -m solidaritynode_backend.cli export-schemas ../docs/schemas
+	cp docs/schemas/messages.json frontend/src/api/messages.json
 	cd frontend && $(PNPM) run gen:api
 
 reset: check-engine ## DELETE the database and results volumes, restart, migrate and seed (asks unless FORCE=1)

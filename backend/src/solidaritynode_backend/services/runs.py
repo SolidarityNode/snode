@@ -38,6 +38,7 @@ from sqlalchemy.orm import Session
 
 from solidaritynode_backend.config import Settings
 from solidaritynode_backend.jobs import JobContext, PostgresJobRunner
+from solidaritynode_backend.messages import msg
 from solidaritynode_backend.orm import DataVersion, Job, Run, Scenario, ScenarioVersion
 from solidaritynode_backend.schemas.scenario import ScenarioBody
 from solidaritynode_backend.services.samples import (
@@ -182,15 +183,11 @@ def create_run(
             try:
                 verify_samples(existing.samples_path, existing.samples_sha256, str(existing.id))
             except SamplesIntegrityError as exc:
-                refused.append(f"run {existing.id}: {exc}")
+                refused.append(msg("run.reuse_refused_item", run=existing.id, detail=exc))
                 continue
             return CreatedRun(existing, reused=True)
         if refused:
-            reuse_refused = (
-                "An earlier run with the same inputs was not reused because its results file "
-                f"failed the integrity check ({'; '.join(refused)}). This run computes the "
-                "results again."
-            )
+            reuse_refused = msg("run.reuse_refused", details="; ".join(refused))
             log.warning("%s", reuse_refused)
     run_id = uuid.uuid4()
     # Estimate the samples file before the run starts; a run above the limit is still queued, and
@@ -265,15 +262,17 @@ def execute_run(
         code_version, model_version = run.code_version, run.model_version
     if code_version != settings.git_commit:
         raise RuntimeError(
-            f"This run was queued for code {code_version}, but the platform now runs code "
-            f"{settings.git_commit} (it was upgraded or rebuilt before the run started). The run "
-            "cannot be reproduced as recorded. Start the run again."
+            msg("run.queued_other_code", queued=code_version, current=settings.git_commit)
         )
     model = get_registry().get(model_id)
     if model.version != model_version:
         raise RuntimeError(
-            f"This run was queued for model {model_id} {model_version}, but the platform now "
-            f"has {model.version}. Start the run again."
+            msg(
+                "run.queued_other_model",
+                model=model_id,
+                queued=model_version,
+                current=model.version,
+            )
         )
     delay = float(config.get("step_delay_s", 0))
 

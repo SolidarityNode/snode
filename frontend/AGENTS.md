@@ -12,5 +12,6 @@ Explanations and examples: [docs/conventions/frontend.md](../docs/conventions/fr
 - Visibly mark results from the diagnostic model, units with an edge-effect warning, and features of `estimated` or `open_data` quality.
 - Accessibility: label every control, support keyboard navigation, use colour scales readable by colour-blind users, and give text alternatives for map information where practical.
 - Route all user-facing text through translation files (Greek and English). No hard-coded strings in components.
+- Use the Greek terms of `docs/i18n/glossary.md`; add a missing term there first. Show server texts through `serverText` (translated by code, `server.<code>` keys).
 - Use the map library and other major libraries only as decided in ADRs (`docs/adr/`).
 - Tests: component tests with Vitest and Testing Library; main user flows with Playwright.

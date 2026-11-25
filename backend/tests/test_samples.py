@@ -43,7 +43,7 @@ def test_layout_metadata_and_checksum(as_admin, as_analyst, worker, settings) ->
     meta = {k.decode(): v.decode() for k, v in (pq.read_schema(path).metadata or {}).items()}
     assert meta["solidaritynode.run_id"] == run["id"]
     assert meta["solidaritynode.model_id"] == "diagnostic-v0"
-    assert meta["solidaritynode.model_version"] == run["model_version"] == "0.2.0"
+    assert meta["solidaritynode.model_version"] == run["model_version"] == "0.2.1"
     assert meta["solidaritynode.package_id"] == run["package_id"]
     assert meta["solidaritynode.package_version"] == "1.0.0"
     assert meta["solidaritynode.data_version_id"] == str(run["data_version_id"])
