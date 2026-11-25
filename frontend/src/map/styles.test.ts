@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { intervalText } from "../components/labels";
+import { intervalLabel, intervalText } from "../components/labels";
 import en from "../i18n/en.json";
-import type { MessageKey } from "../i18n/context";
+import { format, type MessageKey } from "../i18n/context";
 import {
   PROBABILITY_BREAKS,
   SEQUENTIAL,
@@ -13,7 +13,7 @@ import {
   widthScale,
 } from "./styles";
 
-const t = (key: MessageKey) => en[key];
+const t = (key: MessageKey, vars?: Record<string, string | number>) => format(en[key], vars);
 
 describe("colour scales", () => {
   it("uses a fixed 0–1 scale for probabilities, whatever the values", () => {
@@ -54,5 +54,14 @@ describe("intervalText", () => {
   it("says when a value is deterministic or missing", () => {
     expect(intervalText(t, "en", 3, 3, 3, "count")).toBe("3 count (deterministic, no uncertainty)");
     expect(intervalText(t, "en", null, null, null)).toBe("not available");
+  });
+});
+
+describe("intervalLabel", () => {
+  it("names the interval from the run's quantile levels", () => {
+    expect(intervalLabel(t, "en", [0.05, 0.95])).toBe("90 % interval");
+    expect(intervalLabel(t, "en", [0.25, 0.75])).toBe("50 % interval");
+    expect(intervalLabel(t, "en", [0.1, 0.95])).toBe("10–95 % quantile interval");
+    expect(intervalLabel(t, "en", null)).toBe("interval (levels not recorded)");
   });
 });

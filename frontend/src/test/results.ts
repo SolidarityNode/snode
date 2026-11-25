@@ -53,6 +53,7 @@ export function run(id: string, indicators: ReturnType<typeof indicator>[], extr
     edge_effect_units: [],
     indicators,
     is_baseline: false,
+    interval_quantiles: [0.05, 0.95],
     ...extra,
   };
 }

@@ -12,7 +12,7 @@ import { RunStatus } from "../components/RunStatus";
 import { ResultSelectors } from "../components/ResultSelectors";
 import { defaultSelection, type Selection } from "../components/selection";
 import { ScaleLegend } from "../components/ScaleLegend";
-import { intervalText, isProbability, label, num } from "../components/labels";
+import { intervalLabel, intervalText, isProbability, label, num } from "../components/labels";
 import { useT } from "../i18n/context";
 import { MapView, type MapLayer } from "../map/MapView";
 import {
@@ -135,11 +135,13 @@ export function RunPage() {
   );
   const indicator = run?.indicators.find((i) => i.id === selection?.indicator);
   const unitOfMeasure = indicator?.unit ?? "";
+  const interval = intervalLabel(t, lang, run?.interval_quantiles);
+  const statistic = t("result.statistic", { interval });
   const probability = isProbability(indicator);
   const scale = useMemo(
     () =>
       valueScale(
-        visible.map((r) => r.value).filter((v): v is number => v !== null),
+        visible.map((r) => r.median).filter((v): v is number => v !== null),
         probability,
       ),
     [visible, probability],
@@ -166,9 +168,9 @@ export function RunPage() {
     const tooltip = (f: Feature) => {
       const row = byUnit.get(String(f.id));
       if (!row) return `${String(f.id)}: ${t("results.not_reported")}`;
-      const text = intervalText(t, lang, row.value, row.low, row.high, unitOfMeasure);
+      const text = intervalText(t, lang, row.median, row.low, row.high, unitOfMeasure);
       const warn = row.edge_effect_warning ? ` ⚠ ${t("results.edge_effect")}` : "";
-      return `${row.unit_name}: ${text}${warn}`;
+      return `${row.unit_name}, ${statistic}: ${text}${warn}`;
     };
     const layer = (id: string, fill: (r: Row) => string, tip = tooltip): MapLayer => ({
       id,
@@ -183,7 +185,7 @@ export function RunPage() {
       ? [{ id: "quality", data: units, style: qualityOverlay, interactive: false }]
       : [];
     return {
-      values: [layer("results", (r) => scaleColour(scale, r.value)), ...qualityLayer],
+      values: [layer("results", (r) => scaleColour(scale, r.median)), ...qualityLayer],
       widths: [
         layer(
           "widths",
@@ -193,13 +195,13 @@ export function RunPage() {
             const width = row ? intervalWidth(row.low, row.high) : null;
             return width === null
               ? tooltip(f)
-              : `${tooltip(f)} · ${t("results.width", { value: num(width, lang) })}`;
+              : `${tooltip(f)} · ${t("results.width", { interval, value: num(width, lang) })}`;
           },
         ),
         ...qualityLayer,
       ],
     };
-  }, [units, visible, scale, wScale, options.quality, unitOfMeasure, lang, t]);
+  }, [units, visible, scale, wScale, options.quality, unitOfMeasure, interval, statistic, lang, t]);
 
   if (!run) {
     return (
@@ -283,7 +285,7 @@ export function RunPage() {
             </div>
             {options.uncertainty && (
               <div data-testid="uncertainty-map">
-                <h3>{t("results.uncertainty_title")}</h3>
+                <h3>{t("results.uncertainty_title", { interval })}</h3>
                 <MapView
                   label={t("results.uncertainty_map_label")}
                   layers={mapLayers.widths}
@@ -292,6 +294,7 @@ export function RunPage() {
                 <ScaleLegend
                   testId="uncertainty-legend"
                   title={t("legend.uncertainty_title", {
+                    interval,
                     indicator: label(t, "indicator", selection.indicator),
                     unit: unitOfMeasure,
                   })}
@@ -304,7 +307,7 @@ export function RunPage() {
               </div>
             )}
           </div>
-          <p className="muted">{t("legend.central_value_note")}</p>
+          <p className="muted">{t("legend.central_value_note", { interval })}</p>
           {!options.quality && lowQuality > 0 && (
             <p className="muted" data-testid="quality-hidden">
               {t("results.quality_hidden", { count: lowQuality })}
@@ -321,7 +324,7 @@ export function RunPage() {
             <thead>
               <tr>
                 <th scope="col">{t("results.unit")}</th>
-                <th scope="col">{t("results.value")}</th>
+                <th scope="col">{t("results.value", { interval })}</th>
                 <th scope="col">{t("results.before")}</th>
                 <th scope="col">{t("results.changed")}</th>
                 <th scope="col">{t("results.warnings")}</th>
@@ -332,11 +335,17 @@ export function RunPage() {
                 <tr key={r.unit_id} data-unit={r.unit_id}>
                   <th scope="row">{r.unit_name}</th>
                   <td>
-                    <IntervalValue value={r.value} low={r.low} high={r.high} unit={unitOfMeasure} />
+                    <IntervalValue
+                      value={r.median}
+                      low={r.low}
+                      high={r.high}
+                      unit={unitOfMeasure}
+                      interval={interval}
+                    />
                   </td>
                   <td>{r.baseline === null ? "—" : num(r.baseline, lang)}</td>
                   <td>
-                    {r.baseline !== null && r.baseline !== r.value ? (
+                    {r.baseline !== null && r.baseline !== r.median ? (
                       <strong data-testid="changed">{t("results.yes_changed")}</strong>
                     ) : (
                       t("results.no")

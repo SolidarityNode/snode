@@ -754,7 +754,10 @@ export interface components {
     CompareRow: {
       a: components["schemas"]["IntervalOut"];
       b: components["schemas"]["IntervalOut"];
-      /** Difference */
+      /**
+       * Difference
+       * @description Difference of the medians, A − B
+       */
       difference: number | null;
       /** Edge Effect Warning */
       edge_effect_warning: boolean;
@@ -940,15 +943,17 @@ export interface components {
     };
     /**
      * IntervalOut
-     * @description A value with its interval.
+     * @description Summary statistics of one value: mean, median and interval bounds.
      */
     IntervalOut: {
       /** High */
       high: number | null;
       /** Low */
       low: number | null;
-      /** Value */
-      value: number | null;
+      /** Mean */
+      mean: number | null;
+      /** Median */
+      median: number | null;
     };
     /**
      * LayerDiff
@@ -1057,7 +1062,10 @@ export interface components {
     };
     /**
      * ResultRow
-     * @description Summary value of one indicator for ``unit × group × service × time``.
+     * @description Summary statistics of one indicator for ``unit × group × service × time`` (ADR 0017).
+     *
+     *     ``median`` is the central value shown on maps and tables; ``low`` and ``high`` are the
+     *     quantiles given by the run's ``interval_quantiles``; ``mean`` is stored and exported.
      */
     ResultRow: {
       /** Baseline */
@@ -1072,6 +1080,10 @@ export interface components {
       indicator: string;
       /** Low */
       low: number | null;
+      /** Mean */
+      mean: number | null;
+      /** Median */
+      median: number | null;
       /** Service Id */
       service_id: string;
       /** Time Label */
@@ -1080,8 +1092,6 @@ export interface components {
       unit_id: string;
       /** Unit Name */
       unit_name: string;
-      /** Value */
-      value: number | null;
     };
     /**
      * RevalidationOut
@@ -1174,6 +1184,11 @@ export interface components {
       indicators: components["schemas"]["IndicatorOut"][];
       /** Input Hash */
       input_hash: string;
+      /**
+       * Interval Quantiles
+       * @description Quantile levels of every result's low and high bounds (for example [0.05, 0.95], a 90 % interval); null for runs recorded before they were stored.
+       */
+      interval_quantiles?: number[] | null;
       /** Is Baseline */
       is_baseline: boolean;
       /** Model Id */

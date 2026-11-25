@@ -26,7 +26,8 @@ function result(unit: string, value: number, low: number, high: number) {
     service_id: "S1",
     time_label: "static",
     indicator: "risk",
-    value,
+    mean: value,
+    median: value,
     low,
     high,
     baseline: null,
@@ -51,10 +52,20 @@ describe("RunPage results map", () => {
     renderWithSession(<RunPage />, { path: "/runs/r1", route: "/runs/:runId" });
     expect(await screen.findByText("0.42 (0.31–0.55)")).toBeInTheDocument();
     expect(screen.getByTestId("value-legend")).toHaveTextContent(
-      "risk: probability (fixed scale 0–1)",
+      "risk: median probability (fixed scale 0–1)",
     );
     const maps = recorder.current;
     if (!maps) throw new Error("no recorder");
+    expect(screen.getByRole("columnheader", { name: "Median (90 % interval)" })).toBeVisible();
+    expect(screen.getByText(/Colours show the median; the 90 % interval/)).toBeVisible();
+    expect(
+      maps.layers(MAP)[0]?.tooltip?.({
+        type: "Feature",
+        id: "U1",
+        properties: {},
+        geometry: { type: "Point", coordinates: [0, 0] },
+      }),
+    ).toBe("Unit U1, median (90 % interval): 0.42 (0.31–0.55)");
 
     // Defaults: no uncertainty map, no quality layer; the table still marks quality in words.
     expect(screen.queryByTestId("uncertainty-map")).not.toBeInTheDocument();

@@ -23,8 +23,8 @@ function row(unit: string, a: number, b: number) {
     group_id: "G1",
     service_id: "S1",
     indicator: "x",
-    a: { value: a, low: a - 0.5, high: a + 0.5 },
-    b: { value: b, low: b - 1, high: b + 1 },
+    a: { mean: a, median: a, low: a - 0.5, high: a + 0.5 },
+    b: { mean: b, median: b, low: b - 1, high: b + 1 },
     difference: a - b,
     edge_effect_warning: false,
   };
@@ -74,8 +74,20 @@ describe("ComparePage", () => {
       expect(maps.fill("A: Scenario a", "U2")).toBe(SEQUENTIAL[0]);
       expect(maps.fill("B: Scenario b", "U2")).toBe(SEQUENTIAL[4]);
       expect(within(legends[0] as HTMLElement).getByText("> 8.2")).toBeInTheDocument();
-      // The table shows every value with its interval.
+      // The table shows every median with its interval, and names the statistic.
       expect(screen.getAllByText("10 min (9–11)")).toHaveLength(1);
+      expect(screen.getByRole("columnheader", { name: "A: median (90 % interval)" })).toBeVisible();
+      expect(screen.getByRole("columnheader", { name: "B: median (90 % interval)" })).toBeVisible();
+      expect(
+        screen.getByRole("columnheader", { name: "Difference of medians A − B" }),
+      ).toBeVisible();
+      const tooltip = maps.layers("A: Scenario a")[0]?.tooltip?.({
+        type: "Feature",
+        id: "U2",
+        properties: {},
+        geometry: { type: "Point", coordinates: [0, 0] },
+      });
+      expect(tooltip).toBe("Unit U2, median (90 % interval): 1 min (0.5–1.5)");
     },
   );
 
@@ -83,7 +95,7 @@ describe("ComparePage", () => {
     stub("probability", false);
     show();
     const legend = await screen.findByTestId("shared-legend");
-    expect(legend).toHaveTextContent("probability (fixed scale 0–1)");
+    expect(legend).toHaveTextContent("median probability (fixed scale 0–1)");
     expect(within(legend).getByText("≤ 0.2")).toBeInTheDocument();
     expect(within(legend).getByText("> 0.8")).toBeInTheDocument();
   });

@@ -12,7 +12,7 @@ import { MapOptions, type MapOptionsValue } from "../components/MapOptions";
 import { ResultSelectors } from "../components/ResultSelectors";
 import { ScaleLegend } from "../components/ScaleLegend";
 import { defaultSelection, type Selection } from "../components/selection";
-import { intervalText, isProbability, label, num } from "../components/labels";
+import { intervalLabel, intervalText, isProbability, label, num } from "../components/labels";
 import { useT } from "../i18n/context";
 import { MapView, type MapLayer } from "../map/MapView";
 import {
@@ -76,12 +76,25 @@ export function ComparePage() {
 
   const indicator = data?.run_a.indicators.find((i) => i.id === selection?.indicator);
   const unit = indicator?.unit ?? "";
+  // Interval names per run; the shared one only when both runs use the same quantile levels.
+  const { interval, intervalA, intervalB, statistic } = useMemo(() => {
+    const levelsA = data?.run_a.interval_quantiles;
+    const levelsB = data?.run_b.interval_quantiles;
+    const same = JSON.stringify(levelsA) === JSON.stringify(levelsB);
+    const shared = intervalLabel(t, lang, same ? levelsA : null);
+    return {
+      interval: shared,
+      intervalA: intervalLabel(t, lang, levelsA),
+      intervalB: intervalLabel(t, lang, levelsB),
+      statistic: t("result.statistic", { interval: shared }),
+    };
+  }, [data, lang, t]);
   const probability = isProbability(indicator);
   // One scale for both maps, built from the values of A and B together (and one legend).
   const scale = useMemo(
     () =>
       valueScale(
-        rows.flatMap((r) => [r.a.value, r.b.value]).filter((v): v is number => v !== null),
+        rows.flatMap((r) => [r.a.median, r.b.median]).filter((v): v is number => v !== null),
         probability,
       ),
     [rows, probability],
@@ -113,7 +126,7 @@ export function ComparePage() {
         },
         tooltip: (f: Feature) => {
           const r = byUnit.get(String(f.id));
-          return r ? `${r.unit_name}: ${tip(r)}` : `${String(f.id)}: ${t("results.not_reported")}`;
+          return r ? `${r.unit_name}, ${tip(r)}` : `${String(f.id)}: ${t("results.not_reported")}`;
         },
       },
       ...quality,
@@ -122,8 +135,9 @@ export function ComparePage() {
       fill: (r: Row) =>
         options.uncertainty
           ? scaleColour(wScale, intervalWidth(pick(r).low, pick(r).high))
-          : scaleColour(scale, pick(r).value),
-      tip: (r: Row) => intervalText(t, lang, pick(r).value, pick(r).low, pick(r).high, unit),
+          : scaleColour(scale, pick(r).median),
+      tip: (r: Row) =>
+        `${statistic}: ${intervalText(t, lang, pick(r).median, pick(r).low, pick(r).high, unit)}`,
     });
     const a = side((r) => r.a);
     const b = side((r) => r.b);
@@ -133,10 +147,10 @@ export function ComparePage() {
       diff: make(
         "diff",
         (r) => (r.difference === null ? "" : divergingColour(r.difference, maxAbs)),
-        (r) => num(r.difference, lang),
+        (r) => `${t("compare.col_diff")}: ${num(r.difference, lang)}`,
       ),
     };
-  }, [units, rows, scale, wScale, maxAbs, options, unit, lang, t]);
+  }, [units, rows, scale, wScale, maxAbs, options, unit, statistic, lang, t]);
 
   if (!data || !catalog || !selection) {
     return (
@@ -204,7 +218,7 @@ export function ComparePage() {
         testId="shared-legend"
         title={
           options.uncertainty
-            ? t("compare.legend_shared_width", { indicator: indicatorName, unit })
+            ? t("compare.legend_shared_width", { indicator: indicatorName, unit, interval })
             : probability
               ? t("compare.legend_shared_probability", { indicator: indicatorName })
               : t("compare.legend_shared", { indicator: indicatorName, unit })
@@ -212,7 +226,9 @@ export function ComparePage() {
         scale={options.uncertainty ? wScale : scale}
         quality={options.quality}
       />
-      {!options.uncertainty && <p className="muted">{t("legend.central_value_note")}</p>}
+      {!options.uncertainty && (
+        <p className="muted">{t("legend.central_value_note", { interval })}</p>
+      )}
       <Legend
         title={t("compare.legend_diff", { unit })}
         items={[
@@ -239,8 +255,8 @@ export function ComparePage() {
         <thead>
           <tr>
             <th scope="col">{t("results.unit")}</th>
-            <th scope="col">{t("compare.col_a")}</th>
-            <th scope="col">{t("compare.col_b")}</th>
+            <th scope="col">{t("compare.col_a", { interval: intervalA })}</th>
+            <th scope="col">{t("compare.col_b", { interval: intervalB })}</th>
             <th scope="col">{t("compare.col_diff")}</th>
             <th scope="col">{t("results.warnings")}</th>
           </tr>
@@ -250,10 +266,22 @@ export function ComparePage() {
             <tr key={r.unit_id}>
               <th scope="row">{r.unit_name}</th>
               <td>
-                <IntervalValue value={r.a.value} low={r.a.low} high={r.a.high} unit={unit} />
+                <IntervalValue
+                  value={r.a.median}
+                  low={r.a.low}
+                  high={r.a.high}
+                  unit={unit}
+                  interval={intervalA}
+                />
               </td>
               <td>
-                <IntervalValue value={r.b.value} low={r.b.low} high={r.b.high} unit={unit} />
+                <IntervalValue
+                  value={r.b.median}
+                  low={r.b.low}
+                  high={r.b.high}
+                  unit={unit}
+                  interval={intervalB}
+                />
               </td>
               <td>{num(r.difference, lang)}</td>
               <td>{r.edge_effect_warning ? `⚠ ${t("results.edge_effect")}` : ""}</td>

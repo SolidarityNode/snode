@@ -38,3 +38,22 @@ export function intervalText(
   }
   return `${num(value, lang)}${suffix} (${num(low, lang)}–${num(high, lang)})`;
 }
+
+/**
+ * Name of a run's interval from its quantile levels (ADR 0017): `[0.05, 0.95]` → "90 % interval",
+ * asymmetric levels → "10–95 % quantile interval", missing levels → a generic name.
+ */
+export function intervalLabel(
+  t: Translate,
+  lang: string,
+  levels: readonly number[] | null | undefined,
+): string {
+  const [low, high] = levels ?? [];
+  if (levels?.length !== 2 || low === undefined || high === undefined) {
+    return t("result.interval_unknown");
+  }
+  if (Math.abs(low + high - 1) < 1e-9) {
+    return t("result.interval_central", { p: num((high - low) * 100, lang) });
+  }
+  return t("result.interval_quantiles", { low: num(low * 100, lang), high: num(high * 100, lang) });
+}
