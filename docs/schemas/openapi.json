@@ -477,6 +477,59 @@
         "title": "DataVersionRef",
         "type": "object"
       },
+      "EdgeChangeIn": {
+        "additionalProperties": false,
+        "description": "Change the travel time or speed of one edge for one mode (Paper 1 \u00a713, \u00a715.7).\n\nA placeholder: checked and recorded, not applied yet.",
+        "properties": {
+          "amount": {
+            "description": "Signed change",
+            "title": "Amount",
+            "type": "number"
+          },
+          "change": {
+            "description": "absolute: minutes (travel time) or km/h (speed); relative: percent",
+            "enum": [
+              "absolute",
+              "relative"
+            ],
+            "title": "Change",
+            "type": "string"
+          },
+          "edge_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Edge Id",
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "walk",
+              "car",
+              "public_transport"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "quantity": {
+            "enum": [
+              "travel_time",
+              "speed"
+            ],
+            "title": "Quantity",
+            "type": "string"
+          }
+        },
+        "required": [
+          "edge_id",
+          "mode",
+          "quantity",
+          "change",
+          "amount"
+        ],
+        "title": "EdgeChangeIn",
+        "type": "object"
+      },
       "FieldChange": {
         "description": "A feature whose attributes or geometry changed.",
         "properties": {
@@ -810,6 +863,28 @@
         "title": "LoginIn",
         "type": "object"
       },
+      "NetworkChangesIn": {
+        "additionalProperties": false,
+        "description": "Network interventions: edge changes and new edges (placeholders, recorded only).",
+        "properties": {
+          "edge_changes": {
+            "items": {
+              "$ref": "#/components/schemas/EdgeChangeIn"
+            },
+            "title": "Edge Changes",
+            "type": "array"
+          },
+          "new_edges": {
+            "items": {
+              "$ref": "#/components/schemas/NewEdgeIn"
+            },
+            "title": "New Edges",
+            "type": "array"
+          }
+        },
+        "title": "NetworkChangesIn",
+        "type": "object"
+      },
       "NetworkClosureIn": {
         "additionalProperties": false,
         "description": "Network edges closed for the given modes (Paper 3 \u00a79).",
@@ -841,6 +916,63 @@
           "modes"
         ],
         "title": "NetworkClosureIn",
+        "type": "object"
+      },
+      "NewEdgeIn": {
+        "additionalProperties": false,
+        "description": "A new network edge between two existing nodes (Paper 1 \u00a713, \u00a715.7; placeholder).",
+        "properties": {
+          "closable": {
+            "default": true,
+            "description": "Whether disruptions may close it",
+            "title": "Closable",
+            "type": "boolean"
+          },
+          "edge_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Edge Id",
+            "type": "string"
+          },
+          "from_node_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "From Node Id",
+            "type": "string"
+          },
+          "to_node_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "To Node Id",
+            "type": "string"
+          },
+          "travel_time_min": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Minutes to traverse the edge per mode (>= 0)",
+            "minProperties": 1,
+            "propertyNames": {
+              "enum": [
+                "walk",
+                "car",
+                "public_transport"
+              ]
+            },
+            "title": "Travel Time Min",
+            "type": "object"
+          }
+        },
+        "required": [
+          "edge_id",
+          "from_node_id",
+          "to_node_id",
+          "travel_time_min"
+        ],
+        "title": "NewEdgeIn",
         "type": "object"
       },
       "NewFacilityIn": {
@@ -890,6 +1022,48 @@
           "services"
         ],
         "title": "NewFacilityIn",
+        "type": "object"
+      },
+      "PopulationChangeIn": {
+        "additionalProperties": false,
+        "description": "Change the population of one group in one unit (Paper 1 \u00a713, \u00a715.7; placeholder).",
+        "properties": {
+          "amount": {
+            "description": "Signed change",
+            "title": "Amount",
+            "type": "number"
+          },
+          "change": {
+            "description": "absolute: persons; relative: percent of the baseline count",
+            "enum": [
+              "absolute",
+              "relative"
+            ],
+            "title": "Change",
+            "type": "string"
+          },
+          "group_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Group Id",
+            "type": "string"
+          },
+          "unit_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Unit Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "unit_id",
+          "group_id",
+          "change",
+          "amount"
+        ],
+        "title": "PopulationChangeIn",
         "type": "object"
       },
       "PreviewIn": {
@@ -1571,7 +1745,7 @@
       },
       "ScenarioBody": {
         "additionalProperties": false,
-        "description": "The overlay of one scenario version (Spec 00 \u00a73; ADR 0016).\n\n``reference_level`` is the reference-scenario flag: ``null`` for an ordinary scenario, or\nthe standardised level it stands for (OQ-16; how reference scenarios are constructed is\nopen). Disruption scenarios (any severity or closed edge) must state a ``rationing`` case\n(OQ-24).",
+        "description": "The overlay of one scenario version (Spec 00 \u00a73; ADR 0016).\n\n``reference_level`` is the reference-scenario flag: ``null`` for an ordinary scenario, or\nthe standardised level it stands for (OQ-16; how reference scenarios are constructed is\nopen). Disruption scenarios (any severity or closed edge) must state a ``rationing`` case\n(OQ-24). ``network_changes`` and ``population_changes`` are placeholders: validated against\nthe data and recorded on runs, without behaviour yet. Order of application: interventions,\nthen disruptions (ADR 0016; OQ-30, proposed).",
         "properties": {
           "capacity_changes": {
             "items": {
@@ -1590,11 +1764,21 @@
               }
             ]
           },
+          "network_changes": {
+            "$ref": "#/components/schemas/NetworkChangesIn"
+          },
           "new_facilities": {
             "items": {
               "$ref": "#/components/schemas/NewFacilityIn"
             },
             "title": "New Facilities",
+            "type": "array"
+          },
+          "population_changes": {
+            "items": {
+              "$ref": "#/components/schemas/PopulationChangeIn"
+            },
+            "title": "Population Changes",
             "type": "array"
           },
           "rationing": {

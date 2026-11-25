@@ -129,3 +129,157 @@ def test_list_filters_by_owner_and_visibility(as_admin, as_analyst) -> None:  # 
     shared = as_analyst.get("/scenarios", params={"visibility": "shared"}).json()
     assert mine["id"] not in {s["id"] for s in shared}
     assert any(s["is_baseline"] for s in shared)
+
+
+# --- Network and population placeholders (ADR 0016) -------------------------------------------
+
+PLACEHOLDERS = {
+    "name": "Placeholders",
+    "visibility": "shared",
+    "body": {
+        "network_changes": {
+            "edge_changes": [
+                {
+                    "edge_id": "E01",
+                    "mode": "walk",
+                    "quantity": "travel_time",
+                    "change": "relative",
+                    "amount": -20,
+                }
+            ],
+            "new_edges": [
+                {
+                    "edge_id": "E-NEW",
+                    "from_node_id": "N-A1",
+                    "to_node_id": "N-A5",
+                    "travel_time_min": {"walk": 10},
+                }
+            ],
+        },
+        "population_changes": [
+            {"unit_id": "A1", "group_id": "G-OLD", "change": "absolute", "amount": 10}
+        ],
+    },
+}
+
+
+def _net(**fields: object) -> dict[str, object]:
+    return {"network_changes": fields}
+
+
+EDGE_CHANGE = {"edge_id": "E01", "mode": "walk", "quantity": "speed", "change": "relative"}
+
+
+@pytest.mark.parametrize(
+    ("body", "message"),
+    [
+        (_net(edge_changes=[{**EDGE_CHANGE, "amount": -100}]), "above -100"),
+        (_net(edge_changes=[{**EDGE_CHANGE, "quantity": "width", "amount": 1}]), "quantity"),
+        (_net(edge_changes=[{**EDGE_CHANGE, "amount": 1}, {**EDGE_CHANGE, "amount": 2}]), "twice"),
+        (
+            _net(
+                new_edges=[
+                    {
+                        "edge_id": "X",
+                        "from_node_id": "N-A1",
+                        "to_node_id": "N-A1",
+                        "travel_time_min": {"walk": 1},
+                    }
+                ]
+            ),
+            "must differ",
+        ),
+        (
+            _net(
+                new_edges=[
+                    {
+                        "edge_id": "X",
+                        "from_node_id": "N-A1",
+                        "to_node_id": "N-A2",
+                        "travel_time_min": {},
+                    }
+                ]
+            ),
+            "travel_time_min",
+        ),
+        (
+            _net(
+                new_edges=[
+                    {
+                        "edge_id": "X",
+                        "from_node_id": "N-A1",
+                        "to_node_id": "N-A2",
+                        "travel_time_min": {"walk": -1},
+                    }
+                ]
+            ),
+            "must be >= 0",
+        ),
+        (
+            {
+                "population_changes": [
+                    {
+                        "unit_id": "A1",
+                        "group_id": "G-OLD",
+                        "change": "relative",
+                        "amount": float("inf"),
+                    }
+                ]
+            },
+            "finite",
+        ),
+        (
+            {
+                "population_changes": [
+                    {"unit_id": "A1", "group_id": "G-OLD", "change": "absolute", "amount": 1},
+                    {"unit_id": "A1", "group_id": "G-OLD", "change": "relative", "amount": 5},
+                ]
+            },
+            "changed twice",
+        ),
+    ],
+)
+def test_placeholder_schema_rules(body: dict[str, object], message: str) -> None:
+    with pytest.raises(ValidationError, match=message):
+        ScenarioBody.model_validate(body)
+
+
+def test_placeholders_map_to_core_and_stay_schema_1_0() -> None:
+    body = ScenarioBody.model_validate(PLACEHOLDERS["body"])
+    assert body.schema_version == "1.0"
+    assert body.is_disruption is False  # interventions only
+    core = body.to_core("s", "s")
+    kinds = [type(i).__name__ for i in core.interventions]
+    assert kinds == ["EdgeChange", "NewEdge", "PopulationChange"]
+    assert ScenarioBody().model_dump()["network_changes"] == {"edge_changes": [], "new_edges": []}
+    schema = json.loads(SCHEMA_FILE.read_text())
+    assert {"network_changes", "population_changes"} <= set(schema["properties"])
+
+
+def test_placeholder_references_are_checked_and_recorded_on_runs(
+    as_admin, as_analyst, worker
+) -> None:  # type: ignore[no-untyped-def]
+    import_version(as_admin, "1.0.0")
+    worker.run_until_idle()
+    bad = {
+        **PLACEHOLDERS,
+        "body": {
+            "population_changes": [
+                {"unit_id": "Z9", "group_id": "G-OLD", "change": "absolute", "amount": 1}
+            ]
+        },
+    }
+    assert as_analyst.post("/scenarios/validate", json=bad).json()["problems"] == [
+        "unit Z9: missing in data 1.0.0"
+    ]
+    created = as_analyst.post("/scenarios", json=PLACEHOLDERS)
+    assert created.status_code == 201, created.text
+    run = as_analyst.post("/runs", json={"scenario_id": created.json()["id"]}).json()
+    worker.run_until_idle()
+    done = as_analyst.get(f"/runs/{run['id']}").json()
+    assert done["status"] == "succeeded"
+    assert done["diagnostics"]["recorded_only"] == [
+        "edge E01 walk travel_time -20 % (recorded only)",
+        "new edge E-NEW N-A1-N-A5 (walk 10 min) (recorded only)",
+        "unit A1 group G-OLD population +10 persons (recorded only)",
+    ]

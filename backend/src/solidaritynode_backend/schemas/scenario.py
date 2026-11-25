@@ -1,8 +1,11 @@
 """Scenario overlay JSON (ADR 0016, accepted for v0.1, to be revisited).
 
 A scenario is a set of **changes relative to the baseline** (Spec 00 §3): capacity changes
-(absolute or percent), new facilities, facility disruption severities ``DS ∈ [0, 1]`` (Paper 3),
-closed network edges, the rationing case (OQ-24) and the reference-scenario flag (OQ-16).
+(absolute or percent), new facilities, network changes (travel time or speed per edge and mode,
+new edges) and population changes (Paper 1 §13, §15.7; placeholders, recorded only), facility
+disruption severities ``DS ∈ [0, 1]`` (Paper 3), closed network edges, the rationing case
+(OQ-24) and the reference-scenario flag (OQ-16). Interventions are applied before disruptions
+(ADR 0016; OQ-30, proposed).
 Features are referred to by their stable ids from the data package (ADR 0013).
 
 The JSON Schema of :class:`ScenarioBody` is exported to ``docs/schemas/scenario.schema.json``
@@ -20,10 +23,17 @@ from solidaritynode_core.model import (
     CapacityChange,
     CapacityChangeMode,
     CapacityInputs,
+    ChangeMode,
+    EdgeChange,
+    EdgeQuantity,
     Facility,
     FacilityId,
+    GroupId,
+    Intervention,
     NetworkDisruption,
+    NewEdge,
     NewFacility,
+    PopulationChange,
     Rationing,
     ReferenceScenarioLevel,
     Scenario,
@@ -31,13 +41,18 @@ from solidaritynode_core.model import (
     ScenarioKind,
     ServiceId,
     TransportMode,
+    UnitId,
 )
 
 __all__ = [
     "SCENARIO_SCHEMA_VERSION",
     "CapacityChangeIn",
+    "EdgeChangeIn",
+    "NetworkChangesIn",
     "NetworkClosureIn",
+    "NewEdgeIn",
     "NewFacilityIn",
+    "PopulationChangeIn",
     "ScenarioBody",
     "ServiceCapacityIn",
     "SeverityIn",
@@ -84,6 +99,54 @@ class NewFacilityIn(_Strict):
     services: list[ServiceCapacityIn] = Field(min_length=1)
 
 
+Mode = Literal["walk", "car", "public_transport"]
+
+
+class EdgeChangeIn(_Strict):
+    """Change the travel time or speed of one edge for one mode (Paper 1 §13, §15.7).
+
+    A placeholder: checked and recorded, not applied yet.
+    """
+
+    edge_id: str = _ID
+    mode: Mode
+    quantity: Literal["travel_time", "speed"]
+    change: Literal["absolute", "relative"] = Field(
+        description="absolute: minutes (travel time) or km/h (speed); relative: percent"
+    )
+    amount: float = Field(allow_inf_nan=False, description="Signed change")
+
+
+class NewEdgeIn(_Strict):
+    """A new network edge between two existing nodes (Paper 1 §13, §15.7; placeholder)."""
+
+    edge_id: str = _ID
+    from_node_id: str = _ID
+    to_node_id: str = _ID
+    travel_time_min: dict[Mode, float] = Field(
+        min_length=1, description="Minutes to traverse the edge per mode (>= 0)"
+    )
+    closable: bool = Field(default=True, description="Whether disruptions may close it")
+
+
+class NetworkChangesIn(_Strict):
+    """Network interventions: edge changes and new edges (placeholders, recorded only)."""
+
+    edge_changes: list[EdgeChangeIn] = Field(default_factory=list)
+    new_edges: list[NewEdgeIn] = Field(default_factory=list)
+
+
+class PopulationChangeIn(_Strict):
+    """Change the population of one group in one unit (Paper 1 §13, §15.7; placeholder)."""
+
+    unit_id: str = _ID
+    group_id: str = _ID
+    change: Literal["absolute", "relative"] = Field(
+        description="absolute: persons; relative: percent of the baseline count"
+    )
+    amount: float = Field(allow_inf_nan=False, description="Signed change")
+
+
 class SeverityIn(_Strict):
     """Disruption severity ``DS_{f,c}`` of one facility (Paper 3 §7–10)."""
 
@@ -104,12 +167,16 @@ class ScenarioBody(_Strict):
     ``reference_level`` is the reference-scenario flag: ``null`` for an ordinary scenario, or
     the standardised level it stands for (OQ-16; how reference scenarios are constructed is
     open). Disruption scenarios (any severity or closed edge) must state a ``rationing`` case
-    (OQ-24).
+    (OQ-24). ``network_changes`` and ``population_changes`` are placeholders: validated against
+    the data and recorded on runs, without behaviour yet. Order of application: interventions,
+    then disruptions (ADR 0016; OQ-30, proposed).
     """
 
     schema_version: Literal["1.0"] = "1.0"
     capacity_changes: list[CapacityChangeIn] = Field(default_factory=list)
     new_facilities: list[NewFacilityIn] = Field(default_factory=list)
+    network_changes: NetworkChangesIn = Field(default_factory=NetworkChangesIn)
+    population_changes: list[PopulationChangeIn] = Field(default_factory=list)
     severities: list[SeverityIn] = Field(default_factory=list)
     closed_edges: NetworkClosureIn | None = None
     rationing: Literal["uniform", "concentrated"] | None = None
@@ -126,6 +193,13 @@ class ScenarioBody(_Strict):
             raise ValueError(f"new facility id used twice: {', '.join(d)}")
         if self.closed_edges and (d := dupes(self.closed_edges.edge_ids)):
             raise ValueError(f"edge closed twice: {', '.join(d)}")
+        net = self.network_changes
+        if d := dupes([(c.edge_id, c.mode, c.quantity) for c in net.edge_changes]):
+            raise ValueError(f"the same edge, mode and quantity changed twice: {', '.join(d)}")
+        if d := dupes([e.edge_id for e in net.new_edges]):
+            raise ValueError(f"new edge id used twice: {', '.join(d)}")
+        if d := dupes([(p.unit_id, p.group_id) for p in self.population_changes]):
+            raise ValueError(f"population of the same unit and group changed twice: {', '.join(d)}")
         self.to_core("validation", "validation")  # core rules (OQ-16, OQ-24) -> 422
         return self
 
@@ -141,7 +215,7 @@ class ScenarioBody(_Strict):
             ValueError: If a core rule fails (for example a disruption without a rationing case,
                 OQ-24, or a reference level on a counterfactual scenario, OQ-16).
         """
-        interventions: list[CapacityChange | NewFacility] = [
+        interventions: list[Intervention] = [
             CapacityChange(
                 FacilityId(c.facility_id),
                 ServiceId(c.service_id),
@@ -164,6 +238,30 @@ class ScenarioBody(_Strict):
                 capacity=capacity,
             )
             interventions.append(NewFacility(facility, node_id=f.node_id))
+        interventions.extend(
+            EdgeChange(
+                c.edge_id,
+                TransportMode(c.mode),
+                EdgeQuantity(c.quantity),
+                ChangeMode(c.change),
+                c.amount,
+            )
+            for c in self.network_changes.edge_changes
+        )
+        interventions.extend(
+            NewEdge(
+                e.edge_id,
+                e.from_node_id,
+                e.to_node_id,
+                {TransportMode(m): t for m, t in e.travel_time_min.items()},
+                e.closable,
+            )
+            for e in self.network_changes.new_edges
+        )
+        interventions.extend(
+            PopulationChange(UnitId(p.unit_id), GroupId(p.group_id), ChangeMode(p.change), p.amount)
+            for p in self.population_changes
+        )
         closure = None
         if self.closed_edges:
             closure = NetworkDisruption(
