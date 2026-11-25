@@ -12,6 +12,7 @@ from solidaritynode_backend.jobs.base import (
     JobInfo,
     JobRunner,
     JobStatus,
+    JobTimedOutError,
 )
 from solidaritynode_backend.jobs.postgres import PostgresJobRunner
 
@@ -21,5 +22,6 @@ __all__ = [
     "JobInfo",
     "JobRunner",
     "JobStatus",
+    "JobTimedOutError",
     "PostgresJobRunner",
 ]

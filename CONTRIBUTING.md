@@ -62,7 +62,10 @@ All configuration comes from `.env` (git-ignored), created by `make setup` from 
 | `SOLIDARITYNODE_SESSION_COOKIE_SECURE` | backend | `false` | Session cookie only over HTTPS (set `true` behind TLS) |
 | `SOLIDARITYNODE_RESULTS_DIR` | backend, worker on the host | `var/results` (`/data/results` volume in compose) | Per-sample Parquet results and package uploads |
 | `SOLIDARITYNODE_PACKAGES_DIR` | backend | `data/synthetic/packages` | Data packages offered for import on the Admin screen |
-| `SOLIDARITYNODE_WORKER_NAME` | worker | `worker` | Worker name; on start it fails the runs it was running when it stopped |
+| `SOLIDARITYNODE_WORKER_NAME` | worker | `worker` | Worker name, for logs and the job row only |
+| `SOLIDARITYNODE_JOB_HEARTBEAT_SECONDS` | worker | `10` | How often the worker renews the lease (`jobs.heartbeat_at`) of the running job |
+| `SOLIDARITYNODE_JOB_STALE_SECONDS` | worker | `120` | A running job without a heartbeat for this long is failed by any worker ("Interrupted … Start the run again."); at least twice the heartbeat |
+| `SOLIDARITYNODE_JOB_MAX_RUNTIME_SECONDS` | worker | empty (no limit) | Optional maximum runtime per job kind, as `kind=seconds` pairs (for example `run=3600`); a job over it is stopped at its next progress step and marked failed |
 | `SOLIDARITYNODE_TEST_DATABASE_URL` | backend tests | compose `db` on 127.0.0.1:5432 | PostGIS server on which the tests create a throw-away database |
 | `GIT_COMMIT` | image builds | set by `make up` | Build identity shown by `/version` and the footer |
 | `CONTAINER_ENGINE`, `COMPOSE` | Makefile | `podman`, `podman compose` | Container engine and compose command |

@@ -144,7 +144,9 @@ sequenceDiagram
 
 - Interface: `JobRunner` (`submit(kind, payload)`, `info`, `cancel`) in `backend/.../jobs/`;
   implementation `PostgresJobRunner`; worker `python -m solidaritynode_backend.worker` (ADR 0006).
-- A stopped worker marks its running job failed; a restarted worker fails jobs it left running.
+- A stopped worker marks its running job failed. A running job holds a lease (`jobs.heartbeat_at`,
+  renewed by its worker); any worker fails a job whose lease expired, for example after `SIGKILL`.
+  An optional maximum runtime per job kind stops a job and marks it failed.
 - Runs record every reproducibility field and an input hash (ADR 0017); models come from the core
   registry (`solidaritynode_core.model.get_registry`), which holds only `diagnostic-v0`.
 

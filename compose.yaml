@@ -19,6 +19,9 @@ x-backend-env: &backend-env
   SOLIDARITYNODE_DIAGNOSTIC_STEP_DELAY_S: ${SOLIDARITYNODE_DIAGNOSTIC_STEP_DELAY_S:-0.5}
   SOLIDARITYNODE_SESSION_HOURS: ${SOLIDARITYNODE_SESSION_HOURS:-12}
   SOLIDARITYNODE_SESSION_COOKIE_SECURE: ${SOLIDARITYNODE_SESSION_COOKIE_SECURE:-false}
+  SOLIDARITYNODE_JOB_HEARTBEAT_SECONDS: ${SOLIDARITYNODE_JOB_HEARTBEAT_SECONDS:-10}
+  SOLIDARITYNODE_JOB_STALE_SECONDS: ${SOLIDARITYNODE_JOB_STALE_SECONDS:-120}
+  SOLIDARITYNODE_JOB_MAX_RUNTIME_SECONDS: ${SOLIDARITYNODE_JOB_MAX_RUNTIME_SECONDS:-}
 
 services:
   db:
@@ -69,7 +72,8 @@ services:
 
   # Background worker: runs queued jobs (ADR 0006). Same image as the API; the API container
   # applies migrations first. Stop it with `make stop SERVICE=worker`: a running job is marked
-  # failed with a clear message.
+  # failed with a clear message. If it is killed instead, the job's heartbeat stops and any worker
+  # fails it after SOLIDARITYNODE_JOB_STALE_SECONDS.
   worker:
     image: localhost/solidaritynode-backend:dev
     command: ["python", "-m", "solidaritynode_backend.worker"]

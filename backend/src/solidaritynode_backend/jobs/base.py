@@ -62,6 +62,20 @@ class JobCancelledError(Exception):
     """Raised inside a handler when its job was cancelled."""
 
 
+class JobTimedOutError(JobCancelledError):
+    """Raised inside a handler when its job ran longer than the maximum runtime of its kind.
+
+    A subclass of :class:`JobCancelledError`, so a handler that cleans up on cancel also cleans up
+    here; the worker records the job as failed, not cancelled.
+    """
+
+    def __init__(self, kind: str, limit_s: float) -> None:
+        """Record the job kind and its limit in seconds."""
+        super().__init__(kind, limit_s)
+        self.kind = kind
+        self.limit_s = limit_s
+
+
 class JobContext(Protocol):
     """What a running handler can do."""
 

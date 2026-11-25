@@ -111,7 +111,10 @@ def test_worker_restart_fails_interrupted_runs(
     run = as_analyst.post("/runs", json={"scenario_id": sid}).json()
     assert worker.claim() is not None  # the worker "dies" here, leaving the job running
     restarted: Worker = build_worker(settings, engine)
-    assert restarted.recover() == 1
+    assert restarted.fail_stale() == 0  # its lease has not expired yet
+    with engine.begin() as conn:  # ... and now it has (no heartbeat for 10 minutes)
+        conn.execute(text("UPDATE jobs SET heartbeat_at = now() - interval '10 minutes'"))
+    assert restarted.fail_stale() == 1
     failed = as_analyst.get(f"/runs/{run['id']}").json()
     assert failed["status"] == "failed"
     assert "Interrupted" in failed["error"]

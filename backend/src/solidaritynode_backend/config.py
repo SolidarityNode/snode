@@ -48,8 +48,16 @@ class Settings(BaseSettings):
         session_cookie_secure: Send the session cookie only over HTTPS (set in production).
         diagnostic_step_delay_s: Pause after each progress step of a run, so progress and
             cancellation can be followed by hand. Part of the run configuration (and its hash).
-        worker_name: Name of this worker process; on start it fails its own interrupted runs.
+        worker_name: Name of this worker process, for logs and the ``jobs.worker`` column only.
         worker_poll_s: Seconds between queue polls when idle.
+        job_heartbeat_seconds: While a job runs, its worker updates ``jobs.heartbeat_at`` this
+            often from a separate thread (the job's lease, ADR 0006).
+        job_stale_seconds: Any worker marks a running job failed when its heartbeat is older
+            than this (at start and periodically). At least twice ``job_heartbeat_seconds``.
+        job_max_runtime_seconds: Optional maximum runtime per job kind, as ``kind=seconds``
+            pairs separated by commas (for example ``run=3600``). Empty (the default) means no
+            limit for any kind, including the diagnostic model's ``run`` jobs. A job over its
+            limit is stopped at its next progress step and marked failed.
     """
 
     model_config = SettingsConfigDict(
@@ -80,6 +88,24 @@ class Settings(BaseSettings):
     diagnostic_step_delay_s: float = Field(default=0.5, ge=0, le=60)
     worker_name: str = "worker"
     worker_poll_s: float = Field(default=1.0, gt=0)
+    job_heartbeat_seconds: float = Field(default=10.0, gt=0)
+    job_stale_seconds: float = Field(default=120.0, gt=0)
+    job_max_runtime_seconds: str = ""
+
+    def max_runtimes(self) -> dict[str, float]:
+        """Return the maximum runtime in seconds per job kind (empty: no limits)."""
+        limits: dict[str, float] = {}
+        for item in self.job_max_runtime_seconds.split(","):
+            if not item.strip():
+                continue
+            kind, sep, value = item.partition("=")
+            if not sep or not kind.strip():
+                raise ValueError(f"job_max_runtime_seconds: expected kind=seconds, got {item!r}")
+            seconds = float(value)
+            if seconds <= 0:
+                raise ValueError(f"job_max_runtime_seconds: {kind.strip()} must be > 0")
+            limits[kind.strip()] = seconds
+        return limits
 
     def placeholder_secrets(self) -> list[str]:
         """Return the names of secrets whose value starts with ``change-me``."""
@@ -88,6 +114,16 @@ class Settings(BaseSettings):
         if password is not None and str(password).startswith(PLACEHOLDER_PREFIX):
             found.append("database_url (password)")
         return found
+
+    @model_validator(mode="after")
+    def _check_job_timing(self) -> Self:
+        if self.job_stale_seconds < 2 * self.job_heartbeat_seconds:
+            raise ValueError(
+                "job_stale_seconds must be at least twice job_heartbeat_seconds, or healthy "
+                "jobs would be failed as stale"
+            )
+        self.max_runtimes()
+        return self
 
     @model_validator(mode="after")
     def _refuse_placeholder_secrets(self) -> Self:
