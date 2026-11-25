@@ -1,8 +1,8 @@
 # 0019. Bilingual documentation site: Greek user-facing pages with mkdocs-static-i18n
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-26
-- Deciders: maintainer (on the pull request)
+- Deciders: maintainer (review of PR #11)
 - Related: ADR 0018; `docs/i18n/glossary.md`; `mkdocs.yml`, `tools/docs/hooks.py`, `scripts/docs_i18n.py`
 
 ## Context
@@ -25,5 +25,5 @@ Option 1: mkdocs-static-i18n 1.3.1 with the suffix layout, English as the defaul
 - `tools/docs/hooks.py` relies on two internals of the plugin: it adds the root pages (CHANGELOG, CONTRIBUTING, AGENTS.md) after the plugin's `on_files` with the plugin's file factory, and it rewrites the switcher links to relative ones, because the plugin makes the home-page links absolute from `site_url` and they would miss the mike version folder. Both are covered by `make docs-build`; recheck them when the plugin version changes.
 - Changing an English user-facing page means updating its Greek page (`make docs-stamp PAGE=…`) or saying in the pull request that it is stale (AGENTS.md "Documentation rules").
 - Material's search does not offer a Greek stemmer; Greek pages are searchable without stemming.
-- Screenshots on Greek pages show the English UI except where a Greek screenshot exists; Greek UI screenshots for the user guide are a follow-up.
+- Screenshots on Greek pages show the English UI except where a Greek screenshot exists; Greek UI screenshots for the user guide are a follow-up (#12).
 - The migration to Zensical (ADR 0018) must carry the bilingual site over, or replace this plugin with an equivalent; revisit then.

@@ -84,15 +84,15 @@ concept's term the same everywhere; do not translate one concept two ways.
 | processing note | σημείωση επεξεργασίας | in use | study area |
 | licence / attribution | άδεια / αναφορά πηγής | in use | study area |
 | feature (map) | στοιχείο | in use | study area |
-| owner | κάτοχος (the UI also says ιδιοκτήτης in four texts; to align) | in use | scenarios, scenario editor |
+| owner | κάτοχος (never ιδιοκτήτης) | decided | scenarios, scenario editor, server messages |
 | reproducibility / input hash / samples file | αναπαραγωγιμότητα / αποτύπωμα εισόδων / αρχείο δειγμάτων | in use | run page |
 | worker | υπηρεσία εκτέλεσης | in use | run page messages |
 | run status: queued / running / succeeded / failed / cancelled | σε αναμονή / εκτελείται / ολοκληρώθηκε / απέτυχε / ακυρώθηκε | in use | run page, scenarios |
 | preview / import / export | προεπισκόπηση / εισαγωγή / εξαγωγή | in use | Admin, run page |
 | sign in / sign out | σύνδεση / αποσύνδεση | in use | login, header |
-| hub | κεντρικός φορέας δεδομένων ("(hub)" on first mention in a page) | proposed | Greek docs (concepts, data updates, roles, FAQ, home) |
-| hub onboarding | ένταξη (δήμου) στον κεντρικό φορέα δεδομένων | proposed | Greek docs (home, roadmap) |
-| installation | εγκατάσταση | proposed | Greek docs |
+| hub | κεντρική εγκατάσταση (first use on a page: «κεντρική εγκατάσταση (hub)»; never φορέας, which is an organisation, or κόμβος, which is a network node) | decided | Greek docs (concepts, data updates, roles, FAQ, home, roadmap) |
+| hub onboarding | ένταξη (δήμου) στην κεντρική εγκατάσταση | proposed | Greek docs (home, roadmap) |
+| municipal installation | εγκατάσταση δήμου («η εγκατάσταση του δήμου σας»; never bare «εγκατάσταση» where it could mean the hub) | decided | Greek docs |
 | rollback (make an earlier data version active again) | επαναφορά | proposed | Greek docs (Admin, roadmap) |
 
 ## Documentation
@@ -105,7 +105,7 @@ Terms of the Greek pages of the documentation site (`docs/**/*.el.md`) that are 
 | user guide | οδηγός χρήσης | proposed | Greek docs navigation |
 | concepts | βασικές έννοιες | proposed | Greek docs navigation |
 | roadmap | πορεία ανάπτυξης | proposed | Greek docs navigation |
-| platform foundation (v0.1) | θεμέλια της πλατφόρμας (not βάση, which is the baseline) | proposed | Greek docs (home, roadmap) |
+| platform foundation (v0.1) | θεμέλια της πλατφόρμας (not βάση, which is the baseline) | decided | Greek docs (home, roadmap) |
 | milestone / GitHub issue | ορόσημο / θέμα (issue) | proposed | Greek docs (roadmap, FAQ) |
 | user acceptance testing (UAT) | δοκιμές αποδοχής (UAT) | proposed | Greek docs navigation, home |
 
