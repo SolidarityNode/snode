@@ -32,7 +32,18 @@ drops the `demo` schema; the demo packages are built by DP-002).
 ## Decision
 
 **Accepted for v0.1, to be revisited: option 1, a directory or archive (`.zip`, `.tar`,
-`.tar.gz`) with a `manifest.json`, GeoJSON layers and CSV tables.** Schema version `1.0`.
+`.tar.gz`) with a `manifest.json`, one GeoPackage with the layers and CSV tables.** Schema version
+`2.0`.
+
+**Why schema 2.0 (GeoPackage instead of GeoJSON).** Schema 1.0 stored the layers as GeoJSON with
+coordinates in **EPSG:2100** and the obsolete GeoJSON 2008 `crs` member. RFC 7946 GeoJSON allows
+only WGS 84 (EPSG:4326) longitude/latitude, so those files were not valid GeoJSON and other tools
+could misread them. Schema 2.0 keeps the **projected CRS** declared in the manifest (distances
+and areas in metres, as the network and accessibility need) in a format that declares it
+properly: one GeoPackage `layers.gpkg` with one table per layer. It is read and written with the
+standard library (`backend/src/solidaritynode_backend/gpkg.py`, the bootstrap's writer plus a
+reader), opens in QGIS, and is built byte-for-byte reproducibly. Schema 1.x packages are refused
+with the usual "schema version not supported" message.
 
 `manifest.json` keys: `format` (`solidaritynode-data-package`), `schema_version` (`MAJOR.MINOR`;
 an installation reads one major version and refuses others with a clear message), `package_id`,
@@ -40,13 +51,27 @@ an installation reads one major version and refuses others with a clear message)
 `study_area` (`core_municipalities`, `buffer_municipalities`), `buffer` (`rule`, `description`;
 the definition is open, OQ-28), `coverage` (per municipality and layer `boundaries`,
 `population`, `network`, `facilities`, `transit`: `status` `missing | open_data | estimated |
-verified` and the layer `version`), `sources` (name, licence, attribution), `processing_notes`
+verified_by_municipality` and the layer `version`), `layers` (per layer: `table` in
+`layers.gpkg`, `geometry_type`, `licence`, `attribution`; all required), `sources` (name,
+licence, attribution), `processing_notes`
 (`DP-NNN`, required), `changelog` (must contain the package version), `files` (`path`, `sha256`,
 `bytes` for every file; unlisted files are refused).
 
-Files: `layers/{municipalities,spatial_units,facilities,network_nodes,network_edges}.geojson`,
-`tables/{groups,services,population,facility_services}.csv`,
-`checks/hand_check_travel_times.csv` (optional). Every feature has a **stable id** (the same in
+Files: `layers.gpkg` with tables `municipalities`, `spatial_units`, `facilities`,
+`network_nodes`, `network_edges` (geometry column `geom`, 2D, every table in the manifest CRS:
+a layer in another CRS is refused with a message naming both), `tables/{groups,services,
+population,facility_services}.csv`, `checks/hand_check_travel_times.csv` (optional). The reader
+opens the GeoPackage read-only with `trusted_schema` off, runs `quick_check`, and refuses
+non-GeoPackage files, Z/M coordinates and extended geometry blobs.
+
+**CSV dialect**: UTF-8 (a leading byte-order mark is tolerated), comma delimiter, dot as
+decimal separator, one header row with the expected column names, numeric columns as plain
+numbers. Anything else is refused with a message that says what to change, for example a
+semicolon delimiter or comma decimals from a Greek-locale spreadsheet, or a Windows-1253 file.
+
+**One name for the verified state**: `verified_by_municipality`, for feature `quality` and
+layer `coverage` alike (coverage used `verified` in schema 1.0; migration 0008 renamed stored
+rows). Every feature has a **stable id** (the same in
 every package and installation; for units the official statistical code where one exists,
 otherwise a hub-assigned id) and `municipality_id`, `role` (`core | buffer`), `quality`
 (`open_data | estimated | verified_by_municipality`), `valid_from`, `valid_to` and
@@ -62,15 +87,29 @@ incompatible schema is refused. Every imported version is kept (`data_versions`,
 version. Each import creates a baseline run (empty scenario) on the new version. Scenarios are
 revalidated against it; references to closed or missing features are reported.
 
+**Rollback**: an administrator can make an earlier imported version active again (Admin screen,
+`make activate-version VERSION=x.y.z`, `POST /data-versions/{id}/activate`). Like an import, it
+queues a baseline run on that version and revalidates every scenario; nothing is deleted.
+
+**Licences**: every layer carries a licence and an attribution in the manifest (for example
+ODbL 1.0 with "© OpenStreetMap contributors" for OpenStreetMap-derived network layers). The
+Study area screen lists them. Distributing a package carries the obligations of each layer's
+licence (attribution, share-alike for ODbL derivatives, terms of official sources); **legal
+review is needed before any package with real data is distributed**.
+
 Edge effects (OQ-28, **warning only**): a core unit whose geometry touches a buffer municipality
 with `facilities: missing` carries an edge-effect warning on maps and results.
 
 The temporary `demo` schema is dropped by migration 0003.
 
-**Why:** opens in QGIS, simple to check by hand, needs no new library to read or write.
+**Why:** opens in QGIS, keeps the projected CRS properly declared, simple to check by hand,
+needs no new library to read or write.
 
 ## Consequences
 
 - Every version is stored in full: fine for a municipality, revisit for large study areas.
-- No signatures yet (checksums only); no automatic download from the hub.
+- **Checksums detect corruption, not tampering**: whoever can change a file can also change
+  the manifest. Packages must be **signed** (and signatures verified) before any automatic
+  download from the hub is added (ADR 0014); until then packages are imported by hand from a
+  trusted source.
 - Large arrays in packages (Parquet) are not needed yet.

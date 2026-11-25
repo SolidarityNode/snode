@@ -7,6 +7,7 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 ### Added
 
 - Platform mechanics (no scientific method): data packages (ADR 0013) with validation, checksums, preview of changes and transactional import of versioned data; demo packages 1.0.0 and 1.1.0 (DP-002); edge-effect warnings for core units next to buffer municipalities without facility data (OQ-28, warning only).
+- Data packages schema 2.0 (ADR 0013): layers in one GeoPackage `layers.gpkg` in the projected CRS of the manifest (schema 1.0 GeoJSON in EPSG:2100 was not valid RFC 7946), strict CSV dialect, licence and attribution per layer, one name `verified_by_municipality` for coverage and quality, and rollback to an earlier imported version (Admin screen, `make activate-version`).
 - `DEPLOYMENT_MODE` (`municipality` | `hub`; ADR 0012), locked in the database at first initialisation; each role mounts only its own routes (tickets in municipalities, hub routes in the hub). Only the municipal installation is complete.
 - Local accounts with Argon2id, sessions, roles admin, analyst and viewer (ADR 0015); `make create-admin`; demo users in development.
 - Versioned scenario overlays with a JSON Schema (`docs/schemas/scenario.schema.json`, ADR 0016); create, list, get, new version, duplicate, soft delete, validate, revalidate.

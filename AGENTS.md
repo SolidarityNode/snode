@@ -53,6 +53,7 @@ Requires `uv`, Node.js 26 with `pnpm` 12, and Podman (or Docker). `make help` li
 - `make db-shell` — `psql` in the database container with the credentials from `.env`
 - `make seed` — import demo package 1.0.0 (no-op if present), create the demo users when `APP_ENV=development`, wait for queued runs
 - `make import-package PKG=<dir or archive>` — validate, preview and (after typing `yes`, or `YES=1`) import a data package
+- `make activate-version VERSION=<x.y.z>` — make an earlier imported data version active again (rollback; queues a baseline run, revalidates scenarios; asks for `yes` unless `YES=1`)
 - `make create-admin` — create the first administrator interactively
 - `make schemas` — export `docs/schemas/scenario.schema.json` and `openapi.json`, regenerate the frontend API types
 - `make reset` — **delete the database and results volumes**, start, migrate and seed; asks for `yes` unless `FORCE=1`
