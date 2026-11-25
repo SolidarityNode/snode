@@ -98,7 +98,7 @@ Run `make lint test` before every commit. Do not mark work done if either fails.
 2. If anything is ambiguous or the spec is silent, do not invent methodology: comment on the issue with the question and stop.
 3. Plan briefly, implement in small commits, add tests that cover each acceptance criterion.
 4. Update docs and the spec cross-reference if behaviour changed.
-5. Run `make lint test`, then open a PR using the template. Do not merge your own PR.
+5. Run `make lint test`, then open a PR using the template, assigned to the maintainer who asked for it (`gh pr create --assignee <their-login>`; see "Pull requests" in `CONTRIBUTING.md`). Do not merge your own PR.
 
 ## Definition of done
 
