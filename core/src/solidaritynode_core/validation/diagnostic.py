@@ -14,9 +14,14 @@ as accessibility, need, vulnerability or resilience. It does three things:
    hand-check table (DP-002). This is a plain shortest path on the given edge times: no access
    weight (OQ-3), no mode combination (OQ-5), no group-specific speeds (OQ-6); it is not the
    Paper 1 §5 accessibility model.
-3. **Seeded noise** ``diagnostic_noise``: standard normal draws per ``unit × group × service``
-   from ``numpy.random.default_rng(seed)``, so uncertainty display and reproducibility (same seed,
-   same output) can be tested. It means nothing.
+3. **Seeded noise** ``diagnostic_noise`` per ``unit × group × service``, so uncertainty display,
+   totals and reproducibility (same seed, same output) can be tested. It means nothing. Draws
+   are **joint** (registry contract, ADR 0008): draw ``i`` has one shared factor ``s_i`` used by
+   every cell plus an independent term per cell, ``noise = (s_i + e_{cell,i}) / sqrt(2)``. Each
+   cell is standard normal; any two cells have correlation 0.5, so totals across cells must be
+   computed from the same sample index. All draws come from ``numpy.random.default_rng(seed)``.
+
+Version 0.2.0: joint draws (0.1.0 drew every cell independently).
 """
 
 from __future__ import annotations
@@ -52,7 +57,7 @@ __all__ = [
 ]
 
 DIAGNOSTIC_MODEL_ID = "diagnostic-v0"
-DIAGNOSTIC_MODEL_VERSION = "0.1.0"
+DIAGNOSTIC_MODEL_VERSION = "0.2.0"
 DIAGNOSTIC_LABEL = "Diagnostic model: not a research result"
 MODES: tuple[TransportMode, ...] = (TransportMode.WALK, TransportMode.CAR)
 _TOLERANCE = 1e-6
@@ -253,6 +258,9 @@ def run_diagnostic(
     progress(0.7)
 
     rng = np.random.default_rng(seed)
+    # One joint Monte Carlo draw per sample index: the shared factor first, then the independent
+    # terms of every cell in a fixed order (units, groups, services sorted by id).
+    shared = rng.standard_normal(n_samples)
     cells: list[ResultCell] = []
     samples: list[CellSamples] = []
     offering_before = {
@@ -286,7 +294,7 @@ def run_diagnostic(
                         len(closed_touching.get(unit.id, [])),
                     )
                 )
-                draws = rng.standard_normal(n_samples)
+                draws = (shared + rng.standard_normal(n_samples)) / np.sqrt(2.0)
                 samples.append(
                     CellSamples(
                         unit.id, group.id, service.id, STATIC_TIME, "diagnostic_noise", draws
@@ -373,5 +381,6 @@ DIAGNOSTIC_V0 = ModelSpec(
     diagnostic=True,
     default_config={"n_samples": 200},
     run=_run,
+    indicators=INDICATORS,
 )
 """Registry entry of the diagnostic model."""

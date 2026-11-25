@@ -14,7 +14,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -93,6 +93,12 @@ class ResultCell:
 class CellSamples:
     """Monte Carlo samples of one indicator for one cell (stored by the caller, ADR 0008).
 
+    ``values[i]`` belongs to the run's **joint** draw ``i``: across all cells of a run, the same
+    index ``i`` uses the same values of every shared uncertain parameter (across units, groups and
+    services). Models must sample jointly, never independently per cell, so that totals computed
+    sample by sample (:func:`solidaritynode_core.uncertainty.summarise_total`) get correct
+    intervals.
+
     Attributes:
         unit: Spatial unit.
         group: Population group.
@@ -119,7 +125,8 @@ class ModelResult:
         model_version: Version of that model.
         indicators: Description of every indicator in ``cells``.
         cells: Summary values per ``unit × group × service × time`` (core units only).
-        samples: Per-sample values (may be empty).
+        samples: Per-sample values (may be empty). All have the same number of draws; index ``i``
+            is the same joint draw in every cell (see :class:`CellSamples`).
         tables: Model-specific tables as rows of JSON-compatible values.
         diagnostics: JSON-compatible checks and messages.
     """
@@ -137,6 +144,8 @@ class ModelResult:
         known = {i.id for i in self.indicators}
         if unknown := {c.indicator for c in self.cells} - known:
             raise ValueError(f"cells use undescribed indicators: {sorted(unknown)}")
+        if len({len(s.values) for s in self.samples}) > 1:
+            raise ValueError("all samples must have the same number of draws (joint draws)")
         object.__setattr__(self, "tables", MappingProxyType(dict(self.tables)))
         object.__setattr__(self, "diagnostics", MappingProxyType(dict(self.diagnostics)))
 
@@ -160,6 +169,11 @@ class ModelSpec:
             research results.
         default_config: Configuration used when a run gives none.
         run: The model function.
+        sample_dtype: Precision of stored samples (ADR 0008): ``float32`` unless the model
+            needs ``float64``.
+        indicators: The indicators the model returns. Non-deterministic ones are sampled for
+            every ``unit × group × service`` (used to estimate the samples file size before a
+            run starts; ``config["n_samples"]`` gives the number of draws).
     """
 
     id: str
@@ -168,6 +182,8 @@ class ModelSpec:
     diagnostic: bool
     default_config: Mapping[str, Any]
     run: ModelFn
+    sample_dtype: Literal["float32", "float64"] = "float32"
+    indicators: tuple[IndicatorSpec, ...] = ()
 
 
 class ModelRegistry:

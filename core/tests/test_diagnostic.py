@@ -210,6 +210,34 @@ def test_registry_holds_only_the_diagnostic_model() -> None:
     assert registry.ids() == ("diagnostic-v0",)
     spec = registry.get("diagnostic-v0")
     assert spec.diagnostic is True
-    assert spec.version == "0.1.0"
+    assert spec.version == "0.2.0"
     with pytest.raises(KeyError):
         registry.get("vulnerability")
+
+
+def test_samples_are_joint_draws_so_totals_across_units_use_the_same_index() -> None:
+    """ADR 0008: sample ``i`` is one joint draw for every cell. Summing the noise of the six core
+    units at the same index gives the variance of correlated cells (6 + 30 x 0.5 = 21), not the
+    variance an independent pairing would give (6)."""
+    from solidaritynode_core.uncertainty import summarise, summarise_total
+
+    result = run_diagnostic(packages.load("1.0.0"), None, {"n_samples": 5000}, 11, _noop)
+    group, service = result.samples[0].group, result.samples[0].service
+    parts = [
+        s.values
+        for s in result.samples
+        if (s.group, s.service, s.indicator) == (group, service, "diagnostic_noise")
+    ]
+    assert len(parts) == 6
+    assert {len(p) for p in parts} == {5000}
+    total = np.sum(parts, axis=0)  # same sample index across units
+    assert 18.0 < float(total.var()) < 24.0
+    for part in parts:  # every cell is still standard normal
+        assert abs(float(part.mean())) < 0.1
+        assert 0.9 < float(part.var()) < 1.1
+    rng = np.random.default_rng(0)
+    shuffled = np.sum([rng.permutation(p) for p in parts], axis=0)  # pairing draws wrongly
+    assert 4.5 < float(shuffled.var()) < 7.5
+    summary = summarise_total(parts)
+    assert summary.median == pytest.approx(float(np.median(total)))
+    assert summary.high - summary.low > summarise(shuffled).high - summarise(shuffled).low
