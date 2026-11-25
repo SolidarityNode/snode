@@ -44,7 +44,8 @@ Spec 00 §3: a **run** is one **immutable** execution of a scenario and records 
   computed from the model's samples by `solidaritynode_core.uncertainty.summarise_result` (linear
   interpolation); deterministic values have mean = median = low = high. A non-deterministic
   indicator without samples is refused. The per-sample values stay in Parquet (ADR 0008).
-- **diagnostic-v0** is unchanged (same outputs, so its version stays `0.1.0`): its mean and its
+- **diagnostic-v0** was not changed by this summary schema (its version stayed `0.1.0`; it became
+  `0.2.0` later for joint draws, ADR 0008): its mean and its
   own 5 %/95 % bounds equal the stored mean and default quantiles, and the median is computed
   from its existing samples (core test `test_diagnostic_summary_matches_its_samples_…`).
 - **Totals** across units or groups are computed from the stored samples, draw by draw
@@ -58,7 +59,8 @@ Spec 00 §3: a **run** is one **immutable** execution of a scenario and records 
 - Runs stored before migration 0005: `value` became `mean`; deterministic rows got `median =
   mean`; sampled rows have no median ("not available") and no recorded levels, because runs are
   immutable and their samples are not re-read. Start such a run again to get them.
-- Results: see ADR 0008. Comparison is allowed between runs on the same data version (default:
+- Results: see ADR 0008 (samples are joint draws; the file's SHA-256 is recorded on the run and
+  verified on read and export). Comparison is allowed between runs on the same data version (default:
   the baseline run created on import) or between two runs of the same scenario on different data
   versions (labelled); otherwise it is refused. Export: CSV or GeoPackage zipped with
   `metadata.json` holding every reproducibility field.
