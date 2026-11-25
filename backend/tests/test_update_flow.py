@@ -39,7 +39,7 @@ def test_package_update_flow(as_admin, as_analyst, worker) -> None:  # type: ign
     old_run = as_analyst.post("/runs", json={"scenario_id": close["id"]}).json()
     worker.run_until_idle()
     before = _walk(as_analyst, old_run["id"], "A3")
-    assert (before["value"], before["edge_effect_warning"]) == (66, True)
+    assert (before["median"], before["edge_effect_warning"]) == (66, True)
     assert _walk(as_analyst, old_run["id"], "A6")["edge_effect_warning"] is True
 
     # Preview lists exactly the expected changes; import 1.1.0.
@@ -84,8 +84,8 @@ def test_package_update_flow(as_admin, as_analyst, worker) -> None:  # type: ign
     old_rows = as_analyst.get(f"/runs/{old_run['id']}/results").json()
     assert as_analyst.get(f"/runs/{repro['id']}/results").json() == old_rows
     after = _walk(as_analyst, new_run["id"], "A3")
-    assert (after["value"], after["edge_effect_warning"]) == (18, False)  # F4 across the border
-    assert _walk(as_analyst, new_run["id"], "A1")["value"] == 30  # F3 closed: A1 goes to F1
+    assert (after["median"], after["edge_effect_warning"]) == (18, False)  # F4 across the border
+    assert _walk(as_analyst, new_run["id"], "A1")["median"] == 30  # F3 closed: A1 goes to F1
     assert _walk(as_analyst, new_run["id"], "A6")["edge_effect_warning"] is False
     assert as_analyst.get(f"/runs/{new_run['id']}").json()["edge_effect_units"] == []
 

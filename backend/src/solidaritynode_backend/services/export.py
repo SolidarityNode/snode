@@ -35,9 +35,10 @@ RESULT_COLUMNS = (
     "service_id",
     "time_label",
     "indicator",
-    "value",
+    "median",
     "low",
     "high",
+    "mean",
     "baseline",
     "edge_effect_warning",
 )
@@ -58,6 +59,15 @@ def _metadata(meta: Mapping[str, Any]) -> str:
     content = dict(meta)
     if content.get("diagnostic"):
         content["notice"] = DIAGNOSTIC_LABEL
+    levels = content.get("interval_quantiles")
+    content["statistics"] = {
+        "median": "median of the samples (central value shown in the application)",
+        "low": f"quantile {levels[0]} of the samples" if levels else "lower interval bound",
+        "high": f"quantile {levels[1]} of the samples" if levels else "upper interval bound",
+        "mean": "mean of the samples",
+        "deterministic values": "median = low = high = mean = the value",
+        "totals": "compute from samples.parquet draw by draw; never add medians or bounds",
+    }
     return json.dumps(content, indent=2, sort_keys=True, default=str) + "\n"
 
 
@@ -125,7 +135,7 @@ def _write_gpkg(
         db.execute(
             """CREATE TABLE results (fid INTEGER PRIMARY KEY AUTOINCREMENT, geom POLYGON,
             unit_id TEXT, unit_name TEXT, group_id TEXT, service_id TEXT, time_label TEXT,
-            indicator TEXT, value REAL, low REAL, high REAL, baseline REAL,
+            indicator TEXT, median REAL, low REAL, high REAL, mean REAL, baseline REAL,
             edge_effect_warning BOOLEAN)"""
         )
         db.execute(
@@ -139,8 +149,8 @@ def _write_gpkg(
         )
         db.executemany(
             "INSERT INTO results (geom, unit_id, unit_name, group_id, service_id, time_label, "
-            "indicator, value, low, high, baseline, edge_effect_warning) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "indicator, median, low, high, mean, baseline, edge_effect_warning) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [
                 (_gpkg_blob(wkb, srid), *(row.get(c) for c in RESULT_COLUMNS))
                 for wkb, row in features

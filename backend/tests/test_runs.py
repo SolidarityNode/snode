@@ -8,7 +8,9 @@ import sqlite3
 import zipfile
 from pathlib import Path
 
+import numpy as np
 import pyarrow.parquet as pq
+import pytest
 from sqlalchemy import text
 
 from solidaritynode_backend.worker import Worker, build_worker
@@ -55,7 +57,7 @@ def test_run_lifecycle_and_results(as_admin, as_analyst, worker, settings) -> No
         params={"group": "G-OLD", "service": "S-HC", "indicator": "travel_time_walk_min"},
     ).json()
     a3 = next(r for r in rows if r["unit_id"] == "A3")
-    assert (a3["baseline"], a3["value"], a3["edge_effect_warning"]) == (30, 66, True)
+    assert (a3["baseline"], a3["median"], a3["edge_effect_warning"]) == (30, 66, True)
     assert {r["unit_id"] for r in rows} == {"A1", "A2", "A3", "A4", "A5", "A6"}  # core only
     samples = pq.read_table(Path(settings.results_dir) / "runs" / run["id"] / "samples.parquet")
     assert samples.num_rows == 6 * 3 * 2 * 200
@@ -150,7 +152,7 @@ def test_compare_with_baseline_and_refusal_across_data_versions(
         if (r["unit_id"], r["group_id"], r["service_id"], r["indicator"])
         == ("A3", "G-OLD", "S-HC", "travel_time_walk_min")
     )
-    assert (row["a"]["value"], row["b"]["value"], row["difference"]) == (66, 30, 36)
+    assert (row["a"]["median"], row["b"]["median"], row["difference"]) == (66, 30, 36)
     import_version(as_admin, "1.1.0")
     worker.run_until_idle()
     baseline_110 = next(
@@ -190,8 +192,14 @@ def test_export_csv_and_gpkg(as_admin, as_analyst, worker, tmp_path: Path) -> No
     ):
         assert key in meta
     assert meta["notice"] == "Diagnostic model: not a research result"
+    assert meta["interval_quantiles"] == [0.05, 0.95]
+    assert meta["statistics"]["low"] == "quantile 0.05 of the samples"
+    assert "never add medians" in meta["statistics"]["totals"]
     lines = csv_zip.read("results.csv").decode().splitlines()
-    assert lines[0].startswith("unit_id,unit_name,group_id")
+    assert lines[0] == (
+        "unit_id,unit_name,group_id,service_id,time_label,indicator,median,low,high,mean,"
+        "baseline,edge_effect_warning"
+    )
     assert len(lines) == 1 + 6 * 3 * 2 * 5
     response = as_analyst.get(f"/runs/{run['id']}/export", params={"format": "gpkg"})
     gpkg_zip = zipfile.ZipFile(io.BytesIO(response.content))
@@ -201,6 +209,8 @@ def test_export_csv_and_gpkg(as_admin, as_analyst, worker, tmp_path: Path) -> No
         assert db.execute("SELECT count(*) FROM results").fetchone()[0] == len(lines) - 1
         assert db.execute("SELECT srs_id FROM gpkg_geometry_columns").fetchone()[0] == 2100
         assert db.execute("SELECT geom FROM results LIMIT 1").fetchone()[0][:2] == b"GP"
+        columns = [c[1] for c in db.execute("PRAGMA table_info(results)")]
+        assert {"median", "low", "high", "mean"} <= set(columns)
 
 
 def test_viewer_sees_shared_results_but_not_private_runs(
@@ -224,3 +234,59 @@ def test_request_handler_only_queues(as_admin, as_analyst, engine) -> None:  # t
     with engine.connect() as conn:
         assert conn.execute(text("SELECT count(*) FROM run_results")).scalar_one() == 0
         assert conn.execute(text("SELECT status FROM jobs")).scalar_one() == "queued"
+
+
+def _noise(as_analyst, run_id: str) -> list[dict]:  # type: ignore[no-untyped-def,type-arg]
+    rows: list[dict] = as_analyst.get(  # type: ignore[type-arg]
+        f"/runs/{run_id}/results", params={"indicator": "diagnostic_noise"}
+    ).json()
+    return rows
+
+
+@pytest.mark.parametrize("levels", ["0.05,0.95", "0.25,0.75"])
+def test_results_store_mean_median_and_configured_quantiles_from_samples(
+    app, as_admin, as_analyst, engine, settings, levels: str
+) -> None:  # type: ignore[no-untyped-def]
+    from solidaritynode_backend.config import get_settings
+
+    configured = settings.model_copy(update={"result_interval_quantiles": levels})
+    app.dependency_overrides[get_settings] = lambda: configured
+    worker = build_worker(configured, engine)
+    _ready(as_admin, worker)
+    low_q, high_q = (float(x) for x in levels.split(","))
+    sid = as_analyst.post("/scenarios", json=CLOSE_E02).json()["id"]
+    run = as_analyst.post("/runs", json={"scenario_id": sid}).json()
+    assert run["config"]["interval_quantiles"] == [low_q, high_q]  # recorded, part of the hash
+    assert run["interval_quantiles"] == [low_q, high_q]
+    worker.run_until_idle()
+    samples = pq.read_table(
+        Path(settings.results_dir) / "runs" / run["id"] / "samples.parquet"
+    ).to_pandas()
+    rows = _noise(as_analyst, run["id"])
+    assert rows
+    for row in rows:
+        draws = samples[
+            (samples.unit_id == row["unit_id"])
+            & (samples.group_id == row["group_id"])
+            & (samples.service_id == row["service_id"])
+            & (samples.indicator == "diagnostic_noise")
+        ]["value"].to_numpy()
+        assert len(draws) == 200
+        assert row["median"] == pytest.approx(float(np.median(draws)))
+        assert row["mean"] == pytest.approx(float(draws.mean()))
+        assert row["low"] == pytest.approx(float(np.quantile(draws, low_q)))
+        assert row["high"] == pytest.approx(float(np.quantile(draws, high_q)))
+    # Deterministic values: median = mean = low = high.
+    walk = as_analyst.get(
+        f"/runs/{run['id']}/results", params={"indicator": "travel_time_walk_min"}
+    ).json()
+    assert all(r["median"] == r["mean"] == r["low"] == r["high"] for r in walk)
+
+
+def test_settings_refuse_bad_interval_quantiles() -> None:
+    from solidaritynode_backend.config import Settings
+
+    assert Settings().interval_quantiles() == (0.05, 0.95)
+    for bad in ("0.5,0.95", "0.05", "a,b", "0.95,0.05"):
+        with pytest.raises(ValueError, match="interval"):
+            Settings(result_interval_quantiles=bad)

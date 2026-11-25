@@ -93,6 +93,7 @@ def run_out(db: Session, run: Run, user: Principal, *, reused: bool = False) -> 
         edge_effect_units=warned,
         can_cancel=not status_.finished
         and (user.is_admin or (user.can_edit and run.created_by == user.id)),
+        interval_quantiles=(run.config or {}).get("interval_quantiles"),
     )
 
 
@@ -222,7 +223,8 @@ def _results(
         text(
             """
             SELECT r.unit_id, coalesce(f.properties->>'name', r.unit_id) AS unit_name,
-                   r.group_id, r.service_id, r.time_label, r.indicator, r.value, r.low, r.high,
+                   r.group_id, r.service_id, r.time_label, r.indicator, r.mean, r.median, r.low,
+                   r.high,
                    r.baseline, r.edge_effect_warning
             FROM run_results r
             LEFT JOIN data_features f ON f.data_version_id = :dv AND f.layer = 'spatial_units'
@@ -318,7 +320,11 @@ def compare_runs(
     rows = []
     for r in _results(db, a):
         o = rows_b.get((r.unit_id, r.group_id, r.service_id, r.indicator))
-        diff = r.value - o.value if (o and r.value is not None and o.value is not None) else None
+        # Difference of medians (the displayed central values), A − B.
+        other_median = o.median if o else None
+        diff = (
+            r.median - other_median if r.median is not None and other_median is not None else None
+        )
         rows.append(
             CompareRow(
                 unit_id=r.unit_id,
@@ -326,9 +332,10 @@ def compare_runs(
                 group_id=r.group_id,
                 service_id=r.service_id,
                 indicator=r.indicator,
-                a=IntervalOut(value=r.value, low=r.low, high=r.high),
+                a=IntervalOut(mean=r.mean, median=r.median, low=r.low, high=r.high),
                 b=IntervalOut(
-                    value=o.value if o else None,
+                    mean=o.mean if o else None,
+                    median=o.median if o else None,
                     low=o.low if o else None,
                     high=o.high if o else None,
                 ),

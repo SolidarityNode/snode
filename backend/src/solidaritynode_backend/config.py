@@ -8,6 +8,7 @@ from typing import Literal, Self
 
 from pydantic import AliasChoices, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from solidaritynode_core.uncertainty import check_interval
 from sqlalchemy.engine import make_url
 
 __all__ = ["PLACEHOLDER_PREFIX", "AppEnv", "Basemap", "DeploymentMode", "Settings", "get_settings"]
@@ -54,6 +55,9 @@ class Settings(BaseSettings):
             often from a separate thread (the job's lease, ADR 0006).
         job_stale_seconds: Any worker marks a running job failed when its heartbeat is older
             than this (at start and periodically). At least twice ``job_heartbeat_seconds``.
+        result_interval_quantiles: Quantile levels of the interval stored with every result
+            value, as ``low,high`` (default ``0.05,0.95``, a 90 % interval; ``0 < low < 0.5 <
+            high < 1``). Recorded in the run configuration and its input hash (ADR 0017).
         job_max_runtime_seconds: Optional maximum runtime per job kind, as ``kind=seconds``
             pairs separated by commas (for example ``run=3600``). Empty (the default) means no
             limit for any kind, including the diagnostic model's ``run`` jobs. A job over its
@@ -91,6 +95,15 @@ class Settings(BaseSettings):
     job_heartbeat_seconds: float = Field(default=10.0, gt=0)
     job_stale_seconds: float = Field(default=120.0, gt=0)
     job_max_runtime_seconds: str = ""
+    result_interval_quantiles: str = "0.05,0.95"
+
+    def interval_quantiles(self) -> tuple[float, float]:
+        """Return the interval quantile levels ``(low, high)`` of result values."""
+        try:
+            levels = [float(x) for x in self.result_interval_quantiles.split(",")]
+        except ValueError as exc:
+            raise ValueError("result_interval_quantiles: expected low,high (numbers)") from exc
+        return check_interval(levels)
 
     def max_runtimes(self) -> dict[str, float]:
         """Return the maximum runtime in seconds per job kind (empty: no limits)."""
@@ -123,6 +136,7 @@ class Settings(BaseSettings):
                 "jobs would be failed as stale"
             )
         self.max_runtimes()
+        self.interval_quantiles()
         return self
 
     @model_validator(mode="after")

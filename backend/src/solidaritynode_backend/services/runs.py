@@ -7,8 +7,12 @@ error) lives in its job (ADR 0006). The **input hash** covers every recorded inp
 timestamps; starting a run whose hash matches a succeeded run returns that run unless a rerun is
 forced.
 
-Results: summary values per ``unit × group × service × time`` in PostgreSQL (``run_results``),
-per-sample values in Parquet under ``results_dir`` (ADR 0008), model tables in ``run_tables``.
+Results: per ``unit × group × service × time``, the **mean**, the **median** and the interval
+bounds at the quantile levels of the run configuration (``interval_quantiles``, default 5 % and
+95 %) in PostgreSQL (``run_results``), computed from the model's samples by
+:func:`solidaritynode_core.uncertainty.summarise_result` (ADR 0017); per-sample values in Parquet
+under ``results_dir`` (ADR 0008), model tables in ``run_tables``. Totals across units or groups
+are computed from the samples, never by adding medians.
 Results are stored for **core units only** (OQ-28); units with an edge-effect warning are
 flagged.
 """
@@ -28,6 +32,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from solidaritynode_core.model import ModelResult, get_registry
 from solidaritynode_core.scenarios import check_references
+from solidaritynode_core.uncertainty import DEFAULT_INTERVAL, summarise_result
 from sqlalchemy import Engine, select, text
 from sqlalchemy.orm import Session
 
@@ -111,6 +116,7 @@ def create_run(
     full_config = {
         **model.default_config,
         "step_delay_s": settings.diagnostic_step_delay_s,
+        "interval_quantiles": list(settings.interval_quantiles()),
         **(config or {}),
     }
     fields = {
@@ -228,6 +234,10 @@ def execute_run(
     model_config = {k: v for k, v in config.items() if k in model.default_config}
     result = model.run(area, body.to_core(str(run_id), name), model_config, seed, progress)
 
+    # Summary statistics come from the samples, at the run's recorded quantile levels (ADR 0017).
+    # Runs recorded before ``interval_quantiles`` existed used the model's 5 % / 95 % bounds.
+    interval = tuple(config.get("interval_quantiles", DEFAULT_INTERVAL))
+    summaries = summarise_result(result, interval)
     samples_path = settings.results_dir / "runs" / str(run_id) / "samples.parquet"
     if result.samples:
         _write_samples(result, samples_path)
@@ -240,22 +250,23 @@ def execute_run(
                 "service_id": c.service,
                 "time_label": c.time,
                 "indicator": c.indicator,
-                "value": c.value,
-                "low": c.low,
-                "high": c.high,
+                "mean": s.mean if s else None,
+                "median": s.median if s else None,
+                "low": s.low if s else None,
+                "high": s.high if s else None,
                 "baseline": c.baseline,
                 "edge_effect_warning": c.unit in warned,
             }
-            for c in result.cells
+            for c, s in ((x.cell, x.summary) for x in summaries)
             if area.unit_roles.get(c.unit) == "core"
         ]
         if rows:
             db.execute(
                 text(
                     "INSERT INTO run_results (run_id, unit_id, group_id, service_id, time_label, "
-                    "indicator, value, low, high, baseline, edge_effect_warning) VALUES (:run_id, "
-                    ":unit_id, :group_id, :service_id, :time_label, :indicator, :value, :low, "
-                    ":high, :baseline, :edge_effect_warning)"
+                    "indicator, mean, median, low, high, baseline, edge_effect_warning) VALUES "
+                    "(:run_id, :unit_id, :group_id, :service_id, :time_label, :indicator, :mean, "
+                    ":median, :low, :high, :baseline, :edge_effect_warning)"
                 ),
                 rows,
             )

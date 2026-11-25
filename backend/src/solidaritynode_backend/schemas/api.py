@@ -380,10 +380,19 @@ class RunOut(BaseModel):
     diagnostics: dict[str, Any] | None
     edge_effect_units: list[str]
     can_cancel: bool
+    interval_quantiles: list[float] | None = Field(
+        default=None,
+        description="Quantile levels of every result's low and high bounds (for example "
+        "[0.05, 0.95], a 90 % interval); null for runs recorded before they were stored.",
+    )
 
 
 class ResultRow(BaseModel):
-    """Summary value of one indicator for ``unit × group × service × time``."""
+    """Summary statistics of one indicator for ``unit × group × service × time`` (ADR 0017).
+
+    ``median`` is the central value shown on maps and tables; ``low`` and ``high`` are the
+    quantiles given by the run's ``interval_quantiles``; ``mean`` is stored and exported.
+    """
 
     unit_id: str
     unit_name: str
@@ -391,7 +400,8 @@ class ResultRow(BaseModel):
     service_id: str
     time_label: str
     indicator: str
-    value: float | None
+    mean: float | None
+    median: float | None
     low: float | None
     high: float | None
     baseline: float | None
@@ -399,9 +409,10 @@ class ResultRow(BaseModel):
 
 
 class IntervalOut(BaseModel):
-    """A value with its interval."""
+    """Summary statistics of one value: mean, median and interval bounds."""
 
-    value: float | None
+    mean: float | None
+    median: float | None
     low: float | None
     high: float | None
 
@@ -416,7 +427,7 @@ class CompareRow(BaseModel):
     indicator: str
     a: IntervalOut
     b: IntervalOut
-    difference: float | None
+    difference: float | None = Field(description="Difference of the medians, A − B")
     edge_effect_warning: bool
 
 

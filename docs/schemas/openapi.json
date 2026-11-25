@@ -228,6 +228,7 @@
                 "type": "null"
               }
             ],
+            "description": "Difference of the medians, A \u2212 B",
             "title": "Difference"
           },
           "edge_effect_warning": {
@@ -646,7 +647,7 @@
         "type": "object"
       },
       "IntervalOut": {
-        "description": "A value with its interval.",
+        "description": "Summary statistics of one value: mean, median and interval bounds.",
         "properties": {
           "high": {
             "anyOf": [
@@ -670,7 +671,7 @@
             ],
             "title": "Low"
           },
-          "value": {
+          "mean": {
             "anyOf": [
               {
                 "type": "number"
@@ -679,11 +680,23 @@
                 "type": "null"
               }
             ],
-            "title": "Value"
+            "title": "Mean"
+          },
+          "median": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median"
           }
         },
         "required": [
-          "value",
+          "mean",
+          "median",
           "low",
           "high"
         ],
@@ -981,7 +994,7 @@
         "type": "object"
       },
       "ResultRow": {
-        "description": "Summary value of one indicator for ``unit \u00d7 group \u00d7 service \u00d7 time``.",
+        "description": "Summary statistics of one indicator for ``unit \u00d7 group \u00d7 service \u00d7 time`` (ADR 0017).\n\n``median`` is the central value shown on maps and tables; ``low`` and ``high`` are the\nquantiles given by the run's ``interval_quantiles``; ``mean`` is stored and exported.",
         "properties": {
           "baseline": {
             "anyOf": [
@@ -1028,6 +1041,28 @@
             ],
             "title": "Low"
           },
+          "mean": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean"
+          },
+          "median": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median"
+          },
           "service_id": {
             "title": "Service Id",
             "type": "string"
@@ -1043,17 +1078,6 @@
           "unit_name": {
             "title": "Unit Name",
             "type": "string"
-          },
-          "value": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Value"
           }
         },
         "required": [
@@ -1063,7 +1087,8 @@
           "service_id",
           "time_label",
           "indicator",
-          "value",
+          "mean",
+          "median",
           "low",
           "high",
           "baseline",
@@ -1283,6 +1308,21 @@
           "input_hash": {
             "title": "Input Hash",
             "type": "string"
+          },
+          "interval_quantiles": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Quantile levels of every result's low and high bounds (for example [0.05, 0.95], a 90 % interval); null for runs recorded before they were stored.",
+            "title": "Interval Quantiles"
           },
           "is_baseline": {
             "title": "Is Baseline",
