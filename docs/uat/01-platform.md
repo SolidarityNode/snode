@@ -42,6 +42,7 @@ administrator or viewer, so both stay logged in.
 | 10 | Click the line **E02** (between A2 and A3) | The panel shows edge E02 with length 2000, walking time 24, car time 4 and "Can be closed: true". | ☐ |
 | 11 | Look at **Data coverage per municipality and layer** | M-A: facilities `verified`, transit `missing`. M-B: population `estimated`, facilities **`missing`** (in red), transit `missing`. | ☐ |
 | 12 | Press **Tab** until the map has a blue focus frame, then press the arrow keys and `+` / `-` | The map pans and zooms with the keyboard. | ☐ |
+| 12a | In the terminal: `curl -sI http://127.0.0.1:8080/ \| grep -i referrer` | `Referrer-Policy: strict-origin-when-cross-origin` (map tiles keep a Referer, as the OSMF tile usage policy requires; ADR 0007). | ☐ |
 | 13 | Switch **Language** to Ελληνικά, then back to English | All texts change to Greek (menu, titles, legend, table headings) and back. | ☐ |
 
 ## D. Scenarios list
@@ -72,7 +73,11 @@ administrator or viewer, so both stay logged in.
 | --- | --- | --- | --- |
 | 26 | Open **UAT close E02** from **Scenarios** and click **Run this version** | The run page opens with a yellow banner "**Diagnostic model: not a research result.** …". **Status** goes from **queued** to **running** with a moving progress bar and "… % done", then to **succeeded** (a few seconds). | ☐ |
 | 27 | Under **Show** choose **Group** Older people, **Service** Home care, **Indicator** "Walking time to nearest facility (diagnostic)" | The map colours the six A units; B units are grey and dashed ("Not reported"). A3 and A6 have an orange outline. The table row **Unit A3** shows value `66 min (deterministic, no uncertainty)`, **Before the scenario** `30`, **Changed: changed**, and "⚠ edge effect (OQ-28)". | ☐ |
-| 28 | Choose **Indicator** "Diagnostic noise (meaningless)" | Each value is shown with an interval, for example `0.05 [-1.6 – 1.7] 90 % interval`. | ☐ |
+| 28 | Choose **Indicator** "Diagnostic noise (meaningless)" | Each value is shown as the central value with its 90 % interval in brackets, for example `0.05 (-1.6–1.7)`; the column heading says "Value (90 % interval)". Below the map: "Colours show the central value; the 90 % interval is in the tooltip and the table." | ☐ |
+| 28a | Look at **Map layers** above the map | Two boxes, both **unticked**: "Uncertainty: show a second map of the interval width" and "Data quality: hatching for estimated, dots for open data". The results map has **no** hatching or dots and the legend has no quality entries. A note says how many of these units use estimated or open data, and the **Warnings** column marks them in words ("data quality: open data"). | ☐ |
+| 28b | Point at unit **A3** on the map | The tooltip shows the unit, the value and its interval, for example "Unit A3: 0.05 (-1.6–1.7)", plus "⚠ edge effect (OQ-28)". | ☐ |
+| 28c | Tick **Uncertainty** | A second map "Uncertainty (width of the 90 % interval)" appears next to the first, in **blues** (not the value colours, not hatching or dots), with its own legend "Uncertainty of … : width of the 90 % interval". Its tooltips add "interval width …". Switch **Indicator** to the walking time: every unit has the lightest blue and the note says "This indicator is deterministic: its interval has no width." Untick **Uncertainty**: the second map disappears. | ☐ |
+| 28d | Tick **Data quality** | Dots (open data) and hatching (estimated) appear on the map, and the legend adds "Quality: estimated (hatched)" and "Quality: open data (dotted)". The note about hidden quality disappears. Untick it again. Open **Study area**: the quality patterns are always shown there. | ☐ |
 | 29 | Look below the table | "Hand-check of baseline travel times: 48 of 48 match. With the scenario: 48 of 48 match." **What changed per unit** lists A2 ("F1: S-HC staff 4 -> 4.8; F1: DS = 0.5 (recorded only); edge E02 closed") and A3 ("edge E02 closed"). The severity is recorded only: no method turns it into lost capacity yet. | ☐ |
 | 30 | Look at **Reproducibility** | Scenario and version (`UAT close E02 (v2)`), data package `demo-study-area-a 1.0.0`, code version (the commit), model `diagnostic-v0 0.1.0`, seed `1`, configuration, input hash, created and finished times. | ☐ |
 | 31 | Click **Export CSV** and **Export GeoPackage** | Two zip files download. The CSV zip contains `results.csv`, `travel_times.csv`, `unit_changes.csv` and `metadata.json` (with all reproducibility fields and the diagnostic notice). The GeoPackage opens in QGIS with a `results` layer of unit polygons in EPSG:2100. | ☐ |
@@ -90,7 +95,9 @@ administrator or viewer, so both stay logged in.
 | # | Do | Expected result | ✓ |
 | --- | --- | --- | --- |
 | 35 | Open the succeeded run of step 26 (Scenarios → status link) and click **Compare with baseline** | The **Compare runs** page shows the diagnostic banner, "Same data version 1.0.0", three maps (A: UAT close E02, B: Baseline (no changes), Difference A − B) and a legend. | ☐ |
-| 36 | Choose Home care and the walking indicator | Row A3: A `66 min`, B `30 min`, difference `36`. Units without a change show difference `0`. | ☐ |
+| 36 | Choose Home care and the walking indicator | Row A3: A `66 min (deterministic, no uncertainty)`, B `30 min (…)`, difference `36`. Units without a change show difference `0`. | ☐ |
+| 36a | Look at maps A and B and the legend under them | **One** legend for both maps, titled "Walking time … (min): one colour scale for A and B". A unit with the same value has the **same colour** on A and B (for example A1). A3 on map A (66) has the darkest class. | ☐ |
+| 36b | Tick **Uncertainty**, then untick it | Maps A and B switch to blues for the interval width, with one legend "… width of the 90 % interval (min), one scale for A and B"; for the deterministic walking time every unit has the lightest blue. Unticking restores the value colours. | ☐ |
 
 ## I. Worker stops during a run
 
@@ -120,7 +127,7 @@ administrator or viewer, so both stay logged in.
 | 48 | Open **Study area** | No edge-effect banner; A3 and A6 have no orange outline. A fourth dot **F4** appears in B. **F3** is white with a grey dashed ring; clicking it shows "Valid to (closed) 2026-12-01" and "Closed true". Coverage: M-B facilities **verified**. | ☐ |
 | 49 | Open the run of step 26 | An orange note: "This run used data 1.0.0; the active data is 1.1.0." with **Rerun on data 1.1.0**. Its results are unchanged (A3 still 66). | ☐ |
 | 50 | Click **Rerun on data 1.1.0** and wait for **succeeded**; choose Home care and walking | A3 now shows `18 min` (F4 across the border) without an edge-effect warning; A1 shows `30 min` (F3 closed, so A1 goes to F1). | ☐ |
-| 51 | Under **Runs of this scenario**, next to the 1.0.0 run, click **Compare with this run** | The comparison page says "Same scenario across data versions 1.0.0 → 1.1.0. Only allowed because both runs belong to the same scenario." Row A3: A `18 min`, B `66 min`, difference `-48`. | ☐ |
+| 51 | Under **Runs of this scenario**, next to the 1.0.0 run, click **Compare with this run** | The comparison page says "Same scenario across data versions 1.0.0 → 1.1.0. Only allowed because both runs belong to the same scenario." Row A3: A `18 min (…)`, B `66 min (…)`, difference `-48`. Maps A and B share one legend ("one colour scale for A and B"). | ☐ |
 | 52 | Change the address to `/runs/<id of this 1.1.0 run>/compare?with=<id of the Baseline run on 1.0.0>` (ids are in the addresses of those run pages) | Refused with a message: "the runs use different data versions (1.1.0 and 1.0.0); compare runs on the same data version, or two runs of the same scenario". | ☐ |
 
 ## L. Viewer

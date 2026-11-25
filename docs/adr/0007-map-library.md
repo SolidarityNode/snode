@@ -35,6 +35,26 @@ licence (Hippocratic-2.1) is not compatible with AGPL-3.0.
 - Styling: core units solid, buffer units grey and dashed; quality shown with SVG patterns
   (hatching = estimated, dots = open data); edge-effect units with an orange outline; results in
   viridis (sequential) and PuOr (diverging), both readable with common colour-vision deficiencies.
+- **Uncertainty on maps** (AGENTS.md invariant 6). Results maps are coloured by the central value
+  the backend reports (`value`; the median where a model reports one). An **Uncertainty** toggle
+  (off by default) adds a second map of the interval width (`high − low`) in its own palette
+  (Blues), next to the value map; on comparison screens it switches maps A and B to the width.
+  Hatching and dots are **never** used for uncertainty: they mean data quality. Tooltips and
+  tables always show the interval with the value, for example `0.42 (0.31–0.55)`; deterministic
+  values say so. Probability outputs (indicator unit `probability`) use a **fixed 0–1 scale**
+  (classes of 0.2) labelled as a probability, never a range stretched to the data.
+- **Comparison screens** (baseline vs scenario, and the same scenario across data versions) build
+  **one** colour scale from the values of both runs and show **one** legend for maps A and B, so
+  equal values have equal colours (test: `frontend/src/pages/ComparePage.test.tsx`). The
+  difference map keeps its own diverging scale and legend.
+- **Data-quality layer.** On results and comparison maps the quality patterns are a toggleable
+  layer, **off by default**, so they do not hide the value colours; the results table always marks
+  units of `estimated` or `open_data` quality in words, and a note says how many there are. The
+  study-area screen always shows the patterns.
+- **Referrer.** Map tiles must be requested with a valid Referer (OSMF tile usage policy). nginx
+  sends `Referrer-Policy: strict-origin-when-cross-origin` on every response and the Leaflet tile
+  layer sets the same policy on its tile images; never use `no-referrer` or `same-origin`
+  (checked by the end-to-end test).
 - Accessibility: the map container is keyboard-focusable (arrows pan, +/- zoom), every map has a
   text list of its features and a legend in words.
 
@@ -43,8 +63,11 @@ it is small, well known and simple to wrap without a React binding.
 
 ## Consequences
 
-- Large layers (all Local Communities of a region) may need vector tiles: revisit with
-  MapLibre GL JS (BSD-3-Clause) when layers grow.
+- Layer size triggers: above about **1,000 features** in one map, switch Leaflet to its canvas
+  renderer (`preferCanvas`) instead of SVG. Above about **2,000 polygons**, or for **national
+  views in the hub**, revisit with MapLibre GL JS (BSD-3-Clause) and vector tiles. Note that the
+  canvas renderer cannot use the SVG quality patterns as they are; that change needs its own
+  quality marking.
 - **OpenStreetMap's public tile servers are for development and demos only.** The OSMF Tile
   Usage Policy (https://operations.osmfoundation.org/policies/tiles/) gives no SLA and allows
   access to be withdrawn at any time without notice. Production installations need their own
