@@ -18,7 +18,7 @@ Open questions ([`open-questions.md`](open-questions.md), its summary table is t
 30 questions: **10 decided**, 2 partly decided, 1 proposed, **17 open**.
 <!-- END GENERATED: oq-counts -->
 
-Planned per-paper specs, not yet written: `01-accessibility-capacity.md` (Paper 1), `02-hidden-need.md` (Paper 2), `03-vulnerability.md` (Paper 3), `04-resilience.md` (Paper 4). Their work is tracked in the milestones [Paper 1](https://github.com/SolidarityNode/snode/milestone/3) to [Paper 4](https://github.com/SolidarityNode/snode/milestone/6).
+Planned per-paper specs, not yet written: `01-accessibility-capacity.md` (Paper 1), `02-hidden-need.md` (Paper 2), `03-vulnerability.md` (Paper 3), `04-resilience.md` (Paper 4). Their work is tracked in the milestones [v0.3 Paper 1 Accessibility](https://github.com/SolidarityNode/snode/milestone/3) to [v0.6 Paper 4 Resilience](https://github.com/SolidarityNode/snode/milestone/6).
 
 ## Files
 

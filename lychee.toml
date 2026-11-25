@@ -8,8 +8,6 @@ timeout = 30
 accept = ["100..=103", "200..=299", "429"]
 
 exclude = [
-  # The Kintsugi project is private until the maintainer makes it public; then remove this line.
-  '^https://github\.com/orgs/SolidarityNode/projects/',
   # The documentation site exists once GitHub Pages is enabled; then remove this line.
   '^https://solidaritynode\.github\.io/',
   # Tag links exist from the first release tag (v0.1.0) on.

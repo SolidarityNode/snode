@@ -58,7 +58,7 @@ Then follow the [UAT guide](docs/uat/README.md) (setup on Windows with WSL2, Doc
 Work is planned in GitHub, not in these files:
 
 - Project board: [Kintsugi](https://github.com/orgs/SolidarityNode/projects/6), with the views [In progress](https://github.com/orgs/SolidarityNode/projects/6/views/1?filterQuery=status%3A%22In+progress%22) and [Todo](https://github.com/orgs/SolidarityNode/projects/6/views/1?filterQuery=status%3ATodo)
-- Per paper: [Paper 1](https://github.com/SolidarityNode/snode/milestone/3) · [Paper 2](https://github.com/SolidarityNode/snode/milestone/4) · [Paper 3](https://github.com/SolidarityNode/snode/milestone/5) · [Paper 4](https://github.com/SolidarityNode/snode/milestone/6)
+- Per paper (milestones): [v0.3 Paper 1](https://github.com/SolidarityNode/snode/milestone/3) · [v0.4 Paper 2](https://github.com/SolidarityNode/snode/milestone/4) · [v0.5 Paper 3](https://github.com/SolidarityNode/snode/milestone/5) · [v0.6 Paper 4](https://github.com/SolidarityNode/snode/milestone/6)
 - [All milestones](https://github.com/SolidarityNode/snode/milestones) · [`good first issue`](https://github.com/SolidarityNode/snode/issues?q=is%3Aopen+label%3A%22good+first+issue%22) · [Roadmap](docs/roadmap.md)
 
 ## More
