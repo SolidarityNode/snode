@@ -8,18 +8,23 @@ import { DiagnosticBanner } from "../components/DiagnosticBanner";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { IntervalValue } from "../components/IntervalValue";
 import { Legend } from "../components/Legend";
+import { MapOptions, type MapOptionsValue } from "../components/MapOptions";
 import { ResultSelectors } from "../components/ResultSelectors";
+import { ScaleLegend } from "../components/ScaleLegend";
 import { defaultSelection, type Selection } from "../components/selection";
-import { label, num } from "../components/labels";
+import { intervalText, isProbability, label, num } from "../components/labels";
 import { useT } from "../i18n/context";
 import { MapView, type MapLayer } from "../map/MapView";
 import {
   COLOURS,
   DIVERGING,
-  SEQUENTIAL,
-  classBreaks,
   divergingColour,
-  sequentialColour,
+  intervalWidth,
+  qualityOverlay,
+  resultStyle,
+  scaleColour,
+  valueScale,
+  widthScale,
 } from "../map/styles";
 
 type Row = Schemas["CompareRow"];
@@ -35,6 +40,7 @@ export function ComparePage() {
   const [catalog, setCatalog] = useState<Schemas["CatalogOut"] | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [error, setError] = useState<unknown>(null);
+  const [options, setOptions] = useState<MapOptionsValue>({ uncertainty: false, quality: false });
 
   useEffect(() => {
     unwrap(
@@ -68,57 +74,69 @@ export function ComparePage() {
     [data, selection],
   );
 
-  const values = rows.flatMap((r) => [r.a.value, r.b.value]).filter((v): v is number => v !== null);
-  const breaks = classBreaks(values, SEQUENTIAL.length);
+  const indicator = data?.run_a.indicators.find((i) => i.id === selection?.indicator);
+  const unit = indicator?.unit ?? "";
+  const probability = isProbability(indicator);
+  // One scale for both maps, built from the values of A and B together (and one legend).
+  const scale = useMemo(
+    () =>
+      valueScale(
+        rows.flatMap((r) => [r.a.value, r.b.value]).filter((v): v is number => v !== null),
+        probability,
+      ),
+    [rows, probability],
+  );
+  const wScale = useMemo(
+    () =>
+      widthScale(
+        rows
+          .flatMap((r) => [intervalWidth(r.a.low, r.a.high), intervalWidth(r.b.low, r.b.high)])
+          .filter((w): w is number => w !== null),
+      ),
+    [rows],
+  );
   const maxAbs = Math.max(0, ...rows.map((r) => Math.abs(r.difference ?? 0)));
 
   const layers = useMemo(() => {
     if (!units) return { a: [], b: [], diff: [] };
     const byUnit = new Map(rows.map((r) => [r.unit_id, r]));
-    const make = (
-      id: string,
-      fill: (r: Row) => string | null,
-      tip: (r: Row) => string,
-    ): MapLayer[] => [
+    const quality: MapLayer[] = options.quality
+      ? [{ id: "quality", data: units, style: qualityOverlay, interactive: false }]
+      : [];
+    const make = (id: string, fill: (r: Row) => string, tip: (r: Row) => string): MapLayer[] => [
       {
         id,
         data: units,
         style: (f: Feature) => {
           const r = byUnit.get(String(f.id));
-          const colour = r ? fill(r) : null;
-          return {
-            color: r?.edge_effect_warning ? COLOURS.orange : COLOURS.dark,
-            weight: r?.edge_effect_warning ? 4 : 1,
-            fillColor: colour ?? "#d9d9d9",
-            fillOpacity: 0.8,
-            dashArray: r ? "" : "6 4",
-          };
+          return resultStyle(!!r, r?.edge_effect_warning === true, r ? fill(r) : "");
         },
         tooltip: (f: Feature) => {
           const r = byUnit.get(String(f.id));
-          return r ? `${String(f.id)}: ${tip(r)}` : `${String(f.id)}: ${t("results.not_reported")}`;
+          return r ? `${r.unit_name}: ${tip(r)}` : `${String(f.id)}: ${t("results.not_reported")}`;
         },
       },
+      ...quality,
     ];
+    const side = (pick: (r: Row) => Row["a"]) => ({
+      fill: (r: Row) =>
+        options.uncertainty
+          ? scaleColour(wScale, intervalWidth(pick(r).low, pick(r).high))
+          : scaleColour(scale, pick(r).value),
+      tip: (r: Row) => intervalText(t, lang, pick(r).value, pick(r).low, pick(r).high, unit),
+    });
+    const a = side((r) => r.a);
+    const b = side((r) => r.b);
     return {
-      a: make(
-        "a",
-        (r) => (r.a.value === null ? null : sequentialColour(r.a.value, breaks)),
-        (r) => num(r.a.value, lang),
-      ),
-      b: make(
-        "b",
-        (r) => (r.b.value === null ? null : sequentialColour(r.b.value, breaks)),
-        (r) => num(r.b.value, lang),
-      ),
+      a: make("a", a.fill, a.tip),
+      b: make("b", b.fill, b.tip),
       diff: make(
         "diff",
-        (r) => (r.difference === null ? null : divergingColour(r.difference, maxAbs)),
+        (r) => (r.difference === null ? "" : divergingColour(r.difference, maxAbs)),
         (r) => num(r.difference, lang),
       ),
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- breaks/maxAbs derive from rows
-  }, [units, rows, lang, t]);
+  }, [units, rows, scale, wScale, maxAbs, options, unit, lang, t]);
 
   if (!data || !catalog || !selection) {
     return (
@@ -131,7 +149,7 @@ export function ComparePage() {
     );
   }
 
-  const unit = data.run_a.indicators.find((i) => i.id === selection.indicator)?.unit ?? "";
+  const indicatorName = label(t, "indicator", selection.indicator);
   const basemap = config?.basemap ?? "blank";
 
   return (
@@ -152,6 +170,7 @@ export function ComparePage() {
         value={selection}
         onChange={setSelection}
       />
+      <MapOptions value={options} onChange={setOptions} />
       <div className="compare-grid">
         <div>
           <h3>{t("compare.map_a", { name: data.run_a.scenario_name })}</h3>
@@ -181,6 +200,19 @@ export function ComparePage() {
           />
         </div>
       </div>
+      <ScaleLegend
+        testId="shared-legend"
+        title={
+          options.uncertainty
+            ? t("compare.legend_shared_width", { indicator: indicatorName, unit })
+            : probability
+              ? t("compare.legend_shared_probability", { indicator: indicatorName })
+              : t("compare.legend_shared", { indicator: indicatorName, unit })
+        }
+        scale={options.uncertainty ? wScale : scale}
+        quality={options.quality}
+      />
+      {!options.uncertainty && <p className="muted">{t("legend.central_value_note")}</p>}
       <Legend
         title={t("compare.legend_diff", { unit })}
         items={[

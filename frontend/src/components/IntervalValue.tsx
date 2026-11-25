@@ -1,5 +1,5 @@
 import { useT } from "../i18n/context";
-import { num } from "./labels";
+import { intervalText } from "./labels";
 
 interface Props {
   value: number | null | undefined;
@@ -8,28 +8,16 @@ interface Props {
   unit?: string;
 }
 
-/** A value with its interval; deterministic values say so explicitly (never a bare number). */
-export function IntervalValue({ value, low, high, unit }: Props) {
+/** A value with its interval, for example "0.42 (0.31–0.55)"; never a bare number. */
+export function IntervalValue({ value, low, high, unit = "" }: Props) {
   const { t, lang } = useT();
+  const text = intervalText(t, lang, value, low, high, unit);
   if (value === null || value === undefined) {
-    return <span className="muted">{t("result.not_available")}</span>;
-  }
-  const suffix = unit && unit !== "1" ? ` ${unit}` : "";
-  if (low === high && low === value) {
-    return (
-      <span>
-        {num(value, lang)}
-        {suffix} <span className="muted">({t("result.deterministic")})</span>
-      </span>
-    );
+    return <span className="muted">{text}</span>;
   }
   return (
-    <span>
-      {num(value, lang)}
-      {suffix}{" "}
-      <span className="muted">
-        [{num(low, lang)} – {num(high, lang)}] {t("result.interval_90")}
-      </span>
+    <span data-testid="interval" title={t("result.interval_90")}>
+      {text}
     </span>
   );
 }

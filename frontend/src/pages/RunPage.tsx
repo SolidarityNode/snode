@@ -7,14 +7,22 @@ import { canEdit, useSession } from "../app/session";
 import { DiagnosticBanner } from "../components/DiagnosticBanner";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { IntervalValue } from "../components/IntervalValue";
-import { Legend } from "../components/Legend";
+import { MapOptions, type MapOptionsValue } from "../components/MapOptions";
 import { RunStatus } from "../components/RunStatus";
 import { ResultSelectors } from "../components/ResultSelectors";
 import { defaultSelection, type Selection } from "../components/selection";
-import { label, num } from "../components/labels";
+import { ScaleLegend } from "../components/ScaleLegend";
+import { intervalText, isProbability, label, num } from "../components/labels";
 import { useT } from "../i18n/context";
 import { MapView, type MapLayer } from "../map/MapView";
-import { COLOURS, SEQUENTIAL, classBreaks, qualityOverlay, sequentialColour } from "../map/styles";
+import {
+  intervalWidth,
+  qualityOverlay,
+  resultStyle,
+  scaleColour,
+  valueScale,
+  widthScale,
+} from "../map/styles";
 
 type Run = Schemas["RunOut"];
 type Row = Schemas["ResultRow"];
@@ -35,6 +43,7 @@ export function RunPage() {
   const [changes, setChanges] = useState<Record<string, unknown>[]>([]);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [siblings, setSiblings] = useState<Run[]>([]);
+  const [options, setOptions] = useState<MapOptionsValue>({ uncertainty: false, quality: false });
 
   const load = useCallback(() => {
     unwrap(api.GET("/runs/{run_id}", { params: { path: { run_id: runId } } }))
@@ -125,41 +134,72 @@ export function RunPage() {
     [rows, selection],
   );
   const indicator = run?.indicators.find((i) => i.id === selection?.indicator);
-  const breaks = classBreaks(
-    visible.map((r) => r.value).filter((v): v is number => v !== null),
-    SEQUENTIAL.length,
+  const unitOfMeasure = indicator?.unit ?? "";
+  const probability = isProbability(indicator);
+  const scale = useMemo(
+    () =>
+      valueScale(
+        visible.map((r) => r.value).filter((v): v is number => v !== null),
+        probability,
+      ),
+    [visible, probability],
   );
+  const widths = useMemo(
+    () => visible.map((r) => intervalWidth(r.low, r.high)).filter((w): w is number => w !== null),
+    [visible],
+  );
+  const wScale = useMemo(() => widthScale(widths), [widths]);
+  const quality = useMemo(
+    () =>
+      new Map(
+        (units?.features ?? []).map((f) => [String(f.id), String(f.properties?.quality ?? "")]),
+      ),
+    [units],
+  );
+  const lowQuality = visible.filter((r) =>
+    ["estimated", "open_data"].includes(quality.get(r.unit_id) ?? ""),
+  ).length;
 
-  const mapLayers = useMemo<MapLayer[]>(() => {
-    if (!units) return [];
+  const mapLayers = useMemo(() => {
+    if (!units) return { values: [] as MapLayer[], widths: [] as MapLayer[] };
     const byUnit = new Map(visible.map((r) => [r.unit_id, r]));
-    const style = (f: Feature) => {
+    const tooltip = (f: Feature) => {
       const row = byUnit.get(String(f.id));
-      const warned = row?.edge_effect_warning === true;
-      return {
-        color: warned ? COLOURS.orange : COLOURS.dark,
-        weight: warned ? 4 : 1,
-        fillColor: row?.value != null ? sequentialColour(row.value, breaks) : "#d9d9d9",
-        fillOpacity: 0.8,
-        dashArray: row ? "" : "6 4",
-      };
+      if (!row) return `${String(f.id)}: ${t("results.not_reported")}`;
+      const text = intervalText(t, lang, row.value, row.low, row.high, unitOfMeasure);
+      const warn = row.edge_effect_warning ? ` ⚠ ${t("results.edge_effect")}` : "";
+      return `${row.unit_name}: ${text}${warn}`;
     };
-    return [
-      {
-        id: "results",
-        data: units,
-        style,
-        tooltip: (f) => {
-          const row = byUnit.get(String(f.id));
-          return row
-            ? `${String(f.id)}: ${num(row.value, lang)}${row.edge_effect_warning ? ` ⚠ ${t("results.edge_effect")}` : ""}`
-            : `${String(f.id)}: ${t("results.not_reported")}`;
-        },
+    const layer = (id: string, fill: (r: Row) => string, tip = tooltip): MapLayer => ({
+      id,
+      data: units,
+      style: (f: Feature) => {
+        const row = byUnit.get(String(f.id));
+        return resultStyle(!!row, row?.edge_effect_warning === true, row ? fill(row) : "");
       },
-      { id: "quality", data: units, style: qualityOverlay, interactive: false },
-    ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- breaks derive from visible
-  }, [units, visible, lang, t]);
+      tooltip: tip,
+    });
+    const qualityLayer: MapLayer[] = options.quality
+      ? [{ id: "quality", data: units, style: qualityOverlay, interactive: false }]
+      : [];
+    return {
+      values: [layer("results", (r) => scaleColour(scale, r.value)), ...qualityLayer],
+      widths: [
+        layer(
+          "widths",
+          (r) => scaleColour(wScale, intervalWidth(r.low, r.high)),
+          (f) => {
+            const row = byUnit.get(String(f.id));
+            const width = row ? intervalWidth(row.low, row.high) : null;
+            return width === null
+              ? tooltip(f)
+              : `${tooltip(f)} · ${t("results.width", { value: num(width, lang) })}`;
+          },
+        ),
+        ...qualityLayer,
+      ],
+    };
+  }, [units, visible, scale, wScale, options.quality, unitOfMeasure, lang, t]);
 
   if (!run) {
     return (
@@ -217,31 +257,59 @@ export function RunPage() {
               {t("results.edge_effect_units", { units: run.edge_effect_units.join(", ") })}
             </p>
           )}
-          <MapView
-            label={t("run.map_label")}
-            layers={mapLayers}
-            basemap={config?.basemap ?? "blank"}
-          />
-          <Legend
-            title={t("legend.value_title", {
-              indicator: label(t, "indicator", selection.indicator),
-              unit: indicator?.unit ?? "",
-            })}
-            items={[
-              ...SEQUENTIAL.map((c, i) => ({
-                colour: c,
-                label:
-                  i === 0
-                    ? `≤ ${num(breaks[0], lang)}`
-                    : i >= breaks.length
-                      ? `> ${num(breaks[breaks.length - 1], lang)}`
-                      : `${num(breaks[i - 1], lang)} – ${num(breaks[i], lang)}`,
-              })).slice(0, Math.max(1, breaks.length + 1)),
-              { colour: "#d9d9d9", dashed: true, label: t("legend.not_reported") },
-              { colour: "#ffffff", outline: COLOURS.orange, label: t("legend.edge_effect") },
-              { pattern: "dots" as const, label: t("legend.open_data") },
-            ]}
-          />
+          <MapOptions value={options} onChange={setOptions} />
+          <div className={options.uncertainty ? "compare-grid" : ""}>
+            <div>
+              <MapView
+                label={t("run.map_label")}
+                layers={mapLayers.values}
+                basemap={config?.basemap ?? "blank"}
+              />
+              <ScaleLegend
+                testId="value-legend"
+                title={
+                  probability
+                    ? t("legend.probability_title", {
+                        indicator: label(t, "indicator", selection.indicator),
+                      })
+                    : t("legend.value_title", {
+                        indicator: label(t, "indicator", selection.indicator),
+                        unit: unitOfMeasure,
+                      })
+                }
+                scale={scale}
+                quality={options.quality}
+              />
+            </div>
+            {options.uncertainty && (
+              <div data-testid="uncertainty-map">
+                <h3>{t("results.uncertainty_title")}</h3>
+                <MapView
+                  label={t("results.uncertainty_map_label")}
+                  layers={mapLayers.widths}
+                  basemap={config?.basemap ?? "blank"}
+                />
+                <ScaleLegend
+                  testId="uncertainty-legend"
+                  title={t("legend.uncertainty_title", {
+                    indicator: label(t, "indicator", selection.indicator),
+                    unit: unitOfMeasure,
+                  })}
+                  scale={wScale}
+                  quality={options.quality}
+                />
+                {widths.every((w) => w === 0) && (
+                  <p className="muted">{t("results.no_uncertainty")}</p>
+                )}
+              </div>
+            )}
+          </div>
+          <p className="muted">{t("legend.central_value_note")}</p>
+          {!options.quality && lowQuality > 0 && (
+            <p className="muted" data-testid="quality-hidden">
+              {t("results.quality_hidden", { count: lowQuality })}
+            </p>
+          )}
           <table data-testid="results-table">
             <caption>
               {t("results.table_caption", {
@@ -264,12 +332,7 @@ export function RunPage() {
                 <tr key={r.unit_id} data-unit={r.unit_id}>
                   <th scope="row">{r.unit_name}</th>
                   <td>
-                    <IntervalValue
-                      value={r.value}
-                      low={r.low}
-                      high={r.high}
-                      unit={indicator?.unit ?? ""}
-                    />
+                    <IntervalValue value={r.value} low={r.low} high={r.high} unit={unitOfMeasure} />
                   </td>
                   <td>{r.baseline === null ? "—" : num(r.baseline, lang)}</td>
                   <td>
@@ -279,7 +342,18 @@ export function RunPage() {
                       t("results.no")
                     )}
                   </td>
-                  <td>{r.edge_effect_warning ? `⚠ ${t("results.edge_effect")}` : ""}</td>
+                  <td>
+                    {[
+                      r.edge_effect_warning ? `⚠ ${t("results.edge_effect")}` : "",
+                      ["estimated", "open_data"].includes(quality.get(r.unit_id) ?? "")
+                        ? t("results.quality_mark", {
+                            quality: label(t, "quality", quality.get(r.unit_id)),
+                          })
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </td>
                 </tr>
               ))}
             </tbody>

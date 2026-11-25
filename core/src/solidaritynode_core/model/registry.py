@@ -46,7 +46,9 @@ class IndicatorSpec:
     Attributes:
         id: Indicator id (for example ``diagnostic_noise``).
         label: Human-readable label.
-        unit: Unit of measure (for example ``min`` or ``count``).
+        unit: Unit of measure (for example ``min`` or ``count``). Use ``probability`` for
+            outputs that are probabilities in [0, 1]: the frontend then shows them on a fixed
+            0–1 scale labelled as a probability (ADR 0007).
         deterministic: ``True`` when the value carries no uncertainty (interval equals value).
         group_dependent: ``False`` when the value is the same for every group (it is still
             reported per group to keep the unit of analysis, AGENTS.md invariant 1).
