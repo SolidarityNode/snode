@@ -102,6 +102,15 @@ git commit -s -m "feat(core): add travel time interface"
 
 The sign-off certifies the [Developer Certificate of Origin](https://developercertificate.org/): you wrote the change or have the right to submit it under the project licence (AGPL-3.0). The `dco` CI check rejects PRs with unsigned commits. Commits by Dependabot are exempt, since it cannot sign off. To fix the last commit: `git commit --amend -s --no-edit`; for several: `git rebase --signoff main`.
 
+### Documentation and changelog
+
+- Every PR that changes behaviour adds a line under **Unreleased** in [`CHANGELOG.md`](CHANGELOG.md) and updates the user guide page it affects ([`docs/user-guide/`](docs/user-guide/index.md)). Reason: users read the guide and the release notes, not the diff.
+- Diagrams are Mermaid code blocks, updated in the same PR as the change they describe. Reason: they render on GitHub and on the site, and they can be reviewed as text.
+- Link instead of copying: issues and plans live in GitHub ([Kintsugi](https://github.com/orgs/SolidarityNode/projects/6)), decisions in `docs/adr/`, open questions in `docs/specs/open-questions.md`.
+- Generated blocks and files (ADR index, specs index, open-question counts, `docs/architecture/dependencies.md`) are rebuilt with `make docs-generate` and `make deps-report`; CI fails when they are stale.
+- Preview the site with `make docs` (http://127.0.0.1:8001); `make docs-build` builds it with `--strict`. Navigation is in [`mkdocs.yml`](mkdocs.yml); never move a file only for the site.
+- Releases: [`docs/releasing.md`](docs/releasing.md).
+
 ### Pull requests
 
 - Fill in every section of the PR template, including the acceptance-criteria checklist, the dependency/licence table and the data/privacy checklist.

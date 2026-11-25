@@ -46,4 +46,6 @@ Closes #
 - [ ] Domain invariants in `AGENTS.md` still hold
 - [ ] Public API documented (docstrings cite the spec section)
 - [ ] Docs, specs cross-reference and ADRs updated where behaviour or decisions changed
+- [ ] Behaviour changed: a line under **Unreleased** in `CHANGELOG.md` and the affected user guide page (`docs/user-guide/`) updated
+- [ ] Diagrams are Mermaid and match the change; `make docs-build` passes when docs changed
 - [ ] Commits follow Conventional Commits and are signed off (`git commit -s`)
