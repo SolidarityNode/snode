@@ -41,7 +41,8 @@ Closes #
 
 ## Checklist
 
-- [ ] `make lint test` passes locally
+- [ ] `make lint test` passes locally (unit and integration tests; the end-to-end test runs in CI,
+      or locally with `make test-e2e`)
 - [ ] Domain invariants in `AGENTS.md` still hold
 - [ ] Public API documented (docstrings cite the spec section)
 - [ ] Docs, specs cross-reference and ADRs updated where behaviour or decisions changed

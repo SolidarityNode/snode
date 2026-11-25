@@ -74,6 +74,10 @@ commit and `APP_ENV`, plus the commit the frontend was built from. They must mat
 commit of the PR (`git rev-parse --short=12 HEAD`). A `-dirty` suffix means the code on your machine
 has local changes.
 
+**Automated tests first.** `make lint test` (unit and integration tests) is run by the author;
+the end-to-end test runs in CI (job `e2e`) and locally with `make test-e2e`. Check that every
+CI job of the PR is green before starting UAT.
+
 Then follow the PR's "How to test (UAT)" steps. Checklists so far:
 
 - [`00-bootstrap.md`](00-bootstrap.md): the skeleton (partly superseded).

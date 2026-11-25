@@ -2,8 +2,8 @@
 
 Database tests create a fresh database on the server given by ``SOLIDARITYNODE_TEST_DATABASE_URL``
 (default: the compose ``db`` service on 127.0.0.1:5432 with the development credentials), apply
-every Alembic migration, and drop it at the end. ``make test-backend`` starts the ``db`` service
-first; CI uses a PostGIS service container.
+every Alembic migration, and drop it at the end. ``make test-backend`` starts no containers: run
+``make test-db`` (or ``make up``) first. CI uses a PostGIS service container.
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ def database_url() -> Iterator[str]:
     except Exception as exc:  # pragma: no cover - environment problem, explained to the developer
         pytest.fail(
             f"PostGIS for tests is not reachable at {server.render_as_string(hide_password=True)}"
-            f" ({type(exc).__name__}). Start it with `make test-db`, or set "
+            f" ({type(exc).__name__}). Start it with `make test-db` (or `make up`), or set "
             "SOLIDARITYNODE_TEST_DATABASE_URL.",
             pytrace=False,
         )

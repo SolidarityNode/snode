@@ -22,7 +22,9 @@ Requirements: `git`, `make`, [`uv`](https://docs.astral.sh/uv/), Node.js 26 with
 
 ```bash
 make setup        # check tools, create .env if missing, install locked dependencies
-make lint test    # must pass before every commit
+make test-db      # once per session: PostGIS for the backend tests (or keep `make up` running)
+make lint test    # must pass before every commit (unit and integration tests, no containers)
+make test-e2e     # end-to-end test in a throw-away stack; also runs in CI on every PR
 make up           # start db, backend and frontend (Podman by default)
 make down
 ```

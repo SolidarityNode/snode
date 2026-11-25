@@ -95,13 +95,16 @@ lint-frontend:
 
 # --- Tests ---------------------------------------------------------------------------------
 
-test: test-core test-backend test-frontend test-e2e ## Run all tests (unit, backend on PostGIS, end-to-end)
+# `make test` is fast and needs no container engine: unit and integration tests only. The
+# end-to-end test runs with `make test-e2e` and in CI.
+test: test-core test-backend test-frontend ## Unit and integration tests (backend needs PostGIS: make test-db)
 
 test-core:
 	cd core && $(UV_RUN) pytest
 
-# Backend tests need PostGIS: they create and drop a throw-away database. Locally the compose
-# `db` service is started; set SOLIDARITYNODE_TEST_DATABASE_URL to use another server (CI).
+# Backend tests need PostGIS: they create and drop a throw-away database on the server given by
+# SOLIDARITYNODE_TEST_DATABASE_URL (default: the compose `db` service on 127.0.0.1:5432, as left
+# running by `make up` or `make test-db`). `make test-backend` does not start containers.
 test-db: ## Start the database used by the backend tests (skipped if SOLIDARITYNODE_TEST_DATABASE_URL is set)
 	@if [ -z "$${SOLIDARITYNODE_TEST_DATABASE_URL:-}" ]; then \
 	  $(MAKE) --no-print-directory check-engine && $(COMPOSE) up -d db && \
@@ -110,7 +113,7 @@ test-db: ## Start the database used by the backend tests (skipped if SOLIDARITYN
 	  done; echo "Database not ready." >&2; exit 1; \
 	fi
 
-test-backend: test-db
+test-backend:
 	cd backend && $(UV_RUN) pytest
 
 test-frontend:
