@@ -1,0 +1,10 @@
+/* Version banners (tools/docs/overrides/main.html): links readable on the dark and the warning
+   bar, in the bar's own text colour and underlined (not colour alone). */
+.md-banner .sn-banner a,
+[data-md-component="outdated"] .md-banner a {
+  color: inherit;
+  text-decoration: underline;
+}
+.md-banner .sn-banner {
+  margin: 0;
+}

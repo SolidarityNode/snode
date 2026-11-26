@@ -7,6 +7,10 @@
    outside ``docs/`` (code, ``LICENSE``, ``core/AGENTS.md`` ...) becomes a link to the file
    on GitHub at ``DOCS_GIT_REF`` (default ``main``; the docs workflow sets the release tag).
 3. The platform version from ``VERSION`` is shown in the footer (``extra.platform_version``).
+   The version banners (``tools/docs/overrides/main.html``, docs/releasing.md) get
+   ``extra.docs_channel`` (``release`` when ``DOCS_GIT_REF`` is a release tag ``vX.Y.Z``, as the
+   docs workflow sets it for tags; ``dev`` otherwise, including local builds) and
+   ``extra.docs_release`` (``vX.Y`` from ``VERSION``).
 4. Bilingual site (mkdocs-static-i18n, ``page.md`` English, ``page.el.md`` Greek, served under
    ``el/``). The plugin rebuilds every file from ``docs/`` once per language, so the root pages
    of (1) are added after it and made into its kind of file. The language switcher links are
@@ -52,6 +56,9 @@ def on_config(config: MkDocsConfig) -> MkDocsConfig:
     """Expose the platform version and the git ref that GitHub links point to."""
     version = (_root(config) / "VERSION").read_text(encoding="utf-8").strip()
     config.extra["platform_version"] = version
+    ref = os.environ.get("DOCS_GIT_REF", "main")
+    config.extra["docs_channel"] = "release" if re.fullmatch(r"v\d+\.\d+\.\d+", ref) else "dev"
+    config.extra["docs_release"] = "v" + ".".join(version.split(".")[:2])
     config.copyright = (
         f"SolidarityNode {version} · AGPL-3.0-or-later · synthetic data only in this repository"
     )
