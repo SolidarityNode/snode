@@ -122,6 +122,7 @@ def test_onboarding_b_marks_a_for_update_and_b_arrives_as_verified_buffer(
     assert pending["update_available"] is True
     assert pending["pending"]["next_version"] == "1.1.0"
     assert "(M-B): 1 added" in pending["pending"]["changelog"]
+    assert "feature(s) added" not in pending["pending"]["changelog"]  # B's base step: none in A
 
     second = _publish(hub_db, hub_settings, hub_worker, "study-area-a")
     assert second["version"] == "1.1.0"

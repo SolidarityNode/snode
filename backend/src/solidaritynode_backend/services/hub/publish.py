@@ -310,7 +310,7 @@ def pending_changes(
         for r in db.execute(
             text(
                 "SELECT r.id, r.kind, r.municipality_id, r.summary, r.finished_at, "
-                "r.affected_municipalities, c.is_correction "
+                "r.affected_municipalities, r.outputs, c.is_correction "
                 "FROM hub_processing_records r LEFT JOIN hub_changesets c ON c.record_id = r.id "
                 "WHERE r.kind IN ('onboarding_base', 'facility_changeset') "
                 "AND r.status = 'succeeded' AND r.changed AND r.id > :since "
@@ -320,6 +320,24 @@ def pending_changes(
             {"since": since, "until": until_record, "area": [*core, *buffer]},
         ).mappings()
     ]
+    # A base step counts only if it touched a feature of this package (a neighbour's onboarding
+    # also adds features around the neighbour that never enter this study area).
+    in_package = {str(f["feature_id"]) for rows in now.values() for f in rows}
+
+    def touches(record: Mapping[str, Any]) -> bool:
+        if record["kind"] != "onboarding_base":
+            return True
+        layers = (record.get("outputs") or {}).get("layers", {})
+        return any(
+            fid in in_package
+            for entry in layers.values()
+            for key in ("added", "changed", "closed")
+            for fid in entry.get(key, [])
+        )
+
+    records = [r for r in records if touches(r)]
+    for r in records:
+        r.pop("outputs", None)
     changed = last is None or bool(features) or bool(coverage)
     if last is None:
         bump, version = "initial", "1.0.0"
