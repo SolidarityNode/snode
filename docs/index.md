@@ -167,7 +167,7 @@ Each paper adds an analytical tool on top of the foundation, in the order 1 → 
 The method still has open questions; code never resolves them ([how they are handled](../CONTRIBUTING.md#how-open-questions-are-handled)). Current state, counted from the summary table of [`open-questions.md`](specs/open-questions.md):
 
 <!-- BEGIN GENERATED: oq-counts (scripts/docs_indexes.py) -->
-30 questions: **10 decided**, 2 partly decided, 1 proposed, **17 open**.
+41 questions: **14 decided**, 2 partly decided, 1 proposed, **24 open**.
 <!-- END GENERATED: oq-counts -->
 
 ## Background

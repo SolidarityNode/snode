@@ -125,4 +125,4 @@ needs no new library to read or write.
   7 municipal communities are too coarse to show differences in access within it. Which
   spatial unit to use (census tracts, building blocks, a grid) is a method choice for the
   Paper 1 spec (Spec 01), not a package format question; the package format already carries
-  whatever unit the spec chooses.
+  whatever unit the spec chooses. Tracked as OQ-37.
