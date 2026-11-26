@@ -125,6 +125,7 @@ MUNICIPALITY = [
     CREATE TABLE hub_link (
         id smallint PRIMARY KEY DEFAULT 1 CHECK (id = 1),
         study_area_id text,
+        installation_id text,
         installation_name text,
         last_sync_at timestamptz,
         last_contact_at timestamptz,

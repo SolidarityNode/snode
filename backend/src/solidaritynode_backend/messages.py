@@ -224,6 +224,34 @@ HUB_MESSAGES: Final[Mapping[str, str]] = MappingProxyType(
         "hub.installation.not_found": "installation {id} not found",
         "hub.installation.exists": "an installation named {name} already exists",
         "hub.installation.unauthorised": "missing, unknown or revoked installation token",
+        # Submissions from this municipal installation to the hub (ADR 0014 Part A)
+        "submission.not_found": "submission {id} not found",
+        "submission.not_draft": "submission {id} has already been sent",
+        "submission.has_errors": (
+            "submission {id} has errors in its validation report; fix the file and check it again"
+        ),
+        "submission.no_hub": (
+            "no hub connection is configured; export a submission file and give it to the hub"
+        ),
+        "submission.no_token": (
+            "an installation token and one successful contact with the hub are needed to sign "
+            "a submission file"
+        ),
+        "submission.only_submitter": "only who made the submission, or an administrator",
+        "submission.not_withdrawable": "submission {id} can no longer be withdrawn",
+        "submission.withdraw_requested": (
+            "withdrawal requested; it reaches the hub with the next sync"
+        ),
+        "submission.withdraw_refused": (
+            "the hub refused the withdrawal: it has started reviewing the submission"
+        ),
+        "submission.hub_unreachable": "the hub could not be reached: {detail}",
+        "submission.hub_refused": "the hub answered with status {status}",
+        "submission.no_such_version": "the hub has not published version {version}",
+        "submission.checksum_mismatch": (
+            "the downloaded package {version} does not match the SHA-256 the hub published; "
+            "it was not kept"
+        ),
     }
 )
 """Hub message templates by code (ADR 0012); part of :data:`BACKEND_MESSAGES`."""

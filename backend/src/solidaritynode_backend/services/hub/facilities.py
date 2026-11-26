@@ -72,6 +72,7 @@ __all__ = [
     "list_changesets",
     "list_facilities",
     "manual_changeset",
+    "manual_rows",
     "reject_changeset",
     "report_export",
     "template_file",
@@ -1354,6 +1355,43 @@ def create_import(
     return changeset_id
 
 
+def manual_rows(
+    current: Mapping[str, Any] | None,
+    municipality_id: str,
+    facility_id: str | None,
+    values: Mapping[str, Any],
+    services: Sequence[Mapping[str, Any]],
+    close: bool,
+) -> list[tuple[int, dict[str, str]]]:
+    """Turn an edit form into template rows (one per service), in both roles.
+
+    Every field the form leaves out keeps the facility's current value (``current``, a state
+    from a :class:`FeatureSource`), including its location and services.
+    """
+    base = {c: "" for c in COLUMNS}
+    current_services: dict[str, dict[str, Any]] = {}
+    if current is not None:
+        base.update({k: _cell(current.get(k)) for k in FACILITY_FIELDS})
+        base["quality"] = str(current.get("quality") or "")
+        xy = current.get("_xy") or ["", ""]
+        base.update({"x": _cell(xy[0]), "y": _cell(xy[1])})
+        current_services = dict(current.get("services") or {})
+    base.update({k: _cell(v) for k, v in values.items() if k in COLUMNS})
+    base["facility_id"] = facility_id or ""
+    base["municipality"] = municipality_id
+    if close:
+        base["status"] = "closed"
+    chosen = list(services) or [
+        {"service_id": sid, **inputs} for sid, inputs in sorted(current_services.items())
+    ]
+    rows: list[tuple[int, dict[str, str]]] = []
+    for n, service in enumerate(chosen or [{}], start=1):
+        row = dict(base)
+        row.update({k: _cell(v) for k, v in service.items() if k in COLUMNS})
+        rows.append((n, row))
+    return rows
+
+
 def manual_changeset(
     db: Session,
     settings: Settings,
@@ -1374,34 +1412,12 @@ def manual_changeset(
     Raises:
         HubError: If ``facility_id`` does not exist.
     """
-    base = {c: "" for c in COLUMNS}
-    current_services: dict[str, dict[str, Any]] = {}
+    current = None
     if facility_id:
-        current = db.execute(
-            text(
-                "SELECT properties, quality, ST_X(geom) AS x, ST_Y(geom) AS y FROM hub_features "
-                "WHERE layer = 'facilities' AND feature_id = :f"
-            ),
-            {"f": facility_id},
-        ).one_or_none()
+        current = HubFeatureSource(db, settings).existing(municipality_id).get(facility_id)
         if current is None:
             raise HubError("hub.error.facility_not_found", status=404, id=facility_id)
-        base.update({k: _cell(current.properties.get(k)) for k in FACILITY_FIELDS})
-        base.update({"quality": current.quality, "x": _cell(current.x), "y": _cell(current.y)})
-        current_services = dict(current.properties.get("services") or {})
-    base.update({k: _cell(v) for k, v in values.items() if k in COLUMNS})
-    base["facility_id"] = facility_id or ""
-    base["municipality"] = municipality_id
-    if close:
-        base["status"] = "closed"
-    chosen = list(services) or [
-        {"service_id": sid, **inputs} for sid, inputs in sorted(current_services.items())
-    ]
-    rows: list[tuple[int, dict[str, str]]] = []
-    for n, service in enumerate(chosen or [{}], start=1):
-        row = dict(base)
-        row.update({k: _cell(v) for k, v in service.items() if k in COLUMNS})
-        rows.append((n, row))
+    rows = manual_rows(current, municipality_id, facility_id, values, services, close)
     request = ImportRequest(
         municipality_id, source="manual edit", comment=comment, attribution="Manual edit in the hub"
     )

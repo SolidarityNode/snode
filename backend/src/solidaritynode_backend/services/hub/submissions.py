@@ -345,6 +345,7 @@ def installation_packages(db: Session, inst: Mapping[str, Any]) -> dict[str, Any
             )
     core = study_area_municipalities(db, dict(area))[0] if area is not None else []
     return {
+        "installation_id": str(inst["id"]),
         "installation": inst["name"],
         "study_area_id": inst["study_area_id"],
         "study_area_registered": area is not None,

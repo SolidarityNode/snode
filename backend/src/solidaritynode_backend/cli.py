@@ -115,6 +115,10 @@ def _import(settings: Settings, source: Path, yes: bool, preview_only: bool) -> 
                 print("Aborted; nothing imported.")
                 return 1
         outcome = import_package(db, settings, content, None)
+        if settings.deployment_mode == "municipality":
+            from solidaritynode_backend.services.submissions import mark_imported
+
+            mark_imported(db)
         db.commit()
     print(f"Imported as data version {outcome.data_version_id} (now active).")
     print(f"Baseline run queued: {outcome.baseline_run_id}")

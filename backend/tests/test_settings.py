@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 from pydantic import ValidationError
 
@@ -139,3 +141,38 @@ def test_check_config_ok(
     monkeypatch.setenv("APP_ENV", "development")
     assert main(["check-config"]) == 0
     assert capsys.readouterr().out == "configuration OK (APP_ENV=development)\n"
+
+
+def test_hub_url_must_be_https_in_production() -> None:
+    from solidaritynode_backend.config import Settings
+
+    base = {
+        "app_env": "production",
+        "git_commit": "abc123",
+        "session_cookie_secure": True,
+        "database_url": "postgresql+psycopg://u:secret@db/x",
+    }
+    with pytest.raises(ValueError, match="needs an https SOLIDARITYNODE_HUB_URL"):
+        Settings(**base, hub_url="http://hub.example.org/api")
+    assert Settings(**base, hub_url="https://hub.example.org/api").hub_url
+    assert Settings(**base, hub_url="http://localhost:8180/api").hub_url
+    assert Settings(app_env="development", hub_url="http://sn-hub:8080/api").hub_url
+
+
+def test_worker_ticks_only_with_a_hub_link(engine: Any, settings: Any) -> None:
+    from pydantic import SecretStr
+
+    from solidaritynode_backend.worker import build_worker
+
+    assert build_worker(settings, engine).periodic == []
+    linked = settings.model_copy(
+        update={
+            "hub_url": "http://hub.test/api",
+            "hub_token": SecretStr("t"),
+            "hub_sync_seconds": 300,
+        }
+    )
+    ((interval, _),) = build_worker(linked, engine).periodic
+    assert interval == 300
+    off = linked.model_copy(update={"hub_sync": False})
+    assert build_worker(off, engine).periodic == []

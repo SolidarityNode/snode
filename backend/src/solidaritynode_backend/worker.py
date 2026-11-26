@@ -128,6 +128,9 @@ class Worker:
         heartbeat_s: Seconds between lease renewals of the running job.
         stale_s: A running job whose heartbeat is older than this is failed by any worker.
         max_runtime_s: Optional maximum runtime in seconds per job kind.
+        periodic: ``(interval in seconds, function)`` pairs the worker calls while idle, at most
+            once per interval each (for example queuing the hub sync, ADR 0006 and 0014). This
+            is a tick, not a general scheduler.
     """
 
     def __init__(
@@ -139,8 +142,10 @@ class Worker:
         heartbeat_s: float = 10.0,
         stale_s: float = 120.0,
         max_runtime_s: Mapping[str, float] | None = None,
+        periodic: list[tuple[float, Callable[[], None]]] | None = None,
     ) -> None:
         """Configure the worker."""
+        self.periodic = list(periodic or [])
         self.engine = engine
         self.name = name
         self.handlers = dict(handlers)
@@ -272,10 +277,18 @@ class Worker:
     def serve(self, stop: Event, poll_s: float) -> None:
         """Poll the queue until ``stop`` is set, failing stale jobs every ``heartbeat_s``."""
         last_sweep = float("-inf")
+        last_tick = [float("-inf")] * len(self.periodic)
         while not stop.is_set():
             if time.monotonic() - last_sweep >= self.heartbeat_s:
                 self.fail_stale()
                 last_sweep = time.monotonic()
+            for i, (interval, function) in enumerate(self.periodic):
+                if time.monotonic() - last_tick[i] >= interval:
+                    last_tick[i] = time.monotonic()
+                    try:
+                        function()
+                    except Exception:  # a failed tick must not stop the worker
+                        log.warning("periodic task failed", exc_info=True)
             if not self.run_once():
                 stop.wait(poll_s)
 
@@ -290,6 +303,20 @@ def build_worker(settings: Settings, engine: Engine | None = None) -> Worker:
 
         handlers[BASE_JOB_KIND] = partial(run_base, engine, settings)
         handlers[PUBLISH_JOB_KIND] = partial(run_publish, engine, settings)
+    periodic: list[tuple[float, Callable[[], None]]] = []
+    if settings.deployment_mode == "municipality":
+        from solidaritynode_backend.services.submissions import (
+            DOWNLOAD_JOB_KIND,
+            SYNC_JOB_KIND,
+            queue_sync_periodic,
+            run_download,
+            run_sync,
+        )
+
+        handlers[SYNC_JOB_KIND] = partial(run_sync, engine, settings)
+        handlers[DOWNLOAD_JOB_KIND] = partial(run_download, engine, settings)
+        if settings.hub_link_enabled:
+            periodic.append((settings.hub_sync_seconds, partial(queue_sync_periodic, engine)))
     return Worker(
         engine,
         settings.worker_name,
@@ -297,6 +324,7 @@ def build_worker(settings: Settings, engine: Engine | None = None) -> Worker:
         heartbeat_s=settings.job_heartbeat_seconds,
         stale_s=settings.job_stale_seconds,
         max_runtime_s=settings.max_runtimes(),
+        periodic=periodic,
     )
 
 

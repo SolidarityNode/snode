@@ -73,6 +73,18 @@
             ],
             "description": "Number of facilities that will be closed (complete list)",
             "title": "Confirm Close"
+          },
+          "resolutions": {
+            "additionalProperties": {
+              "enum": [
+                "municipality",
+                "hub"
+              ],
+              "type": "string"
+            },
+            "description": "Per conflicting item number: apply the municipality's change or keep the hub's value (ADR 0014 A8)",
+            "title": "Resolutions",
+            "type": "object"
           }
         },
         "title": "ApproveIn",
@@ -241,6 +253,19 @@
             ],
             "title": "Before"
           },
+          "conflict": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Municipal submissions: the facility changed in the hub since the municipality's package (fields, municipality's, hub's and proposed values)",
+            "title": "Conflict"
+          },
           "facility_id": {
             "anyOf": [
               {
@@ -266,6 +291,21 @@
           "label": {
             "title": "Label",
             "type": "string"
+          },
+          "resolution": {
+            "anyOf": [
+              {
+                "enum": [
+                  "municipality",
+                  "hub"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution"
           },
           "rows": {
             "items": {
@@ -294,6 +334,17 @@
           "attribution": {
             "title": "Attribution",
             "type": "string"
+          },
+          "base_package_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Package Version"
           },
           "comment": {
             "title": "Comment",
@@ -383,6 +434,18 @@
             "title": "Id",
             "type": "integer"
           },
+          "installation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Installation Id"
+          },
           "is_correction": {
             "title": "Is Correction",
             "type": "boolean"
@@ -397,7 +460,8 @@
           "kind": {
             "enum": [
               "import",
-              "manual"
+              "manual",
+              "submission"
             ],
             "title": "Kind",
             "type": "string"
@@ -409,6 +473,11 @@
           "municipality_id": {
             "title": "Municipality Id",
             "type": "string"
+          },
+          "offline": {
+            "default": false,
+            "title": "Offline",
+            "type": "boolean"
           },
           "record_id": {
             "anyOf": [
@@ -426,6 +495,18 @@
             "title": "Report",
             "type": "object"
           },
+          "review_started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Started At"
+          },
           "source": {
             "title": "Source",
             "type": "string"
@@ -434,10 +515,45 @@
             "enum": [
               "pending",
               "approved",
-              "rejected"
+              "rejected",
+              "withdrawn"
             ],
             "title": "Status",
             "type": "string"
+          },
+          "submission_uuid": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submission Uuid"
+          },
+          "submitted_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted By"
+          },
+          "submitter_role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitter Role"
           },
           "summary": {
             "anyOf": [
@@ -564,7 +680,8 @@
           "kind": {
             "enum": [
               "import",
-              "manual"
+              "manual",
+              "submission"
             ],
             "title": "Kind",
             "type": "string"
@@ -581,7 +698,8 @@
             "enum": [
               "pending",
               "approved",
-              "rejected"
+              "rejected",
+              "withdrawn"
             ],
             "title": "Status",
             "type": "string"
@@ -748,6 +866,51 @@
           "edge_effect_warning"
         ],
         "title": "CompareRow",
+        "type": "object"
+      },
+      "ConflictOut": {
+        "description": "A conflicting item and how the hub resolved it.",
+        "properties": {
+          "facility_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Facility Id"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "resolution": {
+            "anyOf": [
+              {
+                "enum": [
+                  "municipality",
+                  "hub"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution"
+          }
+        },
+        "required": [
+          "facility_id",
+          "fields",
+          "resolution"
+        ],
+        "title": "ConflictOut",
         "type": "object"
       },
       "CoverageCellOut": {
@@ -1520,6 +1683,222 @@
           "group_dependent"
         ],
         "title": "IndicatorOut",
+        "type": "object"
+      },
+      "InstallationIn": {
+        "description": "Registration of a municipal installation.",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "study_area_id": {
+            "pattern": "^[a-z0-9][a-z0-9-]{1,62}$",
+            "title": "Study Area Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "study_area_id"
+        ],
+        "title": "InstallationIn",
+        "type": "object"
+      },
+      "InstallationInfoOut": {
+        "description": "What the installation's token gives access to.",
+        "properties": {
+          "core_municipalities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Core Municipalities",
+            "type": "array"
+          },
+          "installation": {
+            "title": "Installation",
+            "type": "string"
+          },
+          "installation_id": {
+            "format": "uuid",
+            "title": "Installation Id",
+            "type": "string"
+          },
+          "packages": {
+            "items": {
+              "$ref": "#/components/schemas/InstallationPackageOut"
+            },
+            "title": "Packages",
+            "type": "array"
+          },
+          "study_area_id": {
+            "title": "Study Area Id",
+            "type": "string"
+          },
+          "study_area_registered": {
+            "title": "Study Area Registered",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "installation_id",
+          "installation",
+          "study_area_id",
+          "study_area_registered",
+          "core_municipalities",
+          "packages"
+        ],
+        "title": "InstallationInfoOut",
+        "type": "object"
+      },
+      "InstallationOut": {
+        "description": "A registered installation (never its token).",
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "last_contact_address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Contact Address"
+          },
+          "last_contact_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Contact At"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          },
+          "study_area_id": {
+            "title": "Study Area Id",
+            "type": "string"
+          },
+          "study_area_registered": {
+            "title": "Study Area Registered",
+            "type": "boolean"
+          },
+          "token_issued_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Token Issued At"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "study_area_id",
+          "study_area_registered",
+          "active",
+          "token_issued_at",
+          "revoked_at",
+          "last_contact_at",
+          "last_contact_address",
+          "created_at"
+        ],
+        "title": "InstallationOut",
+        "type": "object"
+      },
+      "InstallationPackageOut": {
+        "description": "A published package version of the installation's study area.",
+        "properties": {
+          "archive_sha256": {
+            "title": "Archive Sha256",
+            "type": "string"
+          },
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "changes": {
+            "title": "Changes",
+            "type": "string"
+          },
+          "changeset_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Changeset Ids",
+            "type": "array"
+          },
+          "created": {
+            "format": "date",
+            "title": "Created",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "created",
+          "published_at",
+          "archive_sha256",
+          "bytes",
+          "changes",
+          "changeset_ids"
+        ],
+        "title": "InstallationPackageOut",
         "type": "object"
       },
       "IntervalOut": {
@@ -4101,6 +4480,229 @@
         "title": "StudyAreaOut",
         "type": "object"
       },
+      "SubmissionIn": {
+        "description": "A submission sent by a municipal installation (personal data already dropped there).",
+        "properties": {
+          "base_package_version": {
+            "title": "Base Package Version",
+            "type": "string"
+          },
+          "based_on": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "description": "Per facility id: its state in the package the change was based on",
+            "title": "Based On",
+            "type": "object"
+          },
+          "comment": {
+            "default": "",
+            "title": "Comment",
+            "type": "string"
+          },
+          "complete_list": {
+            "default": false,
+            "title": "Complete List",
+            "type": "boolean"
+          },
+          "file_name": {
+            "default": "",
+            "title": "File Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_correction": {
+            "default": false,
+            "title": "Is Correction",
+            "type": "boolean"
+          },
+          "municipality_id": {
+            "title": "Municipality Id",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionRowIn"
+            },
+            "maxItems": 5000,
+            "title": "Rows",
+            "type": "array"
+          },
+          "submitted_by": {
+            "description": "Pseudonymous user id",
+            "pattern": "^u-[0-9a-f]{8}$",
+            "title": "Submitted By",
+            "type": "string"
+          },
+          "submitter_role": {
+            "enum": [
+              "analyst",
+              "admin"
+            ],
+            "title": "Submitter Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "municipality_id",
+          "base_package_version",
+          "submitted_by",
+          "submitter_role",
+          "rows"
+        ],
+        "title": "SubmissionIn",
+        "type": "object"
+      },
+      "SubmissionRowIn": {
+        "description": "One sanitised row of the import template.",
+        "properties": {
+          "row": {
+            "title": "Row",
+            "type": "integer"
+          },
+          "values": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Values",
+            "type": "object"
+          }
+        },
+        "required": [
+          "row",
+          "values"
+        ],
+        "title": "SubmissionRowIn",
+        "type": "object"
+      },
+      "SubmissionStatusOut": {
+        "description": "The hub's view of one of the installation's submissions.",
+        "properties": {
+          "changeset_id": {
+            "title": "Changeset Id",
+            "type": "integer"
+          },
+          "comment": {
+            "title": "Comment",
+            "type": "string"
+          },
+          "conflicts": {
+            "items": {
+              "$ref": "#/components/schemas/ConflictOut"
+            },
+            "title": "Conflicts",
+            "type": "array"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/CheckOut"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "errors": {
+            "title": "Errors",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "review_started": {
+            "title": "Review Started",
+            "type": "boolean"
+          },
+          "state": {
+            "enum": [
+              "pending_review",
+              "rejected_by_validation",
+              "approved",
+              "rejected",
+              "withdrawn"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          }
+        },
+        "required": [
+          "id",
+          "changeset_id",
+          "state",
+          "comment",
+          "decided_at",
+          "decided_by",
+          "review_started",
+          "summary",
+          "errors",
+          "entries",
+          "conflicts"
+        ],
+        "title": "SubmissionStatusOut",
+        "type": "object"
+      },
+      "TokenOut": {
+        "description": "A newly issued installation token, shown once.",
+        "properties": {
+          "installation": {
+            "$ref": "#/components/schemas/InstallationOut"
+          },
+          "token": {
+            "description": "Shown only now; store it as SOLIDARITYNODE_HUB_TOKEN",
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "installation",
+          "token"
+        ],
+        "title": "TokenOut",
+        "type": "object"
+      },
       "UserIn": {
         "additionalProperties": false,
         "description": "New user.",
@@ -5003,6 +5605,49 @@
         ]
       }
     },
+    "/hub/changesets/{changeset_id}/review": {
+      "post": {
+        "description": "Record that an administrator started reviewing a municipal submission.\n\nFrom then on the municipality can no longer withdraw it (ADR 0014 A4).",
+        "operationId": "start_review_hub_changesets__changeset_id__review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "changeset_id",
+            "required": true,
+            "schema": {
+              "title": "Changeset Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangesetOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Start Review",
+        "tags": [
+          "hub"
+        ]
+      }
+    },
     "/hub/coverage": {
       "get": {
         "description": "Coverage matrix: municipalities \u00d7 layers with onboarding status (the onboarding list).",
@@ -5423,6 +6068,357 @@
           }
         },
         "summary": "Facility Import",
+        "tags": [
+          "hub"
+        ]
+      }
+    },
+    "/hub/installation/me": {
+      "get": {
+        "description": "The installation, its study area and its published packages.",
+        "operationId": "me_hub_installation_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallationInfoOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Me",
+        "tags": [
+          "hub installation API"
+        ]
+      }
+    },
+    "/hub/installation/packages/{version}/download": {
+      "get": {
+        "description": "Download a published package of the installation's own study area.",
+        "operationId": "download_hub_installation_packages__version__download_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "title": "Version",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/zip": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download",
+        "tags": [
+          "hub installation API"
+        ]
+      }
+    },
+    "/hub/installation/submissions": {
+      "get": {
+        "description": "Status of the installation's own submissions (unknown or others' ids are left out).",
+        "operationId": "submission_statuses_hub_installation_submissions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ids",
+            "required": true,
+            "schema": {
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "maxItems": 500,
+              "title": "Ids",
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SubmissionStatusOut"
+                  },
+                  "title": "Response Submission Statuses Hub Installation Submissions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submission Statuses",
+        "tags": [
+          "hub installation API"
+        ]
+      },
+      "post": {
+        "description": "Receive a submission (idempotent by its id); the hub validates it again.",
+        "operationId": "submit_hub_installation_submissions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionStatusOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit",
+        "tags": [
+          "hub installation API"
+        ]
+      }
+    },
+    "/hub/installation/submissions/{submission_id}/withdraw": {
+      "post": {
+        "description": "Withdraw a submission before the hub starts reviewing it.",
+        "operationId": "withdraw_hub_installation_submissions__submission_id__withdraw_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "submission_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Submission Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionStatusOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Withdraw",
+        "tags": [
+          "hub installation API"
+        ]
+      }
+    },
+    "/hub/installations": {
+      "get": {
+        "description": "Registered municipal installations (tokens are never shown again).",
+        "operationId": "list_installations_hub_installations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InstallationOut"
+                  },
+                  "title": "Response List Installations Hub Installations Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Installations",
+        "tags": [
+          "hub"
+        ]
+      },
+      "post": {
+        "description": "Register an installation for one study area and issue its token (shown once).",
+        "operationId": "register_installation_hub_installations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Register Installation",
+        "tags": [
+          "hub"
+        ]
+      }
+    },
+    "/hub/installations/{installation_id}/revoke": {
+      "post": {
+        "description": "Revoke the installation's token at once.",
+        "operationId": "revoke_token_hub_installations__installation_id__revoke_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "installation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Installation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Revoke Token",
+        "tags": [
+          "hub"
+        ]
+      }
+    },
+    "/hub/installations/{installation_id}/token": {
+      "post": {
+        "description": "Issue a new token (shown once); the previous one stops working at once.",
+        "operationId": "issue_token_hub_installations__installation_id__token_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "installation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Installation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Issue Token",
         "tags": [
           "hub"
         ]
@@ -6049,6 +7045,39 @@
           }
         },
         "summary": "Publish",
+        "tags": [
+          "hub"
+        ]
+      }
+    },
+    "/hub/submission-files": {
+      "post": {
+        "description": "Upload an offline submission file exported by a municipal installation (ADR 0014 A3).",
+        "operationId": "upload_submission_file_hub_submission_files_post",
+        "requestBody": {
+          "content": {
+            "application/zip": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangesetOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Upload Submission File",
         "tags": [
           "hub"
         ]

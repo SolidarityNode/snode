@@ -464,6 +464,7 @@ class InstallationPackageOut(BaseModel):
 class InstallationInfoOut(BaseModel):
     """What the installation's token gives access to."""
 
+    installation_id: uuid.UUID
     installation: str
     study_area_id: str
     study_area_registered: bool

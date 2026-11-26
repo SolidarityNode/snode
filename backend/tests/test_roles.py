@@ -121,7 +121,9 @@ def test_the_other_roles_routes_do_not_exist(mode: str, settings: Any, users: An
     assert client.get(ROLE_PATHS[other]).status_code == 404
     paths = set(app.openapi()["paths"])
     prefix = ROLE_PATHS[other].rsplit("/", 1)[0]
-    assert not any(p.startswith(prefix) for p in paths), "other role's routes are not mounted"
+    assert not any(p == prefix or p.startswith(prefix + "/") for p in paths), (
+        "other role's routes are not mounted"
+    )
     assert any(p.startswith(ROLE_PATHS[mode].rsplit("/", 1)[0]) for p in paths)
 
 
