@@ -22,7 +22,7 @@ The table below is generated from the header lines (`Status`, `Date`, `Related`)
 | [0011](0011-container-engine.md) | Container engine (Podman default, Docker supported) | Proposed (stub, needs a human decision) | 2026-11-24 |  |
 | [0012](0012-deployment-model.md) | Deployment model: municipal installations and a hub | Accepted for v0.1, to be revisited | 2026-11-24 | OQ-21, OQ-28 |
 | [0013](0013-data-packages.md) | Data packages: format, versioning, checksums and buffer | Accepted for v0.1, to be revisited | 2026-11-24 | OQ-28 |
-| [0014](0014-upward-data-flow.md) | Upward data flow from municipalities to the hub | Proposed (stub, needs a human decision) | 2026-11-24 | OQ-8, OQ-16, OQ-21, OQ-27 |
+| [0014](0014-upward-data-flow.md) | Upward data flow from municipalities to the hub | Proposed (Part A, facility corrections: proposal for v0.2, under review in PR #14; Part B, aggregated indicators: stub, needs a human decision) | 2026-11-24 | OQ-8, OQ-16, OQ-21, OQ-27 |
 | [0015](0015-authentication-and-roles.md) | Authentication and roles | Accepted for v0.1, to be revisited | 2026-11-24 | OQ-21 |
 | [0016](0016-scenario-schema-and-versioning.md) | Scenario schema and versioning | Accepted for v0.1, to be revisited | 2026-11-24 | OQ-16, OQ-24 |
 | [0017](0017-run-reproducibility-and-result-storage.md) | Run reproducibility and result storage | Accepted for v0.1, to be revisited | 2026-11-24 |  |
