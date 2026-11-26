@@ -35,6 +35,8 @@ validation:
 
 theme:
   name: material
+  # Version banners (docs/releasing.md, "Documentation versions"): announce and outdated blocks.
+  custom_dir: tools/docs/overrides
   language: en
   logo: assets/brand/favicon.svg
   favicon: assets/brand/favicon.svg
@@ -49,6 +51,7 @@ theme:
     - content.code.copy
     - content.action.view
     - toc.follow
+    - announce.dismiss
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -111,6 +114,9 @@ plugins:
             Contributing: Συνεισφορά
             Roadmap: Πορεία ανάπτυξης
             Changelog: Ιστορικό αλλαγών (στα αγγλικά)
+
+extra_css:
+  - assets/stylesheets/version-banners.css
 
 extra:
   version:

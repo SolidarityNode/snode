@@ -1,0 +1,68 @@
+{#-
+  Version banners of the documentation site (docs/releasing.md, "Documentation versions").
+
+  * dev build (extra.docs_channel == "dev"): a bar that cannot be dismissed, linking to the
+    latest release.
+  * release build ("release"): a dismissible bar, shown only while this version carries the
+    mike alias "latest" (checked in the browser from versions.json by
+    docs/assets/javascripts/version-banners.js), linking to the development version.
+  * older releases: Material's outdated-version banner (extra.version.default), linking to
+    latest.
+
+  The banner HTML is static: links are resolved when clicked (same page in the other version
+  if it exists, otherwise its home, in the current language), so the hash Material uses to
+  remember a dismissed bar stays the same.
+-#}
+{% extends "base.html" %}
+
+{% set sn_el = config.theme.language == "el" %}
+
+{% block announce %}
+  {%- if config.extra.docs_channel == "dev" -%}
+    <p class="sn-banner sn-banner--dev" data-sn-banner="dev">
+      {%- if sn_el -%}
+        <strong>Έκδοση ανάπτυξης:</strong> περιγράφει δουλειά σε εξέλιξη που μπορεί να μην έχει
+        κυκλοφορήσει ακόμα. Για την πλατφόρμα που έχει κυκλοφορήσει, δείτε την
+        <a href="#" data-sn-version="latest">τελευταία έκδοση</a>.
+      {%- else -%}
+        <strong>Development version:</strong> describes work in progress that may not be
+        released yet. For the released platform, see the
+        <a href="#" data-sn-version="latest">latest version</a>.
+      {%- endif -%}
+    </p>
+  {%- else -%}
+    <p class="sn-banner sn-banner--latest" data-sn-banner="latest">
+      {%- if sn_el -%}
+        Διαβάζετε την τεκμηρίωση της τελευταίας έκδοσης ({{ config.extra.docs_release }}). Οι
+        αποφάσεις μεθόδου και οι λειτουργίες σε εξέλιξη βρίσκονται στην
+        <a href="#" data-sn-version="dev">έκδοση ανάπτυξης (dev)</a>.
+      {%- else -%}
+        You are reading the documentation of the latest release
+        ({{ config.extra.docs_release }}). Method decisions and features in progress are in the
+        <a href="#" data-sn-version="dev">development version (dev)</a>.
+      {%- endif -%}
+    </p>
+  {%- endif -%}
+{% endblock %}
+
+{% block outdated %}
+  {%- if sn_el -%}
+    Διαβάζετε την τεκμηρίωση μιας παλαιότερης έκδοσης ({{ config.extra.docs_release }}).
+    <a href="#" data-sn-version="latest"><strong>Μετάβαση στην τελευταία έκδοση.</strong></a>
+  {%- else -%}
+    You are reading the documentation of an older release ({{ config.extra.docs_release }}).
+    <a href="#" data-sn-version="latest"><strong>Go to the latest version.</strong></a>
+  {%- endif -%}
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script>
+    window.SN_DOCS = {
+      channel: {{ config.extra.docs_channel | tojson }},
+      base: {{ base_url | tojson }},
+      lang: {{ config.theme.language | tojson }}
+    };
+  </script>
+  <script src="{{ 'assets/javascripts/version-banners.js' | url }}"></script>
+{% endblock %}

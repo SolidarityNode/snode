@@ -1,0 +1,6 @@
+{#-
+  Override of Material's partial (9.8.2), which calls new URL("{{ base_url }}") without a base:
+  base_url is relative in this site, so the original throws "Invalid URL" and the banner of an
+  older version could flash late. Same logic, resolved against the page address.
+-#}
+<script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("{{ base_url }}",location.href),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
