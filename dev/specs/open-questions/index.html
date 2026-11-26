@@ -2502,6 +2502,61 @@
 <td>order of applying interventions and disruptions</td>
 <td>proposed (2026-11-25)</td>
 </tr>
+<tr>
+<td>OQ-31</td>
+<td>forecasting in Paper 4: users, levels, platform</td>
+<td>decided (2026-11-26)</td>
+</tr>
+<tr>
+<td>OQ-32</td>
+<td>risk maps from hazard forecasts</td>
+<td>decided (2026-11-26)</td>
+</tr>
+<tr>
+<td>OQ-33</td>
+<td>DBN time step: two time scales</td>
+<td>decided (2026-11-26)</td>
+</tr>
+<tr>
+<td>OQ-34</td>
+<td>one-month forecast and conditional forecasts</td>
+<td>decided (2026-11-26)</td>
+</tr>
+<tr>
+<td>OQ-35</td>
+<td>spatial dependence and neighbourhood definition</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-36</td>
+<td>group-specific travel time</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-37</td>
+<td>spatial unit for large municipalities</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-38</td>
+<td>sparse hourly observations in crisis mode</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-39</td>
+<td>facility calendars</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-40</td>
+<td>external hazard sources, licences and conversion to disruption probabilities</td>
+<td>open</td>
+</tr>
+<tr>
+<td>OQ-41</td>
+<td>evaluation of forecasts</td>
+<td>open</td>
+</tr>
 </tbody>
 </table>
 <p>Future-work notes (<code>N-…</code>): N-2a 3SFCA, N-2b constrained allocation for sensitivity, N-2c constrained allocation in Paper 4, N-8a intensity of hidden need, N-8b small area estimation, N-8c direct validation of hidden need, N-24a severity weighting, N-24b breadth as BN parent.</p>
@@ -2535,6 +2590,27 @@
 <p><strong>OQ-5 (modes, §3.4–5).</strong> Accessibility is computed per mode, but supply and gap are per group. How modes combine for a group (mode shares, best mode, weighting) is not specified. Status: open.</p>
 <p><strong>OQ-6 (groups, §4).</strong> Group definitions and thresholds, demand rates and their sources are not fixed. Groups can overlap (for example an elderly person with low income), so summing groups may double count population and demand. Overlap handling is not specified. <strong>Also (added 2026-11-23):</strong> tickets record a social group; decide whether a ticket can carry several groups or a priority rule applies, consistently with how population and demand handle overlap. Status: open.</p>
 <p><strong>OQ-7 (BN engine and discretisation, §9–10).</strong> Discretisation of continuous inputs, CPT size for nodes with many parents, the elicitation protocol and the choice of inference engine are open. Decide through ADRs. Status: open.</p>
+<p><strong>OQ-36 (group-specific travel time, §5; raised 2026-11-26 from the maintainer's notes).</strong> The notation already writes travel time per group, <code>T_if^{g,m}</code>, but Paper 1 does not say how a group's travel time differs from the general one. The maintainer's notes list four ways, which <strong>can be combined</strong>:</p>
+<ol>
+<li><strong>speed per group</strong> (for example a lower walking speed for older or mobility-limited people);</li>
+<li><strong>edge passability per group</strong> (βατότητα: steps, slopes or crossings that a group cannot use, or uses more slowly);</li>
+<li><strong>availability of a mode per group</strong> (for example no car), which is OQ-5;</li>
+<li>
+<p><strong>acceptable distance per group</strong> through the access weight <code>w(T)</code>, which is OQ-3.</p>
+</li>
+<li>
+<p><strong>Recommendation in the notes:</strong> a new OQ in the Paper 1 spec; no choice between the four ways is made.</p>
+</li>
+<li><strong>Interactions.</strong> Options 3 and 4 are already open as OQ-5 and OQ-3; options 1 and 2 need group attributes on network edges or a group speed table, and the data to fill them.</li>
+<li>Status: open.</li>
+</ol>
+<p><strong>OQ-37 (spatial unit for large municipalities; raised 2026-11-25 in UAT 01, recorded in ADR 0013 "Open for later", and 2026-11-26 in the maintainer's notes).</strong> The first application uses the Local Community (ΤΚ) as spatial unit. For a large municipality this is too coarse: Athens has 7 municipal communities (δημοτικές κοινότητες) for about 640,000 residents, so differences in access within it are hidden.</p>
+<ul>
+<li><strong>Options in the notes:</strong> building blocks (οικοδομικά τετράγωνα) or groups of them; a regular grid (κάνναβος); hexagons.</li>
+<li><strong>Already in place.</strong> The platform carries whatever unit a source holds (ADR 0013; the hub's base step, DP-003), so this is a method choice for the Paper 1 spec, not a format question. The choice affects population disaggregation, small-number uncertainty (OQ-35, OQ-21) and computation time.</li>
+<li><strong>Recommendation in the notes:</strong> a new OQ in the Paper 1 spec; no option is chosen.</li>
+<li>Status: open.</li>
+</ul>
 <h2 id="paper-2-hidden-need">Paper 2 (hidden need)<a class="headerlink" href="#paper-2-hidden-need" title="Permanent link">&para;</a></h2>
 <p><strong>OQ-8 (from probability to quantity, §12).</strong> <code>P(HN = Low/Medium/High)</code> must become <code>ExpectedHiddenNeed</code> in the same units as demand to compute <code>ETN = EstimatedDemand + ExpectedHiddenNeed</code>. The conversion is not defined. <strong>Status: decided (2026-11-23).</strong></p>
 <ul>
@@ -2673,18 +2749,94 @@
 <li><strong>Vulnerability is not risk.</strong> Averaging vulnerability over scenarios weighted by their probability of occurrence gives <strong>risk</strong>, which is a separate output. Vulnerability results must never depend on which scenarios happen to be included in a run.</li>
 <li><strong>Rationale.</strong> Keeps Paper 3's definition almost unchanged, removes double counting in Paper 4, avoids overlap with Social Susceptibility, makes results independent of the chosen scenario set, and turns Paper 4's updating into standard, well-documented parameter learning. The earlier proposal (vulnerability as an average over scenarios) was rejected because it conflates vulnerability with risk and depends on the scenario set.</li>
 <li><strong>Additions agreed with this decision.</strong></li>
-<li><strong>Maps at reference scenarios.</strong> Vulnerability is mapped at standardised <strong>reference scenarios</strong> (for example minor, moderate, severe disruption), so that areas and groups are compared at the same intensity. Risk maps are produced separately, only if disruption probabilities become available.</li>
+<li><strong>Maps at reference scenarios.</strong> Vulnerability is mapped at standardised <strong>reference scenarios</strong> (for example minor, moderate, severe disruption), so that areas and groups are compared at the same intensity. Risk maps are produced separately, only if disruption probabilities become available. Since OQ-32 (2026-11-26), hazard forecasts and warnings provide such probabilities in Paper 4.</li>
 <li><strong>Weight of experts against data:</strong> new question OQ-27.</li>
 <li><strong>Observation node.</strong> Because Vulnerability is latent, Paper 4 needs a measurement node <code>P(ObservedConsequence | V)</code> stating what is observed for each vulnerability level. To be specified together with OQ-18.</li>
 <li><strong>Spec impact.</strong> Paper 3 §2 and §17 (wording), Paper 3 §25–26 (maps at reference scenarios), Paper 4 §2.1, §8, §10 and the diagram in §15 must be rewritten. The domain invariant 2 (now in the root <code>AGENTS.md</code>) is updated accordingly.</li>
 </ul>
 <h2 id="paper-4-operations-dynamics-resilience">Paper 4 (operations, dynamics, resilience)<a class="headerlink" href="#paper-4-operations-dynamics-resilience" title="Permanent link">&para;</a></h2>
-<p><strong>OQ-17 (DBN structure, §5, §12).</strong> How facility functional state is derived from indicators (rules or learned), their thresholds, the time-slice length and the DBN topology (for example first-order Markov) are not specified. Status: open.</p>
+<p><strong>OQ-17 (DBN structure, §5, §12).</strong> How facility functional state is derived from indicators (rules or learned), their thresholds, the time-slice length and the DBN topology (for example first-order Markov) are not specified. <strong>Time step:</strong> decided in OQ-33 (2026-11-26: a weekly and an hourly scale with the same structure); the derivation of the functional state, its thresholds and the topology stay open here, as does the dependence on neighbouring units (OQ-35). Status: open.</p>
 <p><strong>OQ-18 (observed consequence, §9).</strong> How observed group consequence is computed from tickets, and against which denominator. Tickets observe demand, not hidden need. Since OQ-16, this also includes the measurement node <code>P(ObservedConsequence | V)</code> that links the latent Vulnerability to what tickets show. Status: open.</p>
 <p><strong>OQ-19 (resilience estimation, §13).</strong> How the five trajectory indicators combine, how continuous trajectories map to <code>P(Resilience)</code>, and the baseline reference level are open. The research description states that final selection and weighting of indicators is part of the research. Status: open.</p>
 <p><strong>OQ-20 (resource mobilisation, §6).</strong> Parameters, activation delays and capacity limits of volunteer and other additional resources are not specified, and Paper 3 explicitly excludes adaptive capacity. Status: open.</p>
 <p><strong>OQ-27 (weight of expert priors against observed data; raised with OQ-16).</strong> When the Vulnerability CPT is learned from observed disruptions, the expert-elicited CPT acts as a prior with an equivalent sample size: how many observed disruptions should it take to move the experts' judgement? Options include a fixed equivalent sample size per CPT row, elicited confidence per row, or hierarchical pooling across units and groups. Also open: how to handle the small number of real disruptions and the dependence between observations in the same disruption. Status: open.</p>
 <p><strong>OQ-21 (re-identification risk, §4.1).</strong> Tickets are anonymous, but spatial unit, group and timestamps together can identify people in small units. Decide minimum cell sizes (k-anonymity), retention and aggregation rules before collecting any real data. These rules also limit how finely observations can be used for learning (OQ-8, OQ-16). The ticket field "first request in this period" (OQ-8) must not become an identifier. Status: open.</p>
+<p><strong>OQ-31 (forecasting in Paper 4: users, levels and platform; decided by the maintainer 2026-11-26).</strong> Paper 4 monitors operations and recovery from tickets and a DBN, but does not say whether the platform also estimates the present and forecasts ahead, for whom, and how. <strong>Status: decided (2026-11-26).</strong></p>
+<ul>
+<li><strong>Decision.</strong></li>
+<li><strong>Forecasting (πρόγνωση) and (near) real-time maps are part of Paper 4</strong>, not a separate paper.</li>
+<li><strong>Two users:</strong><ul>
+<li><strong>daily operations</strong> (καθημερινή λειτουργία; the head of the social service): an estimate of the present and a forecast from days to weeks ahead, updated once a day;</li>
+<li><strong>crisis</strong> (κρίση; Civil Protection together with the social service): a horizon from hours to 3 days, updated every 15–60 minutes, started by a warning or by hand; the main map is the <strong>risk map</strong> (OQ-32).</li>
+</ul>
+</li>
+<li><strong>Three levels:</strong><ul>
+<li><strong>current picture</strong> (τρέχουσα εικόνα): the observations;</li>
+<li><strong>nowcast</strong> (εκτίμηση του τώρα): filtering with the DBN;</li>
+<li><strong>forecast</strong> (πρόγνωση): prediction with the DBN, together with external signals (OQ-40).</li>
+</ul>
+</li>
+<li><strong>Scheduled runs, not streaming.</strong> Each update is a scheduled run in the worker, a normal, reproducible run (ADR 0017); maps show the time of the update.</li>
+<li><strong>Uncertainty is always shown</strong>, as probabilities, intervals and fan charts (βεντάλιες); totals and sums are computed draw by draw (ADR 0008, <code>summarise_total</code>).</li>
+<li><strong>Decision support, not automatic action.</strong> A forecast supports decisions and never acts by itself: operational support is a response of the system (AGENTS.md invariant 7).</li>
+<li><strong>Prerequisites stated with the decision.</strong> Real recording of requests and facility state in the municipality (the Paper 4 pilot), and anonymity limits for small numbers on maps (OQ-21).</li>
+<li><strong>Rationale (from the notes).</strong> The two users differ in horizon and update frequency but use the same model; making each update a normal run keeps every map reproducible and comparable.</li>
+<li><strong>Rejected options.</strong> A separate forecasting paper; continuous streaming updates; forecasts that trigger actions automatically.</li>
+<li><strong>Left open here.</strong> A retention rule for the volume of crisis-mode results (frequent runs; see the retention note of ADR 0017).</li>
+<li><strong>Spec impact.</strong> Paper 4 gains a forecasting section (users, levels, update cycle); the DBN section (§12) is used for filtering and prediction; facility and territorial output (§14) gains time-stamped maps with uncertainty. Domain model §1 and §4.4. See <code>paper-revisions.md</code>.</li>
+</ul>
+<p><strong>OQ-32 (risk maps from hazard forecasts; decided by the maintainer 2026-11-26).</strong> Until now risk maps were to be produced "only if disruption probabilities exist" (OQ-16). <strong>Status: decided (2026-11-26).</strong></p>
+<ul>
+<li><strong>Decision.</strong> A weather forecast or a warning gives <strong>probabilities of disruption</strong>. <strong>Risk = vulnerability weighted by these probabilities</strong> (AGENTS.md invariant 2). This makes risk maps possible in Paper 4; in crisis mode the risk map is the main map (OQ-31).</li>
+<li><strong>Rationale.</strong> The definition of risk is unchanged (OQ-16): what was missing were the probabilities, which hazard forecasts provide. Vulnerability stays a relationship evaluated at disruptions, and its results still do not depend on which scenarios are included.</li>
+<li><strong>Rejected option.</strong> Keeping risk maps out of scope until historical disruption frequencies exist.</li>
+<li><strong>Left open.</strong> Which external sources, under which licences, and how they become a disruption probability per facility or edge: OQ-40.</li>
+<li><strong>Spec impact.</strong> Paper 4 forecasting section (risk maps); Paper 3 §25–26 note that risk maps come from Paper 4.</li>
+</ul>
+<p><strong>OQ-33 (DBN time step: two time scales; decided by the maintainer 2026-11-26, replacing "hourly only").</strong> The time-slice length of the DBN was open (OQ-17). <strong>Status: decided (2026-11-26).</strong></p>
+<ul>
+<li><strong>Decision: two scales, to start with.</strong></li>
+<li><strong>Daily operations: a one-week step</strong> (βήμα μία εβδομάδα), with a horizon from weeks to months (one month = 4 steps).</li>
+<li><strong>Crisis: a one-hour step</strong>, with a horizon from hours to a few days.</li>
+<li><strong>Same network structure, different transition probabilities</strong> per scale.</li>
+<li><strong>Hand-over between the two.</strong> A crisis run starts from the current estimate of the weekly model. When the crisis ends, its results (facilities affected, accumulated need, recovery) return to the weekly model as observations.</li>
+<li><strong>Few crisis data:</strong> the hourly model relies on expert estimates and on the vulnerability relationship of Paper 3 (OQ-16); how sparse hourly observations are used is OQ-38.</li>
+<li><strong>Rationale (from the notes).</strong> Weekly counts are more stable and have fewer zeros, and the week matches the service's weekly planning; a crisis needs hours.</li>
+<li><strong>Rejected option.</strong> One hourly step for everything (the earlier choice, replaced by this decision).</li>
+<li><strong>Considered for later (not rejected).</strong> A one-day step for daily operations, which captures differences within the week.</li>
+<li><strong>Spec impact.</strong> Paper 4 §12 (time slice and the two parameter sets), §5 (facility state per time step), forecasting section; OQ-17 keeps the topology and state derivation.</li>
+</ul>
+<p><strong>OQ-34 (one-month forecast and conditional forecasts; decided by the maintainer 2026-11-26).</strong> What the daily-operations forecast covers and how it handles disasters it cannot foresee. <strong>Status: decided (2026-11-26).</strong></p>
+<ul>
+<li><strong>Decision.</strong></li>
+<li><strong>One month ahead</strong> on the weekly scale: filtering (where the system is now), then prediction of 4 steps.</li>
+<li>It covers <strong>seasonality, trends, known events</strong> (planned closures or openings, payments, holidays) and <strong>recovery</strong>.</li>
+<li>It does <strong>not</strong> predict a disaster that comes without warning. For that there is the <strong>conditional forecast</strong> (υπό όρους πρόγνωση, "if a heatwave comes in July"): a Paper 3 scenario applied on top of the forecast.</li>
+<li><strong>Backtesting</strong> at horizons of 1, 2 and 4 weeks (the measures are open: OQ-41).</li>
+<li><strong>Rationale.</strong> Keeps the forecast honest about what it can know; disasters enter as explicit, labelled scenarios, so the same scenario engine (ADR 0016, OQ-30) serves Papers 3 and 4.</li>
+<li><strong>Rejected option.</strong> A forecast that claims to include unannounced disasters.</li>
+<li><strong>Spec impact.</strong> Paper 4 forecasting section; scenario overlays on forecast runs (with OQ-30).</li>
+</ul>
+<p><strong>OQ-38 (sparse hourly observations in crisis mode; raised 2026-11-26).</strong> Real crises are rare and hourly counts per facility are small and often zero, so the hourly model of OQ-33 has little data to learn from or to filter with. Status: open.</p>
+<ul>
+<li><strong>From the notes:</strong> the hourly model relies on expert estimates and on the Paper 3 vulnerability relationship; crisis results return to the weekly model as observations (OQ-33).</li>
+<li><strong>To decide:</strong> how hourly observations enter the filter (aggregation over several hours or facilities, observation model for zero counts), how they update the hourly transition probabilities (with OQ-27), and the anonymity limits for small hourly counts (OQ-21).</li>
+</ul>
+<p><strong>OQ-39 (facility calendars; raised 2026-11-26).</strong> The hourly model needs, per facility, when it is open: opening hours, public holidays, duty rotas (εφημερίες). When a facility is closed, need accumulates. Status: open.</p>
+<ul>
+<li><strong>From the notes:</strong> opening hours already exist in the hub's facility import template, as free text; they must be stored <strong>structured</strong>, not as free text.</li>
+<li><strong>To decide:</strong> the calendar format (weekly pattern plus exceptions), where holidays come from, and how accumulated need is released when the facility opens again.</li>
+</ul>
+<p><strong>OQ-40 (external hazard sources, licences and conversion to disruption probabilities; raised 2026-11-26).</strong> Risk maps (OQ-32) and forecasts (OQ-31) need external signals. Status: open.</p>
+<ul>
+<li><strong>Candidate sources in the notes:</strong> the national meteorological service (ΕΜΥ), meteo.gr, Copernicus, Civil Protection warnings; each with its licence and attribution.</li>
+<li><strong>To decide:</strong> which sources, under which licences (<code>docs/data-sources.md</code>); how a hazard field or warning becomes a <strong>probability of disruption per facility or network edge</strong>; and how sources are distributed. The notes recommend (with OQ-35) that national hazard fields are registered <strong>once in the hub</strong> and that every installation takes its part from <strong>the same source and version</strong>, so municipalities stay consistent.</li>
+</ul>
+<p><strong>OQ-41 (evaluation of forecasts; raised 2026-11-26).</strong> How forecasts are judged before they are trusted. Status: open.</p>
+<ul>
+<li><strong>From the notes:</strong> calibration of probabilities and backtesting (at 1, 2 and 4 weeks for the monthly forecast, OQ-34).</li>
+<li><strong>To decide:</strong> the measures (for example calibration and sharpness, proper scoring rules), the reference forecasts to compare against, and the minimum history needed before forecasts are shown to users.</li>
+</ul>
 <h2 id="general">General<a class="headerlink" href="#general" title="Permanent link">&para;</a></h2>
 <p><strong>OQ-22 (terminology).</strong> "ΤΚ" (Local Community) versus a generic spatial unit; group names (Low-income, Economically vulnerable); language of identifiers and documentation. Status: open.</p>
 <p><strong>OQ-23 (Digital Twin wording).</strong> Paper 1's conclusion calls the result a "probabilistic baseline Digital Twin", while the research description says a Digital Twin is not assumed from the start. Keep wording consistent in README and docs. Status: open.</p>
@@ -2701,6 +2853,53 @@
 <li><strong>Proposed default</strong> (used by the platform, <code>core.scenarios.apply_overlay</code>, ADR 0016): interventions first, in the order new facilities, capacity changes, network changes (edge changes, then new edges), population changes; then disruptions (severities, then closed edges), which may also hit the new facilities and new edges of the same scenario.</li>
 <li><strong>Rationale.</strong> A disruption acts on the system as it is after the planned interventions ("what if we add a centre, and then a flood closes the road to it?"); applying disruptions first would make it impossible to disrupt what an intervention adds.</li>
 <li><strong>Open.</strong> Whether some combinations should be refused; whether a severity applies to a facility's capacity before or after a capacity change to the same facility (only recorded today, no behaviour).</li>
+<li><strong>Maintainer's note (2026-11-26).</strong> The notes list the confirmation of this order (interventions first, then disruptions) for the Paper 3 spec. Not yet decided: the status stays proposed until the spec confirms it.</li>
+</ul>
+<p><strong>OQ-35 (spatial dependence and neighbourhood definition, all papers; raised 2026-11-26 from the maintainer's notes).</strong> Spatial units are not independent. The notes identify four mechanisms, each needing its own "neighbourhood" (γειτονιά):</p>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Neighbourhood</th>
+<th>Paper</th>
+<th>How</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Units share facilities: when a facility closes, demand goes to the next ones</td>
+<td><strong>functional</strong>: units that use the same facilities (from the 2SFCA allocation)</td>
+<td>1, 3</td>
+<td>already in the model, through the network (AGENTS.md invariant 3)</td>
+</tr>
+<tr>
+<td>A disruption spreads (flood, heatwave, fire)</td>
+<td><strong>hazard</strong>: same basin, zone, island or forecast field</td>
+<td>3, 4</td>
+<td>shared (correlated) draws of the hazard field for all units, not independent draws per unit</td>
+</tr>
+<tr>
+<td>Small numbers: the need of a small ΤΚ is estimated with large uncertainty</td>
+<td><strong>geographic</strong>: adjacent units or units within a travel time</td>
+<td>2</td>
+<td>spatial smoothing (for example BYM/CAR-type models) that borrows information from neighbours</td>
+</tr>
+<tr>
+<td>Pressure transmitted over time (crisis)</td>
+<td><strong>functional</strong> and <strong>hazard</strong></td>
+<td>4</td>
+<td>DBN nodes of unit <code>i</code> depend on the state of its neighbours in the previous step</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Scaling notes for all of Greece (from the notes).</strong></li>
+<li>Neighbourhoods are computed <strong>in the hub during onboarding</strong> and shipped in the package as a new layer: an adjacency graph with stable ids, method, version and a <code>DP-NNN</code> note.</li>
+<li>The <strong>buffer</strong> (OQ-28) exists for exactly this: neighbours across the boundary are in the package, and the package improves when a neighbour is onboarded.</li>
+<li><strong>Islands:</strong> a network-based neighbourhood (including ferries) is natural; a purely geographic one is not.</li>
+<li><strong>Hazards beyond municipal boundaries:</strong> national hazard fields are registered once in the hub; each installation takes its part from the same source and version (OQ-40).</li>
+<li><strong>To decide (per paper):</strong> which neighbourhood each mechanism uses, its parameters (adjacency or travel-time threshold), whether the geographic smoothing of Paper 2 is adopted (with N-8b small area estimation), and how the DBN neighbour dependence of Paper 4 is structured (with OQ-17). The package layer for neighbourhoods needs a format change (ADR 0013) once a method needs it.</li>
+<li>Status: open.</li>
 </ul>
 
 

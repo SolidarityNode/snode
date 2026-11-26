@@ -1599,6 +1599,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#new-section-forecasting-and-near-real-time-maps-oq-31-oq-32-oq-33-oq-34" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New section: forecasting and (near) real-time maps (OQ-31, OQ-32, OQ-33, OQ-34)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-time-step-of-the-dbn-two-scales-oq-33" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        §12 Time step of the DBN: two scales (OQ-33)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#future-work-to-mention" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2827,6 +2849,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#new-section-forecasting-and-near-real-time-maps-oq-31-oq-32-oq-33-oq-34" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New section: forecasting and (near) real-time maps (OQ-31, OQ-32, OQ-33, OQ-34)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-time-step-of-the-dbn-two-scales-oq-33" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        §12 Time step of the DBN: two scales (OQ-33)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#future-work-to-mention" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2924,7 +2968,7 @@
 </ul>
 <h3 id="open-items-affecting-paper-1">Open items affecting Paper 1<a class="headerlink" href="#open-items-affecting-paper-1" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Access weight <code>w(T)</code> (OQ-3), relation of the deterministic gap to the BBN (OQ-4), combining transport modes (OQ-5), group definitions and overlap (OQ-6), discretisation and BN engine (OQ-7).</li>
+<li>Access weight <code>w(T)</code> (OQ-3), relation of the deterministic gap to the BBN (OQ-4), combining transport modes (OQ-5), group definitions and overlap (OQ-6), discretisation and BN engine (OQ-7), group-specific travel time <code>T_if^{g,m}</code> (OQ-36), spatial unit for large municipalities (OQ-37), spatial dependence between units (OQ-35).</li>
 </ul>
 <h2 id="paper-2-hidden-need">Paper 2: Hidden need<a class="headerlink" href="#paper-2-hidden-need" title="Permanent link">&para;</a></h2>
 <h3 id="11-2-10-12-hidden-need-as-non-take-up-oq-8">§1.1, §2, §10, §12 Hidden need as non-take-up (OQ-8)<a class="headerlink" href="#11-2-10-12-hidden-need-as-non-take-up-oq-8" title="Permanent link">&para;</a></h3>
@@ -2999,10 +3043,11 @@
 <h3 id="2526-maps-at-reference-scenarios-oq-16">§25–26 Maps at reference scenarios (OQ-16)<a class="headerlink" href="#2526-maps-at-reference-scenarios-oq-16" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Change:</strong> present vulnerability maps at standardised <strong>reference scenarios</strong> (minor, moderate, severe) so areas and groups are compared at the same intensity. Risk maps only if disruption probabilities become available.</li>
+<li><strong>Add (OQ-32, 2026-11-26):</strong> state that such probabilities come from hazard forecasts and warnings in Paper 4, where risk maps (vulnerability weighted by disruption probabilities) are produced; Paper 3 itself stays at reference scenarios.</li>
 </ul>
 <h3 id="open-items-affecting-paper-3">Open items affecting Paper 3<a class="headerlink" href="#open-items-affecting-paper-3" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Affected population and catchments (OQ-13), disrupted service function (OQ-14), states and thresholds (OQ-15).</li>
+<li>Affected population and catchments (OQ-13), disrupted service function (OQ-14), states and thresholds (OQ-15), confirmation of the order of interventions and disruptions (OQ-30), correlated hazard draws across units (OQ-35).</li>
 </ul>
 <h2 id="paper-4-resilience">Paper 4: Resilience<a class="headerlink" href="#paper-4-resilience" title="Permanent link">&para;</a></h2>
 <h3 id="21-8-10-15-vulnerability-used-and-learned-not-redefined-oq-16">§2.1, §8, §10, §15 Vulnerability used and learned, not redefined (OQ-16)<a class="headerlink" href="#21-8-10-15-vulnerability-used-and-learned-not-redefined-oq-16" title="Permanent link">&para;</a></h3>
@@ -3029,13 +3074,32 @@
 <li><strong>Add:</strong> the <code>facility_id</code> where the request is made or scheduled (OQ-29), needed for facility functional state (§5), operational output (§14) and recording coverage; state that it falls under the same privacy rules (minimum cell sizes, aggregation, retention).</li>
 <li><strong>Add:</strong> a "first request in this period" flag (yes/no, no identifier) so that people can be counted without being identified; a rule for tickets of people belonging to several groups (OQ-6); and recording coverage per facility and period.</li>
 </ul>
+<h3 id="new-section-forecasting-and-near-real-time-maps-oq-31-oq-32-oq-33-oq-34">New section: forecasting and (near) real-time maps (OQ-31, OQ-32, OQ-33, OQ-34)<a class="headerlink" href="#new-section-forecasting-and-near-real-time-maps-oq-31-oq-32-oq-33-oq-34" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Add a section</strong> (after §12, DBN, or where the author places it) stating that forecasting is part of Paper 4, not a separate paper (OQ-31):</li>
+<li><strong>two users:</strong> daily operations (head of the social service; nowcast and forecast from days to weeks, updated daily) and crisis (Civil Protection with the social service; hours to 3 days, updated every 15–60 minutes, started by a warning or by hand);</li>
+<li><strong>three levels:</strong> current picture (observations), nowcast (DBN filtering), forecast (DBN prediction with external signals);</li>
+<li><strong>decision support, not automatic action</strong> (operational support is a system response);</li>
+<li>each update is a <strong>scheduled, reproducible run</strong>, maps show the update time, and uncertainty is always shown (probabilities, intervals, fan charts; totals draw by draw).</li>
+<li><strong>Risk maps (OQ-32):</strong> risk = vulnerability weighted by the disruption probabilities given by a weather forecast or warning; in crisis mode the risk map is the main map. This is where the "risk only if disruption probabilities exist" of OQ-16 becomes possible.</li>
+<li><strong>One-month forecast (OQ-34):</strong> filtering, then 4 weekly steps; covers seasonality, trends, known events and recovery; does not predict unannounced disasters, which enter as <strong>conditional forecasts</strong> (a Paper 3 scenario on top of the forecast); backtesting at 1, 2 and 4 weeks.</li>
+<li><strong>Prerequisites to state:</strong> real recording of requests and facility state in the pilot municipality; anonymity limits for small numbers on maps (OQ-21).</li>
+<li><strong>Why (methods/discussion):</strong> the same DBN serves monitoring, nowcasting and forecasting; making every update a normal run keeps maps reproducible and comparable; conditional forecasts keep the forecast honest about what it cannot foresee.</li>
+<li><strong>Open:</strong> sparse hourly observations (OQ-38), facility calendars (OQ-39), external hazard sources, licences and conversion to disruption probabilities (OQ-40), evaluation of forecasts (OQ-41), retention of crisis-mode results, and the boundary with a future digital twin (ADR 0020).</li>
+</ul>
+<h3 id="12-time-step-of-the-dbn-two-scales-oq-33">§12 Time step of the DBN: two scales (OQ-33)<a class="headerlink" href="#12-time-step-of-the-dbn-two-scales-oq-33" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Change:</strong> specify two time scales with the <strong>same network structure and different transition probabilities</strong>: a <strong>one-week step</strong> for daily operations (horizon weeks to months; one month = 4 steps) and a <strong>one-hour step</strong> for crises (hours to a few days). A crisis starts from the current weekly estimate, and its results (facilities affected, accumulated need, recovery) return to the weekly model as observations.</li>
+<li><strong>Why:</strong> weekly counts are more stable, with fewer zeros, and match the service's weekly planning; the hourly model relies on expert estimates and the Paper 3 vulnerability relationship because crisis data are few. This replaces the earlier "hourly only" choice.</li>
+<li><strong>Mention as future option:</strong> a one-day step for daily operations (differences within the week).</li>
+</ul>
 <h3 id="future-work-to-mention">Future work to mention<a class="headerlink" href="#future-work-to-mention" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Capacity-constrained allocation as a model of redistribution and resource mobilisation (N-2c); severity weighting by service (N-24a).</li>
 </ul>
 <h3 id="open-items-affecting-paper-4">Open items affecting Paper 4<a class="headerlink" href="#open-items-affecting-paper-4" title="Permanent link">&para;</a></h3>
 <ul>
-<li>DBN structure and time step (OQ-17, OQ-25), observed consequence (OQ-18), resilience estimation (OQ-19), resource mobilisation (OQ-20), privacy of tickets (OQ-21).</li>
+<li>DBN structure (OQ-17; the time step is decided in OQ-33), reference period (OQ-25), observed consequence (OQ-18), resilience estimation (OQ-19), resource mobilisation (OQ-20), privacy of tickets (OQ-21), neighbour dependence in the DBN (OQ-35), forecasting items OQ-38 to OQ-41.</li>
 </ul>
 
 
