@@ -1,17 +1,17 @@
 # 0014. Upward data flow from municipalities to the hub
 
-- Status: Proposed (Part A, facility corrections: proposal for v0.2, under review in PR #14; Part B, aggregated indicators: stub, needs a human decision)
-- Date: 2026-11-24 (Part A: 2026-11-26)
+- Status: Part A (facility corrections) accepted for v0.2, to be revisited; Part B (aggregated indicators) proposed, stub, needs a human decision
+- Date: 2026-11-24 (Part A proposed and accepted for v0.2: 2026-11-26)
 - Related: Spec 00 §3 (Deployment), OQ-21, OQ-8, OQ-16, OQ-27; ADR 0006, 0010, 0012, 0013, 0015
 
 Two kinds of data could travel from a municipal installation to the hub: **corrections of
 facility data** (Part A, proposed for v0.2) and **aggregated indicators** from operation
 (Part B, not decided). They have different privacy profiles and are decided separately.
 
-## Part A: facility corrections submitted from a municipal installation (proposal for v0.2)
+## Part A: facility corrections submitted from a municipal installation
 
-**Status of this part: Proposed, waiting for the maintainer's answers in PR #14.** Points
-marked *(v0.2)* are simplifications to be accepted for v0.2 and revisited.
+**Status of this part: Accepted for v0.2, to be revisited** (maintainer's answers to decisions
+15–27 in PR #14, 2026-11-26). Points marked *(v0.2)* are simplifications to revisit.
 
 ### Context
 
@@ -30,139 +30,160 @@ decided (2026-11-26):
 - **Scope of v0.2: facilities only** (template columns, CSV and XLSX, and a manual edit form).
   Boundaries, units, population and network come later.
 
-**Relation to Part B.** Facility corrections are reference data about organisations, not
-operational data: the import already drops anything that looks like personal data
-(`facility-import.md`). Part A therefore does **not** relax Part B: tickets, per-request records
-and aggregated indicators still never leave an installation until Part B and ADR 0010 are
-decided. It also keeps ADR 0012's rule: **every connection is opened by the installation**; the
-hub never calls an installation and holds no credentials *for* it (it only keeps the hash of a
-token the installation presents).
+### What may leave an installation (decision 16)
 
-### A1. Connection
+- **Reference data about organisations**: facility rows in the import template, after the
+  personal-data columns and values have been dropped locally (A7). Nothing else.
+- **Never**: data about people or about individual requests (for example the request log of the
+  Paper 4 pilot, tickets), and **never scenario results**, except what Part B may decide later.
+  Part A does not relax Part B: aggregated indicators still do not leave an installation until
+  Part B and ADR 0010 are decided.
+- ADR 0012's rule holds: **every connection is opened by the installation**; the hub never calls
+  an installation and holds no credentials *for* it (it keeps only what it needs to check the
+  installation's token, A2).
+
+### A1. Connection (decision 17)
 
 - The installation calls the hub API over **HTTPS**. The hub address is set **only in
   configuration** (`SOLIDARITYNODE_HUB_URL`), never from the UI, so a user cannot make the
   server call an arbitrary address (SSRF).
 - With `APP_ENV=production` the settings refuse a plain `http://` URL except `localhost` /
-  `127.0.0.1` (checked by `make check-config`, like the other production rules). Development
-  allows `http` for the two local compose projects.
-- The hub serves the installation API under its own prefix (for example `/hub/installation/…`),
-  authenticated by the installation token (A2) in an `Authorization: Bearer` header, not by
-  session cookies; the frontend proxy passes it through unchanged.
+  `127.0.0.1` (checked by `make check-config`). Development allows `http` between the local
+  compose projects.
+- The hub serves the installation API under its own prefix (`/hub/installation/…`),
+  authenticated by the installation token in an `Authorization: Bearer` header, not by session
+  cookies; the frontend proxy passes it through unchanged.
 
-### A2. Trust between installations
+### A2. Trust between installations (decision 18, 25)
 
 - A hub administrator **registers** each installation (name, the one study area it serves) and
-  **issues an installation token**: random (at least 256 bits), shown **once**, stored in the hub
-  only as its SHA-256 (as sessions are, ADR 0015), and stored in the municipal `.env` as the
-  secret `SOLIDARITYNODE_HUB_TOKEN` (never in git, never logged, never shown in the UI; the UI
-  only says "token present: yes/no").
+  **issues an installation token**: random (256 bits), shown **once**. The municipal
+  administrator stores it as the secret `SOLIDARITYNODE_HUB_TOKEN` in `.env` (never in git,
+  never logged, never shown in the UI; the UI only says "token present: yes/no") and restarts
+  the backend and worker; the admin guide (`docs/user-guide/hub-updates.md`) says how, and how
+  to check the connection.
 - **Scope** of a token: submit changes for the **core** municipalities of its study area only
-  (not the buffer: a municipality does not correct its neighbours); read the status of **its
-  own** submissions; list and download the packages of **its own** study area. Nothing else.
-- **Revocation** takes effect at once. **Rotation**: issuing a new token revokes the old one at
-  once *(v0.2; a grace period can come later)*. The hub records the last contact (time, client
-  address as seen by its proxy, ADR 0015) per installation.
-- Failed token checks are throttled like sign-ins (ADR 0015) and answered with one generic 401.
+  (not its buffer); read and withdraw **its own** submissions; list and download the packages of
+  **its own** study area. Nothing else.
+- *(v0.2)* **One active token per installation**: issuing a new token revokes the old one at
+  once; revocation takes effect at once. The hub records the last contact (time and the client
+  address its proxy reports, ADR 0015).
+- What the hub stores (decision 20): `token_hash = SHA-256(token)` to authenticate API calls, and
+  `offline_key = HMAC-SHA256(key = token, message = "solidaritynode offline submission v1")` to
+  verify offline files (A3). Neither gives back the token.
+- **An attacker who reads the hub database** cannot call the hub API as an installation (the
+  token cannot be recovered from either value), but can **forge offline submission files** for
+  that installation with `offline_key`. Such files still go through the hub's validation and a
+  hub administrator's review, are marked "offline" in the review, and can only be uploaded by a
+  hub administrator. Rotating the token changes both values.
+- Failed token checks get one generic 401.
 
-### A3. Offline fallback
+### A3. Offline fallback (decision 20)
 
-- An installation without a network path to the hub exports a **submission file**: an archive
-  with the same content as an online submission (A7: the **sanitised** rows and the changeset,
-  never the original upload) and a `manifest.json` with SHA-256 checksums.
-- The file carries the installation id and an **HMAC-SHA256 of its content keyed with the
-  installation token**, so the hub can check which installation made it without a network call.
-- A hub administrator uploads it; the hub treats it exactly as an online submission (same
-  validation, same changeset, same status). Status then travels back only when the installation
-  is next online, or by hand (the municipal admin can mark a submission "sent offline").
+- An installation without a network path to the hub exports a **submission file**: a `.zip`
+  with `submission.json` (the same content as an online submission: the **sanitised** rows, the
+  locally computed changeset and the comment, never the original upload), `manifest.json` with
+  its SHA-256, and `signature.txt` = HMAC-SHA256 of `submission.json` keyed with `offline_key`
+  (derived from the token as in A2, so installation and hub compute the same key).
+- A hub administrator uploads it; the hub checks the installation, its token not being revoked
+  and the HMAC, then treats it exactly as an online submission (same validation, same
+  changeset, same idempotency by UUID). Status travels back when the installation is next
+  online (or not at all, if it never is).
 
-### A4. Lifecycle and status
+### A4. Lifecycle and status (decision 26)
 
 ```
 draft → sent → received → rejected_by_validation
                         → pending_review → approved → published_in <version> → imported
                                          → rejected
+draft | sent | received | pending_review (before review starts) → withdrawn
 ```
 
-- `draft`: saved locally, validated locally, not sent. `sent`: queued for the worker, or being
-  retried (A5); the last error and next try are shown. `received`: the hub stored it (it returns
-  its changeset id). `rejected_by_validation`: the hub's own validation found errors.
-  `pending_review` → `approved` / `rejected` by a hub administrator, **with a comment** that is
-  shown in the municipality. `published_in <version>`: a published package of the
-  installation's study area contains the changeset (the manifest's `provenance` lists
-  changeset ids). `imported`: the installation imported that version (or a later one).
-- Every transition stores who (municipal user, or "hub" with the hub administrator's username)
-  and when.
+- `draft`: saved and validated locally, not sent. `sent`: queued for the worker or being
+  retried (A5); the last error and next try are shown. `received`: the hub stored it.
+  `rejected_by_validation`: the hub's own validation found errors. `pending_review` →
+  `approved` / `rejected` by a hub administrator, **with a comment** shown in the municipality.
+  `published_in <version>`: a published package of the installation's study area lists the
+  changeset in its manifest `provenance`. `imported`: the installation imported that version or
+  a later one.
+- `withdrawn`: the submitter or a municipal administrator withdraws it, **until the hub starts
+  reviewing it** (a hub administrator opens it for review); after that the hub refuses.
+- Every transition stores who (the municipal user's pseudonym, A7, or the hub administrator's
+  username) and when.
 
-### A5. Synchronisation
+### A5. Synchronisation (decision 21)
 
-- A **scheduled job in the worker** (`hub_sync`) sends queued submissions and polls the hub for
-  status changes and new package versions, every `SOLIDARITYNODE_HUB_SYNC_SECONDS` (default
-  300). The Submissions page asks for an extra sync while it is open (a "check now" that queues
-  the job; it never calls the hub from the request handler).
-- **Retries with exponential backoff** (for example 1 min, doubling, at most 1 h) while the hub
-  is unreachable; the submission stays `sent`.
-- **Idempotent resend:** every submission has a UUID chosen by the installation; the hub stores
-  it, and a second send of the same UUID returns the existing changeset instead of creating
-  another.
-- This is ADR 0006's revisit trigger 3 (scheduled jobs) and 4 (retries of external calls).
-  *(v0.2)*: the worker gets a small periodic tick that enqueues `hub_sync` when none is queued or
-  running, on the existing PostgreSQL queue; procrastinate stays the candidate if scheduling
-  grows.
+- A worker job `hub_sync` sends queued submissions, withdrawals and polls the hub for status
+  changes and new package versions. *(v0.2)* The worker gets a **small periodic tick** that
+  enqueues `hub_sync` every `SOLIDARITYNODE_HUB_SYNC_SECONDS` (default **300**) when none is
+  queued or running; the Submissions page has **Check now**, which only queues the job (no call
+  from a request handler).
+- **At most one sync runs at a time** (checked when queuing, plus a database advisory lock while
+  it runs); it has a **heartbeat** like every job (ADR 0006).
+- **Exponential backoff** while the hub is unreachable (1 min, doubling, at most 1 h); the
+  submission stays `sent`.
+- **Idempotent resend:** every submission has a UUID chosen by the installation; a second send of
+  the same UUID returns the existing changeset.
+- **Switch off:** `SOLIDARITYNODE_HUB_SYNC=false` (offline installations), or no hub URL; then
+  nothing is called and submissions are exported as files (A3).
+- This hits ADR 0006 revisit triggers 3 and 4. No general scheduler now: the Paper 4 scheduled
+  runs (OQ-31) will reopen the scheduler question (note in ADR 0006).
 
-### A6. New package versions
+### A6. New package versions (decision 22)
 
 - The sync job lists the packages of the installation's study area. A newer version than the
   active one is shown to the **administrator** as "a new version is available" with its
   changelog. **Download** is on the administrator's request (a job), verifying the archive's
-  SHA-256 against the hub's package record; the existing **preview and confirm** then applies. No
-  automatic import.
-- **Signing.** *(v0.2)*: checksums over TLS are enough because the download is made by the
-  installation itself, from the hub address in its configuration, with its token, over HTTPS;
-  the checksum comes over the same authenticated channel; and an administrator still previews
-  and confirms every import. Signing (for example minisign or Sigstore, key held by the hub) is
-  required before any **automatic** import, or for packages passed around outside the platform
-  (ADR 0013 "Consequences" stays valid for manual files).
+  SHA-256 against the hub's package record; the existing **preview and confirm** then applies.
+- *(v0.2)* **Checksums over TLS are enough**, because the installation downloads on its
+  administrator's request, from the hub address in its configuration, with its token, over
+  HTTPS, and an administrator previews and confirms every import. **Signing is required before
+  any automatic import** (and remains advisable for packages passed around outside the
+  platform; ADR 0013 "Consequences").
 
-### A7. Privacy
+### A7. Privacy (decisions 19, 23)
 
 - Validation runs **locally first**, with the **same validator code** as the hub, on the
   facilities of the installation's active package; personal-data columns and values are dropped
   **before anything leaves the municipality**. What is sent: the sanitised rows (template
   columns only), the computed changeset and the comment; **never the original file**. The hub
-  validates again on receipt.
-- Shared code: the parsing, personal-data and row checks are pure and can move to `core` or a
-  backend module used by both roles; locating points needs PostGIS and stays in the backend,
-  reading the hub's curated features in the hub and the active data version in the
-  installation.
-- The hub stores who submitted as "municipality X (installation Y, user Z)". User Z is a
-  municipal employee: see decision 19.
+  validates again. A test checks that the same file gives the same report in both roles, except
+  for the location checks that depend on each side's data.
+- The validator is **one backend module used by both roles**: parsing, personal-data and row
+  checks are shared as they are; location checks read the hub's curated features in the hub and
+  the active data version in the installation (`core` keeps model code only).
+- **Who submitted** (decision 19): a **stable pseudonymous id per user** (for example
+  `u-3f9c2a1b`), created by the installation, plus the role. Only the installation can resolve
+  it; its **administrators** see the mapping to usernames. The hub stores "municipality X
+  (installation Y, user u-…, analyst)".
 
-### A8. Conflicts
+### A8. Conflicts (decision 24)
 
-- Each item of a submission records the **package version it was based on** and a fingerprint
-  of the facility as that package had it. On receipt, the hub compares it with the facility's
-  current state.
-- If the hub changed the facility since (another changeset, a later version), the item is marked
-  **conflict**, shown in the review with the three states (in the municipality's package, now in
-  the hub, proposed); it is never overwritten silently. *(v0.2)*: the hub administrator must
-  confirm each conflicting item explicitly, or reject the submission.
+- Each item records the **package version it was based on** and the facility's values in that
+  package. On receipt, the hub compares them with the facility's current state.
+- If the hub changed the facility since, the item is marked **conflict** and shown in the review
+  with the three states (municipality's package, hub now, proposed); it is never overwritten
+  silently. The hub administrator **resolves each conflicting item** (take the municipality's
+  change, or keep the hub's value) before approving, and the **submitter sees how each conflict
+  was resolved**.
 
 ### A9. "Complete list" from a municipality
 
 - Allowed: the municipal UI asks for the same confirmation as the hub (type the number of
-  facilities that will be closed); the hub review shows the closures prominently and asks for
-  the count again before approving.
+  facilities that will be closed); the hub review shows the closures prominently and asks for the
+  count again before approving.
 
-### Consequences (Part A, if accepted)
+### Consequences (Part A)
 
 - New settings in the municipal installation: `SOLIDARITYNODE_HUB_URL`,
-  `SOLIDARITYNODE_HUB_TOKEN` (secret), `SOLIDARITYNODE_HUB_SYNC_SECONDS`.
-- New tables: in the hub, installations and their token hashes, and the submission UUID on
-  changesets; in the installation, submissions with their status history.
-- ADR 0006 gains the periodic tick (A5); ADR 0012 and 0015 gain the installation token as a
-  second kind of credential.
-- Part B (aggregated indicators) is unchanged and still not decided.
+  `SOLIDARITYNODE_HUB_TOKEN` (secret), `SOLIDARITYNODE_HUB_SYNC`,
+  `SOLIDARITYNODE_HUB_SYNC_SECONDS`.
+- New tables: in the hub, installations (token hash, offline key, last contact) and submission
+  fields on changesets; in the installation, submissions with their status history and the
+  user pseudonyms.
+- ADR 0006 gains the periodic tick; ADR 0012 and 0015 gain the installation token as a second
+  kind of credential.
+- Part B (aggregated indicators) is unchanged and not decided.
 
 ## Part B: aggregated indicators (not decided)
 
