@@ -8,7 +8,8 @@ import { label } from "./labels";
 
 export function Layout() {
   const { t, lang, setLang } = useT();
-  const { user, logout, activeDataVersion: dv } = useSession();
+  const { user, logout, activeDataVersion: dv, config } = useSession();
+  const hub = config?.deployment_mode === "hub";
   const navigate = useNavigate();
   return (
     <div className="layout">
@@ -20,9 +21,22 @@ export function Layout() {
         <h1 className="layout__brand">
           <img src="/brand/logo.svg" alt="" width="56" height="32" />
           SN Kintsugi
+          {hub && <span className="badge badge--hub">{t("nav.hub_badge")}</span>}
         </h1>
         <nav aria-label={t("nav.main")}>
-          {user && (
+          {user && hub && (
+            <>
+              <NavLink to="/" end>
+                {t("nav.hub_onboarding")}
+              </NavLink>
+              <NavLink to="/sources">{t("nav.hub_sources")}</NavLink>
+              <NavLink to="/facilities">{t("nav.hub_facilities")}</NavLink>
+              <NavLink to="/coverage">{t("nav.hub_coverage")}</NavLink>
+              <NavLink to="/study-areas">{t("nav.hub_study_areas")}</NavLink>
+              {user.role === "admin" && <NavLink to="/admin">{t("nav.admin")}</NavLink>}
+            </>
+          )}
+          {user && !hub && (
             <>
               <NavLink to="/" end>
                 {t("nav.study_area")}
@@ -66,12 +80,31 @@ export function Layout() {
       </main>
       <footer className="layout__footer">
         {t("footer.licence")} ·{" "}
-        <span data-testid="data-version">
-          {dv
-            ? t("footer.data_version", { package: dv.package_id, version: dv.version })
-            : t("footer.no_data")}
-        </span>{" "}
-        · <BuildInfo />
+        {!hub && (
+          <>
+            <span data-testid="data-version">
+              {dv
+                ? t("footer.data_version", { package: dv.package_id, version: dv.version })
+                : t("footer.no_data")}
+            </span>{" "}
+            ·{" "}
+          </>
+        )}
+        <BuildInfo />
+        {config?.docs_url && (
+          <>
+            {" "}
+            ·{" "}
+            <a
+              data-testid="user-guide"
+              href={lang === "el" ? `${config.docs_url}el/` : config.docs_url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t("footer.user_guide")}
+            </a>
+          </>
+        )}
       </footer>
     </div>
   );
