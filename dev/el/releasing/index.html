@@ -51,6 +51,8 @@
       
     
     
+      <link rel="stylesheet" href="../../assets/stylesheets/version-banners.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -83,9 +85,34 @@
     </div>
     <div data-md-component="announce">
       
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+              <button class="md-banner__button md-icon" aria-label="Μην το ξαναδείξετε αυτό">
+                
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+              </button>
+            
+            <p class="sn-banner sn-banner--dev" data-sn-banner="dev"><strong>Έκδοση ανάπτυξης:</strong> περιγράφει δουλειά σε εξέλιξη που μπορεί να μην έχει
+        κυκλοφορήσει ακόμα. Για την πλατφόρμα που έχει κυκλοφορήσει, δείτε την
+        <a href="#" data-sn-version="latest">τελευταία έκδοση</a>.</p>
+          </div>
+          
+            <script>var el=document.querySelector("[data-md-component=announce]");if(el){var content=el.querySelector(".md-typeset");__md_hash(content.innerHTML)===__md_get("__announce")&&(el.hidden=!0)}</script>
+          
+        </aside>
+      
     </div>
     
       <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              Διαβάζετε την τεκμηρίωση μιας παλαιότερης έκδοσης (v0.1).
+    <a href="#" data-sn-version="latest"><strong>Μετάβαση στην τελευταία έκδοση.</strong></a>
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../..",location.href),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
         
       </div>
     
@@ -1874,6 +1901,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Documentation versions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#version-banners" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version banners
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -2241,6 +2285,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Documentation versions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#version-banners" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version banners
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -2324,6 +2385,71 @@ git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </
 </ol>
 <h2 id="documentation-versions">Documentation versions<a class="headerlink" href="#documentation-versions" title="Permanent link">&para;</a></h2>
 <p>The site is versioned with <a href="https://github.com/jimporter/mike">mike</a>: <code>dev</code> is built from <code>main</code> on every push, and each release tag <code>vX.Y.Z</code> publishes <code>X.Y</code> (patch releases overwrite their minor version) and moves <code>latest</code> to it. The version selector at the top of the site lists them. Each version holds both languages: the Greek pages are under <code>el/</code> (for example <code>/snode/latest/el/</code>), and the language switcher keeps the version.</p>
+<h3 id="version-banners">Version banners<a class="headerlink" href="#version-banners" title="Permanent link">&para;</a></h3>
+<p>Every page says which version of the documentation it belongs to, in the page's language
+(English or Greek, terms from <code>docs/i18n/glossary.md</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Banner</th>
+<th>Can be closed</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>latest</code> (the release it points to, for example <code>0.1</code>)</td>
+<td>dark bar: "You are reading the documentation of the latest release (v0.1). Method decisions and features in progress are in the development version (dev)."</td>
+<td>yes; it stays closed in that browser until the text changes (a new release)</td>
+<td>the same page in <code>dev</code>, or the <code>dev</code> home</td>
+</tr>
+<tr>
+<td><code>dev</code></td>
+<td>dark bar: "Development version: describes work in progress that may not be released yet. For the released platform, see the latest version."</td>
+<td>no</td>
+<td>the same page in <code>latest</code>, or the <code>latest</code> home</td>
+</tr>
+<tr>
+<td>an older release (no longer <code>latest</code>)</td>
+<td>Material's yellow outdated-version banner: "You are reading the documentation of an older release (v0.1). Go to the latest version."</td>
+<td>no</td>
+<td>the same page in <code>latest</code>, or the <code>latest</code> home</td>
+</tr>
+</tbody>
+</table>
+<p>How it works:</p>
+<ul>
+<li><strong>Which kind of build.</strong> <code>tools/docs/hooks.py</code> sets <code>extra.docs_channel</code> from <code>DOCS_GIT_REF</code>: a
+  release tag <code>vX.Y.Z</code> (set by the docs workflow for tags) gives <code>release</code>, anything else
+  (<code>main</code>, or a local <code>make docs</code>) gives <code>dev</code>. The version in the text, <code>vX.Y</code>, is
+  <code>extra.docs_release</code>, taken from <code>VERSION</code> at build time; nothing is hard-coded.</li>
+<li><strong>Latest or older.</strong> A release build cannot know whether a later release will replace it, so
+  the browser decides from mike's <code>versions.json</code>: the bar is shown only while the version has
+  the alias <code>latest</code>; otherwise Material's outdated banner (<code>extra.version.default</code>) appears.
+  Old versions are never rebuilt.</li>
+<li><strong>Links</strong> keep the language and the page: they are resolved on click
+  (<code>docs/assets/javascripts/version-banners.js</code>); if the page does not exist in the other
+  version, the link opens that version's home in the same language.</li>
+<li><strong>Templates:</strong> <code>tools/docs/overrides/main.html</code> (blocks <code>announce</code> and <code>outdated</code>, feature
+  <code>announce.dismiss</code>); <code>tools/docs/overrides/partials/javascripts/outdated.html</code> fixes Material's
+  inline script for relative base URLs.</li>
+<li><strong>Testing locally</strong> (in a throw-away clone, because <code>mike deploy</code> commits to the <code>gh-pages</code>
+  branch of the repository it runs in):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>.<span class="w"> </span>/tmp/sn-docs-test<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/tmp/sn-docs-test
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$OLDPWD</span><span class="s2">/tools/docs/.venv/bin:</span><span class="nv">$PATH</span><span class="s2">"</span>
+<span class="nv">DOCS_GIT_REF</span><span class="o">=</span>v0.1.0<span class="w"> </span>mike<span class="w"> </span>deploy<span class="w"> </span>-F<span class="w"> </span>mkdocs.yml<span class="w"> </span>--update-aliases<span class="w"> </span><span class="m">0</span>.1<span class="w"> </span>latest
+mike<span class="w"> </span>set-default<span class="w"> </span>-F<span class="w"> </span>mkdocs.yml<span class="w"> </span>latest
+<span class="nv">DOCS_GIT_REF</span><span class="o">=</span>main<span class="w"> </span>mike<span class="w"> </span>deploy<span class="w"> </span>-F<span class="w"> </span>mkdocs.yml<span class="w"> </span>dev
+mike<span class="w"> </span>serve<span class="w"> </span>-F<span class="w"> </span>mkdocs.yml<span class="w"> </span>-a<span class="w"> </span><span class="m">127</span>.0.0.1:8002
+</code></pre></div>
+<p>Open <code>http://127.0.0.1:8002/latest/</code>, <code>/dev/</code> and their <code>el/</code> pages. For the outdated banner,
+  deploy a second release in the clone (set <code>VERSION</code> to <code>0.2.0</code>, then
+  <code>DOCS_GIT_REF=v0.2.0 mike deploy -F mkdocs.yml --update-aliases 0.2 latest</code>) and open <code>/0.1/</code>.</p>
+<p><img alt="Banner of the latest version" src="../../assets/screenshots/version-banners/latest-en.png" />
+<img alt="Banner of the development version, in Greek" src="../../assets/screenshots/version-banners/dev-el.png" />
+<img alt="Banner of an older version, in Greek" src="../../assets/screenshots/version-banners/outdated-el.png" /></p>
 <p><strong>One-time setup (maintainer):</strong> in the repository settings, <strong>Settings → Pages → Build and deployment → Source: Deploy from a branch</strong>, branch <code>gh-pages</code>, folder <code>/ (root)</code>. The branch is created by the first run of the <code>docs</code> workflow on <code>main</code>. The site is then at <a href="https://solidaritynode.github.io/snode/">https://solidaritynode.github.io/snode/</a>.</p>
 
 
@@ -2419,11 +2545,21 @@ git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "search.highlight", "search.suggest", "content.code.copy", "content.action.view", "toc.follow"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "\u0391\u03bd\u03c4\u03b9\u03b3\u03c1\u03ac\u03c6\u03b7\u03ba\u03b5 \u03c3\u03c4\u03bf \u03c0\u03c1\u03cc\u03c7\u03b5\u03b9\u03c1\u03bf", "clipboard.copy": "\u0391\u03bd\u03c4\u03b9\u03b3\u03c1\u03b1\u03c6\u03ae \u03c3\u03c4\u03bf \u03c0\u03c1\u03cc\u03c7\u03b5\u03b9\u03c1\u03bf", "search.result.more.one": "1 \u03b1\u03ba\u03cc\u03bc\u03b1 \u03c3\u03b5 \u03b1\u03c5\u03c4\u03ae\u03bd \u03c4\u03b7 \u03c3\u03b5\u03bb\u03af\u03b4\u03b1", "search.result.more.other": "# \u03b1\u03ba\u03cc\u03bc\u03b1 \u03c3\u03b5 \u03b1\u03c5\u03c4\u03ae\u03bd \u03c4\u03b7 \u03c3\u03b5\u03bb\u03af\u03b4\u03b1", "search.result.none": "\u03b4\u03b5\u03bd \u03b2\u03c1\u03ae\u03ba\u03b5 \u03ba\u03ac\u03c0\u03bf\u03b9\u03bf \u03ad\u03b3\u03b3\u03c1\u03b1\u03c6\u03bf", "search.result.one": "1 \u03ad\u03b3\u03b3\u03c1\u03b1\u03c6\u03bf \u03c0\u03bf\u03c5 \u03c4\u03b1\u03b9\u03c1\u03b9\u03ac\u03b6\u03b5\u03b9", "search.result.other": "# \u03ad\u03b3\u03b3\u03c1\u03b1\u03c6\u03b1 \u03c0\u03bf\u03c5 \u03c4\u03b1\u03b9\u03c1\u03b9\u03ac\u03b6\u03bf\u03c5\u03bd", "search.result.placeholder": "\u03a0\u03bb\u03b7\u03ba\u03c4\u03c1\u03bf\u03bb\u03bf\u03b3\u03ae\u03c3\u03c4\u03b5 \u03b3\u03b9\u03b1 \u03bd\u03b1 \u03b1\u03c1\u03c7\u03af\u03c3\u03b5\u03b9 \u03b7 \u03b1\u03bd\u03b1\u03b6\u03ae\u03c4\u03b7\u03c3\u03b7", "search.result.term.missing": "\u039b\u03b5\u03af\u03c0\u03b5\u03b9", "select.version": "\u0395\u03c0\u03b9\u03bb\u03bf\u03b3\u03ae \u03ad\u03ba\u03b4\u03bf\u03c3\u03b7\u03c2"}, "version": {"default": ["latest", "dev"], "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "search.highlight", "search.suggest", "content.code.copy", "content.action.view", "toc.follow", "announce.dismiss"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "\u0391\u03bd\u03c4\u03b9\u03b3\u03c1\u03ac\u03c6\u03b7\u03ba\u03b5 \u03c3\u03c4\u03bf \u03c0\u03c1\u03cc\u03c7\u03b5\u03b9\u03c1\u03bf", "clipboard.copy": "\u0391\u03bd\u03c4\u03b9\u03b3\u03c1\u03b1\u03c6\u03ae \u03c3\u03c4\u03bf \u03c0\u03c1\u03cc\u03c7\u03b5\u03b9\u03c1\u03bf", "search.result.more.one": "1 \u03b1\u03ba\u03cc\u03bc\u03b1 \u03c3\u03b5 \u03b1\u03c5\u03c4\u03ae\u03bd \u03c4\u03b7 \u03c3\u03b5\u03bb\u03af\u03b4\u03b1", "search.result.more.other": "# \u03b1\u03ba\u03cc\u03bc\u03b1 \u03c3\u03b5 \u03b1\u03c5\u03c4\u03ae\u03bd \u03c4\u03b7 \u03c3\u03b5\u03bb\u03af\u03b4\u03b1", "search.result.none": "\u03b4\u03b5\u03bd \u03b2\u03c1\u03ae\u03ba\u03b5 \u03ba\u03ac\u03c0\u03bf\u03b9\u03bf \u03ad\u03b3\u03b3\u03c1\u03b1\u03c6\u03bf", "search.result.one": "1 \u03ad\u03b3\u03b3\u03c1\u03b1\u03c6\u03bf \u03c0\u03bf\u03c5 \u03c4\u03b1\u03b9\u03c1\u03b9\u03ac\u03b6\u03b5\u03b9", "search.result.other": "# \u03ad\u03b3\u03b3\u03c1\u03b1\u03c6\u03b1 \u03c0\u03bf\u03c5 \u03c4\u03b1\u03b9\u03c1\u03b9\u03ac\u03b6\u03bf\u03c5\u03bd", "search.result.placeholder": "\u03a0\u03bb\u03b7\u03ba\u03c4\u03c1\u03bf\u03bb\u03bf\u03b3\u03ae\u03c3\u03c4\u03b5 \u03b3\u03b9\u03b1 \u03bd\u03b1 \u03b1\u03c1\u03c7\u03af\u03c3\u03b5\u03b9 \u03b7 \u03b1\u03bd\u03b1\u03b6\u03ae\u03c4\u03b7\u03c3\u03b7", "search.result.term.missing": "\u039b\u03b5\u03af\u03c0\u03b5\u03b9", "select.version": "\u0395\u03c0\u03b9\u03bb\u03bf\u03b3\u03ae \u03ad\u03ba\u03b4\u03bf\u03c3\u03b7\u03c2"}, "version": {"default": ["latest", "dev"], "provider": "mike"}}</script>
     
     
+  
       <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
+  <script>
+    window.SN_DOCS = {
+      channel: "dev",
+      base: "../..",
+      lang: "el"
+    };
+  </script>
+  <script src="../../assets/javascripts/version-banners.js"></script>
+
   </body>
 </html>
