@@ -39,6 +39,20 @@ PERMISSIONS: dict[tuple[str, str], str] = {
     ("POST", "/hub/study-areas"): "admin",
     ("POST", "/hub/study-areas/{study_area_id}/publish"): "admin",
     ("GET", "/hub/study-areas/{study_area_id}/packages/{version}/download"): "viewer",
+    ("POST", "/hub/changesets/{changeset_id}/review"): "admin",
+    ("POST", "/hub/submission-files"): "admin",
+    ("GET", "/hub/installations"): "admin",
+    ("POST", "/hub/installations"): "admin",
+    ("POST", "/hub/installations/{installation_id}/token"): "admin",
+    ("POST", "/hub/installations/{installation_id}/revoke"): "admin",
+}
+# The installation API takes only installation tokens, never a session (any role: 401).
+TOKEN_ONLY: set[tuple[str, str]] = {
+    ("GET", "/hub/installation/me"),
+    ("POST", "/hub/installation/submissions"),
+    ("GET", "/hub/installation/submissions"),
+    ("POST", "/hub/installation/submissions/{submission_id}/withdraw"),
+    ("GET", "/hub/installation/packages/{version}/download"),
 }
 SAMPLE = {
     "municipality_id": "M-A",
@@ -48,6 +62,8 @@ SAMPLE = {
     "changeset_id": "1",
     "study_area_id": "study-area-a",
     "version": "1.0.0",
+    "installation_id": "00000000-0000-0000-0000-000000000000",
+    "submission_id": "00000000-0000-0000-0000-000000000000",
 }
 
 
@@ -64,7 +80,17 @@ def test_every_hub_endpoint_is_in_the_permission_table(hub_app: Any) -> None:
         if path.startswith("/hub")
         for method in operations
     }
-    assert routes == set(PERMISSIONS)
+    assert routes == set(PERMISSIONS) | TOKEN_ONLY
+
+
+@pytest.mark.parametrize(("method", "path"), sorted(TOKEN_ONLY))
+def test_installation_api_refuses_sessions(
+    hub_app: Any, hub_users: Any, method: str, path: str
+) -> None:
+    for role in (None, *ROLES):
+        client = TestClient(hub_app) if role is None else hub_login(hub_app, role)
+        response = client.request(method, _path(path), json={}, params={"ids": []})
+        assert response.status_code == 401, (role, response.text)
 
 
 @pytest.mark.parametrize(("method", "path"), sorted(PERMISSIONS))

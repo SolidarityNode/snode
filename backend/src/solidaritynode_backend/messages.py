@@ -194,6 +194,36 @@ HUB_MESSAGES: Final[Mapping[str, str]] = MappingProxyType(
             "municipality {municipality} is not a core municipality of this installation's "
             "study area; only core municipalities can be corrected from here"
         ),
+        "hub.submission.source": (
+            "submitted by municipality {municipality} (installation {installation}, user {user}, "
+            "{role})"
+        ),
+        "hub.submission.attribution": "Municipality {municipality}",
+        "hub.submission.other_installation": (
+            "submission {id} was already received from another installation"
+        ),
+        "hub.submission.validation_failed": (
+            "rejected by the hub's validation; see the validation report"
+        ),
+        "hub.submission.withdrawn_note": "withdrawn by the municipality",
+        "hub.submission.not_found": "submission {id} not found",
+        "hub.submission.review_started": (
+            "submission {id} can no longer be withdrawn: the hub has started reviewing it"
+        ),
+        "hub.submission.unresolved_conflicts": (
+            "changeset {id} has conflicts: choose for each one whether to apply the "
+            "municipality's change or keep the hub's value"
+        ),
+        "hub.submission.bad_file": "this is not a valid submission file: {detail}",
+        "hub.submission.bad_signature": (
+            "the submission file's signature does not match a registered installation"
+        ),
+        "hub.submission.study_area_missing": (
+            "study area {id} of this installation is not registered in the hub yet"
+        ),
+        "hub.installation.not_found": "installation {id} not found",
+        "hub.installation.exists": "an installation named {name} already exists",
+        "hub.installation.unauthorised": "missing, unknown or revoked installation token",
     }
 )
 """Hub message templates by code (ADR 0012); part of :data:`BACKEND_MESSAGES`."""

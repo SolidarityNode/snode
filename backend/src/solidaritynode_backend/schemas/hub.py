@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import uuid
 from datetime import date, datetime
 from typing import Any, Literal
 
@@ -188,15 +189,21 @@ class ChangesetItemOut(BaseModel):
     before: dict[str, Any] | None
     after: dict[str, Any] | None
     fields: list[str]
+    conflict: dict[str, Any] | None = Field(
+        default=None,
+        description="Municipal submissions: the facility changed in the hub since the "
+        "municipality's package (fields, municipality's, hub's and proposed values)",
+    )
+    resolution: Literal["municipality", "hub"] | None = None
 
 
 class ChangesetSummaryOut(BaseModel):
     """A changeset in a list."""
 
     id: int
-    kind: Literal["import", "manual"]
+    kind: Literal["import", "manual", "submission"]
     municipality_id: str
-    status: Literal["pending", "approved", "rejected"]
+    status: Literal["pending", "approved", "rejected", "withdrawn"]
     source: str
     comment: str
     file_name: str | None
@@ -220,6 +227,13 @@ class ChangesetOut(ChangesetSummaryOut):
     record_id: int | None
     report: dict[str, Any]
     items: list[ChangesetItemOut]
+    installation_id: uuid.UUID | None = None
+    submission_uuid: uuid.UUID | None = None
+    submitted_by: str | None = None
+    submitter_role: str | None = None
+    base_package_version: str | None = None
+    offline: bool = False
+    review_started_at: datetime | None = None
 
 
 class ApproveIn(BaseModel):
@@ -228,6 +242,11 @@ class ApproveIn(BaseModel):
     comment: str = ""
     confirm_close: int | None = Field(
         default=None, description="Number of facilities that will be closed (complete list)"
+    )
+    resolutions: dict[int, Literal["municipality", "hub"]] = Field(
+        default_factory=dict,
+        description="Per conflicting item number: apply the municipality's change or keep the "
+        "hub's value (ADR 0014 A8)",
     )
 
 
@@ -346,3 +365,107 @@ class PublishOut(BaseModel):
     package_id: int
     version: str
     job_id: str
+
+
+# --- Installations and their submissions (ADR 0014 Part A) -----------------------------------
+
+
+class InstallationIn(BaseModel):
+    """Registration of a municipal installation."""
+
+    name: str = Field(min_length=1, max_length=100)
+    study_area_id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]{1,62}$")
+
+
+class InstallationOut(BaseModel):
+    """A registered installation (never its token)."""
+
+    id: uuid.UUID
+    name: str
+    study_area_id: str
+    study_area_registered: bool
+    active: bool
+    token_issued_at: datetime | None
+    revoked_at: datetime | None
+    last_contact_at: datetime | None
+    last_contact_address: str | None
+    created_at: datetime
+
+
+class TokenOut(BaseModel):
+    """A newly issued installation token, shown once."""
+
+    installation: InstallationOut
+    token: str = Field(description="Shown only now; store it as SOLIDARITYNODE_HUB_TOKEN")
+
+
+class SubmissionRowIn(BaseModel):
+    """One sanitised row of the import template."""
+
+    row: int
+    values: dict[str, str]
+
+
+class SubmissionIn(BaseModel):
+    """A submission sent by a municipal installation (personal data already dropped there)."""
+
+    id: uuid.UUID
+    municipality_id: str
+    base_package_version: str
+    file_name: str = ""
+    comment: str = ""
+    complete_list: bool = False
+    is_correction: bool = False
+    submitted_by: str = Field(pattern=r"^u-[0-9a-f]{8}$", description="Pseudonymous user id")
+    submitter_role: Literal["analyst", "admin"]
+    rows: list[SubmissionRowIn] = Field(max_length=5000)
+    based_on: dict[str, dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Per facility id: its state in the package the change was based on",
+    )
+
+
+class ConflictOut(BaseModel):
+    """A conflicting item and how the hub resolved it."""
+
+    facility_id: str | None
+    fields: list[str]
+    resolution: Literal["municipality", "hub"] | None
+
+
+class SubmissionStatusOut(BaseModel):
+    """The hub's view of one of the installation's submissions."""
+
+    id: uuid.UUID
+    changeset_id: int
+    state: Literal["pending_review", "rejected_by_validation", "approved", "rejected", "withdrawn"]
+    comment: str
+    decided_at: datetime | None
+    decided_by: str | None
+    review_started: bool
+    summary: dict[str, int] | None
+    errors: int
+    entries: list[CheckOut]
+    conflicts: list[ConflictOut]
+
+
+class InstallationPackageOut(BaseModel):
+    """A published package version of the installation's study area."""
+
+    version: str
+    created: date
+    published_at: datetime | None
+    archive_sha256: str
+    bytes: int
+    changes: str
+    changeset_ids: list[int]
+
+
+class InstallationInfoOut(BaseModel):
+    """What the installation's token gives access to."""
+
+    installation: str
+    study_area_id: str
+    study_area_registered: bool
+    core_municipalities: list[str]
+    packages: list[InstallationPackageOut]

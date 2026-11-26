@@ -26,7 +26,7 @@ HUB_DEMO = REPO / "data" / "synthetic" / "demo" / "hub"
 SOURCES = HUB_DEMO / "sources"
 IMPORTS = HUB_DEMO / "imports"
 HUB_TABLES = (
-    "hub_packages, hub_study_areas, hub_changeset_items, hub_changesets, "
+    "hub_installations, hub_packages, hub_study_areas, hub_changeset_items, hub_changesets, "
     "hub_processing_records, hub_onboarding_events, hub_onboarding, hub_features, hub_sources, "
     "jobs, sessions, users, login_throttle"
 )

@@ -37,6 +37,8 @@ from solidaritynode_backend.schemas.hub import (
     FacilityEditIn,
     FacilityOut,
     HistoryEntryOut,
+    InstallationIn,
+    InstallationOut,
     JobOut,
     OnboardingDetailOut,
     PublishIn,
@@ -48,8 +50,11 @@ from solidaritynode_backend.schemas.hub import (
     StatusIn,
     StudyAreaIn,
     StudyAreaOut,
+    TokenOut,
 )
 from solidaritynode_backend.services.hub import facilities as fac
+from solidaritynode_backend.services.hub import installations as hub_installations
+from solidaritynode_backend.services.hub import submissions as hub_submissions
 from solidaritynode_backend.services.hub.base import start_base
 from solidaritynode_backend.services.hub.common import HubError, manual_transition
 from solidaritynode_backend.services.hub.coverage import coverage_matrix
@@ -505,7 +510,13 @@ def approve(
     """Apply a changeset (administrators); a complete list needs the number to close."""
     try:
         fac.approve_changeset(
-            db, settings, changeset_id, admin.id, body.comment, body.confirm_close
+            db,
+            settings,
+            changeset_id,
+            admin.id,
+            body.comment,
+            body.confirm_close,
+            body.resolutions,
         )
     except HubError as exc:
         db.rollback()
@@ -524,6 +535,107 @@ def reject(changeset_id: int, body: RejectIn, admin: Admin, db: Db) -> Changeset
         raise _fail(exc) from None
     db.commit()
     return _changeset(db, changeset_id)
+
+
+@router.post("/changesets/{changeset_id}/review", response_model=ChangesetOut)
+def start_review(changeset_id: int, admin: Admin, db: Db) -> ChangesetOut:
+    """Record that an administrator started reviewing a municipal submission.
+
+    From then on the municipality can no longer withdraw it (ADR 0014 A4).
+    """
+    current = _changeset(db, changeset_id)
+    hub_submissions.start_review(db, current.id, admin.id)
+    db.commit()
+    return _changeset(db, changeset_id)
+
+
+@router.post(
+    "/submission-files",
+    response_model=ChangesetOut,
+    status_code=status.HTTP_201_CREATED,
+    openapi_extra={
+        "requestBody": {
+            "content": {"application/zip": {"schema": {"type": "string", "format": "binary"}}},
+            "required": True,
+        }
+    },
+)
+async def upload_submission_file(
+    request: Request, _: Admin, db: Db, settings: Config
+) -> ChangesetOut:
+    """Upload an offline submission file exported by a municipal installation (ADR 0014 A3)."""
+    limit = int(settings.hub_max_facility_file_mb * 1024 * 1024)
+    data = bytearray()
+    async for chunk in request.stream():
+        data += chunk
+        if len(data) > limit:
+            raise _fail(
+                HubError(
+                    "hub.source.too_large", status=413, limit=settings.hub_max_facility_file_mb
+                )
+            )
+
+    def work() -> int:
+        inst, payload = hub_submissions.verify_offline_file(db, bytes(data))
+        result = hub_submissions.receive(db, settings, inst, payload, offline=True)
+        return int(result["changeset_id"])
+
+    try:
+        changeset_id = await run_in_threadpool(work)
+    except HubError as exc:
+        db.rollback()
+        raise _fail(exc) from None
+    db.commit()
+    return _changeset(db, changeset_id)
+
+
+# --- Installations (ADR 0014 Part A) ---------------------------------------------------------
+
+
+@router.get("/installations", response_model=list[InstallationOut])
+def list_installations(_: Admin, db: Db) -> list[dict[str, Any]]:
+    """Registered municipal installations (tokens are never shown again)."""
+    return hub_installations.list_installations(db)
+
+
+@router.post("/installations", response_model=TokenOut, status_code=status.HTTP_201_CREATED)
+def register_installation(body: InstallationIn, admin: Admin, db: Db) -> dict[str, Any]:
+    """Register an installation for one study area and issue its token (shown once)."""
+    try:
+        row, token = hub_installations.register_installation(
+            db, body.name, body.study_area_id, admin.id
+        )
+    except HubError as exc:
+        db.rollback()
+        raise _fail(exc) from None
+    db.commit()
+    return {"installation": row, "token": token}
+
+
+@router.post("/installations/{installation_id}/token", response_model=TokenOut)
+def issue_token(installation_id: uuid.UUID, _: Admin, db: Db) -> dict[str, Any]:
+    """Issue a new token (shown once); the previous one stops working at once."""
+    try:
+        token = hub_installations.issue_token(db, installation_id)
+        row = hub_installations.get_installation(db, installation_id)
+    except HubError as exc:
+        db.rollback()
+        raise _fail(exc) from None
+    db.commit()
+    return {"installation": row, "token": token}
+
+
+@router.post("/installations/{installation_id}/revoke", response_model=InstallationOut)
+def revoke_token(installation_id: uuid.UUID, _: Admin, db: Db) -> dict[str, Any]:
+    """Revoke the installation's token at once."""
+    try:
+        hub_installations.revoke(db, installation_id)
+        row = hub_installations.get_installation(db, installation_id)
+    except HubError as exc:
+        db.rollback()
+        raise _fail(exc) from None
+    db.commit()
+    return row
 
 
 # --- Study areas and packages --------------------------------------------------------------

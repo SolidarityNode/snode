@@ -6,6 +6,7 @@ from functools import lru_cache
 from ipaddress import IPv4Network, IPv6Network, ip_network
 from pathlib import Path
 from typing import Literal, Self
+from urllib.parse import urlsplit
 
 from pydantic import AliasChoices, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -109,6 +110,15 @@ class Settings(BaseSettings):
         hub_max_source_mb: Hub only: largest raw source file accepted by the upload screen.
         hub_max_facility_file_mb: Hub only: largest facility import file.
         hub_max_facility_rows: Hub only: most rows in one facility import file.
+        hub_url: Municipal installation only: address of the hub API (for example
+            ``https://hub.example.org/api``), set only here, never from the UI (ADR 0014 Part A).
+            Empty: no hub connection (submissions are exported as files). With
+            ``APP_ENV=production`` it must use ``https`` (``http`` only for localhost).
+        hub_token: Municipal installation only: the installation token issued by the hub
+            (secret, never logged or shown).
+        hub_sync: Municipal installation only: let the worker contact the hub (off for
+            offline installations).
+        hub_sync_seconds: Municipal installation only: how often the worker syncs with the hub.
     """
 
     model_config = SettingsConfigDict(
@@ -159,6 +169,20 @@ class Settings(BaseSettings):
     hub_max_source_mb: float = Field(default=4096.0, gt=0)
     hub_max_facility_file_mb: float = Field(default=5.0, gt=0)
     hub_max_facility_rows: int = Field(default=5000, gt=0)
+    hub_url: str = ""
+    hub_token: SecretStr = SecretStr("")
+    hub_sync: bool = True
+    hub_sync_seconds: float = Field(default=300.0, ge=10)
+
+    @property
+    def hub_link_enabled(self) -> bool:
+        """Whether this municipal installation may contact the hub (URL, token, sync on)."""
+        return (
+            self.deployment_mode == "municipality"
+            and bool(self.hub_url)
+            and bool(self.hub_token.get_secret_value())
+            and self.hub_sync
+        )
 
     @property
     def hub_srid(self) -> int:
@@ -254,12 +278,30 @@ class Settings(BaseSettings):
                 "job_stale_seconds must be at least twice job_heartbeat_seconds, or healthy "
                 "jobs would be failed as stale"
             )
+        found.extend(self._hub_url_problems())
         for check in (self.max_runtimes, self.interval_quantiles, self.trusted_networks):
             try:
                 check()
             except ValueError as exc:
                 found.append(str(exc))
         return found
+
+    def _hub_url_problems(self) -> list[str]:
+        if not self.hub_url:
+            return []
+        url = urlsplit(self.hub_url)
+        if url.scheme not in ("http", "https") or not url.hostname:
+            return ["hub_url: expected an http(s) address such as https://hub.example.org/api"]
+        if (
+            self.app_env == "production"
+            and url.scheme == "http"
+            and url.hostname not in ("localhost", "127.0.0.1", "::1")
+        ):
+            return [
+                "APP_ENV=production needs an https SOLIDARITYNODE_HUB_URL (http only for "
+                "localhost), so submissions and packages travel encrypted (ADR 0014)"
+            ]
+        return []
 
     @model_validator(mode="after")
     def _check(self) -> Self:

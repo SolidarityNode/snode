@@ -1262,7 +1262,7 @@ def create_import(
     request: ImportRequest,
     file_name: str,
     data: bytes,
-    user_id: int,
+    user_id: int | None,
     *,
     kind: str = "import",
     parsed: Parsed | None = None,
@@ -1445,7 +1445,8 @@ def changeset_detail(db: Session, changeset_id: int) -> dict[str, Any]:
         dict(i)
         for i in db.execute(
             text(
-                "SELECT item_no, action, facility_id, label, rows, before, after, fields "
+                "SELECT item_no, action, facility_id, label, rows, before, after, fields, "
+                "conflict, resolution "
                 "FROM hub_changeset_items WHERE changeset_id = :c ORDER BY item_no"
             ),
             {"c": changeset_id},
@@ -1480,13 +1481,25 @@ def approve_changeset(
     user_id: int,
     comment: str = "",
     confirm_close: int | None = None,
+    resolutions: Mapping[int, str] | None = None,
 ) -> dict[str, Any]:
     """Apply a pending changeset to the curated facilities (administrators).
 
+    Args:
+        db: Session (the caller commits).
+        settings: Settings.
+        changeset_id: The changeset.
+        user_id: Hub administrator.
+        comment: Decision comment (returned to a submitting municipality).
+        confirm_close: Number of closures, required for a complete list.
+        resolutions: For each conflicting item of a municipal submission (ADR 0014 A8), by
+            item number: ``municipality`` (apply the proposed change) or ``hub`` (keep the
+            hub's value: the item is not applied).
+
     Raises:
         HubError: If it is not pending, its report has errors, a "complete list" closure is not
-            confirmed with the number of facilities to close, or a facility changed since the
-            preview (upload the file again).
+            confirmed with the number of facilities to close, a conflict is not resolved, or a
+            facility changed since the preview (upload the file again).
     """
     cs = _changeset_row(db, changeset_id, lock=True)
     if cs["status"] != "pending":
@@ -1504,11 +1517,29 @@ def approve_changeset(
             count=closing,
             municipality=cs["municipality_id"],
         )
+    chosen = {int(k): v for k, v in (resolutions or {}).items()}
+    for item in items:
+        if not item.get("conflict"):
+            continue
+        choice = chosen.get(int(item["item_no"]))
+        if choice not in ("municipality", "hub"):
+            raise HubError("hub.submission.unresolved_conflicts", status=409, id=changeset_id)
+        db.execute(
+            text(
+                "UPDATE hub_changeset_items SET resolution = :r "
+                "WHERE changeset_id = :c AND item_no = :n"
+            ),
+            {"r": choice, "c": changeset_id, "n": item["item_no"]},
+        )
+        item["resolution"] = choice
     existing = _existing(db, str(cs["municipality_id"]))
     today = datetime.now(UTC).date()
-    ids: dict[str, list[str]] = {"added": [], "updated": [], "closed": []}
+    ids: dict[str, list[str]] = {"added": [], "updated": [], "closed": [], "kept": []}
     for item in items:
         fid = item["facility_id"]
+        if item.get("resolution") == "hub":
+            ids["kept"].append(fid)
+            continue
         if item["action"] != "add" and _public(existing.get(fid, {})) != item["before"]:
             raise HubError("hub.import.stale", status=409, id=fid)
         if item["action"] == "add":
@@ -1560,7 +1591,7 @@ def approve_changeset(
         },
         user_id=user_id,
     )
-    changed = any(ids.values())
+    changed = any(ids[k] for k in ("added", "updated", "closed"))
     finish_record(
         db,
         record_id,
@@ -1698,7 +1729,8 @@ def facility_history(db: Session, facility_id: str) -> list[dict[str, Any]]:
                 "c.decided_at, d.username AS decided_by_name, c.decision_comment "
                 "FROM hub_changeset_items i JOIN hub_changesets c ON c.id = i.changeset_id "
                 "LEFT JOIN users u ON u.id = c.created_by LEFT JOIN users d ON d.id = c.decided_by "
-                "WHERE i.facility_id = :f AND c.status = 'approved' ORDER BY c.decided_at, c.id"
+                "WHERE i.facility_id = :f AND c.status = 'approved' "
+                "AND i.resolution IS DISTINCT FROM 'hub' ORDER BY c.decided_at, c.id"
             ),
             {"f": facility_id},
         ).mappings()

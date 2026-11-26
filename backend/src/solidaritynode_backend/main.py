@@ -16,6 +16,7 @@ from solidaritynode_backend.routers import (
     data,
     health,
     hub,
+    hub_installation,
     requests,
     runs,
     scenarios,
@@ -34,7 +35,7 @@ COMMON_ROUTERS: tuple[APIRouter, ...] = (
 ROLE_ROUTERS: dict[DeploymentMode, tuple[APIRouter, ...]] = {
     # Tickets exist only in municipal installations; hub features only in the hub (ADR 0012).
     "municipality": (requests.router,),
-    "hub": (hub.router,),
+    "hub": (hub.router, hub_installation.router),
 }
 
 __all__ = ["COMMON_ROUTERS", "ROLE_ROUTERS", "app", "create_app"]
