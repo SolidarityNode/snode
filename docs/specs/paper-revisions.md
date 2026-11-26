@@ -36,7 +36,7 @@
 - **Future work to mention:** 3SFCA as a refinement (N-2a); capacity-constrained allocation as an alternative model in sensitivity analysis, noting it assumes coordinated allocation and understates the gap (N-2b).
 
 ### Open items affecting Paper 1
-- Access weight `w(T)` (OQ-3), relation of the deterministic gap to the BBN (OQ-4), combining transport modes (OQ-5), group definitions and overlap (OQ-6), discretisation and BN engine (OQ-7).
+- Access weight `w(T)` (OQ-3), relation of the deterministic gap to the BBN (OQ-4), combining transport modes (OQ-5), group definitions and overlap (OQ-6), discretisation and BN engine (OQ-7), group-specific travel time `T_if^{g,m}` (OQ-36), spatial unit for large municipalities (OQ-37), spatial dependence between units (OQ-35).
 
 ## Paper 2: Hidden need
 
@@ -103,9 +103,10 @@
 
 ### §25–26 Maps at reference scenarios (OQ-16)
 - **Change:** present vulnerability maps at standardised **reference scenarios** (minor, moderate, severe) so areas and groups are compared at the same intensity. Risk maps only if disruption probabilities become available.
+- **Add (OQ-32, 2026-11-26):** state that such probabilities come from hazard forecasts and warnings in Paper 4, where risk maps (vulnerability weighted by disruption probabilities) are produced; Paper 3 itself stays at reference scenarios.
 
 ### Open items affecting Paper 3
-- Affected population and catchments (OQ-13), disrupted service function (OQ-14), states and thresholds (OQ-15).
+- Affected population and catchments (OQ-13), disrupted service function (OQ-14), states and thresholds (OQ-15), confirmation of the order of interventions and disruptions (OQ-30), correlated hazard draws across units (OQ-35).
 
 ## Paper 4: Resilience
 
@@ -129,8 +130,25 @@
 - **Add:** the `facility_id` where the request is made or scheduled (OQ-29), needed for facility functional state (§5), operational output (§14) and recording coverage; state that it falls under the same privacy rules (minimum cell sizes, aggregation, retention).
 - **Add:** a "first request in this period" flag (yes/no, no identifier) so that people can be counted without being identified; a rule for tickets of people belonging to several groups (OQ-6); and recording coverage per facility and period.
 
+### New section: forecasting and (near) real-time maps (OQ-31, OQ-32, OQ-33, OQ-34)
+- **Add a section** (after §12, DBN, or where the author places it) stating that forecasting is part of Paper 4, not a separate paper (OQ-31):
+  - **two users:** daily operations (head of the social service; nowcast and forecast from days to weeks, updated daily) and crisis (Civil Protection with the social service; hours to 3 days, updated every 15–60 minutes, started by a warning or by hand);
+  - **three levels:** current picture (observations), nowcast (DBN filtering), forecast (DBN prediction with external signals);
+  - **decision support, not automatic action** (operational support is a system response);
+  - each update is a **scheduled, reproducible run**, maps show the update time, and uncertainty is always shown (probabilities, intervals, fan charts; totals draw by draw).
+- **Risk maps (OQ-32):** risk = vulnerability weighted by the disruption probabilities given by a weather forecast or warning; in crisis mode the risk map is the main map. This is where the "risk only if disruption probabilities exist" of OQ-16 becomes possible.
+- **One-month forecast (OQ-34):** filtering, then 4 weekly steps; covers seasonality, trends, known events and recovery; does not predict unannounced disasters, which enter as **conditional forecasts** (a Paper 3 scenario on top of the forecast); backtesting at 1, 2 and 4 weeks.
+- **Prerequisites to state:** real recording of requests and facility state in the pilot municipality; anonymity limits for small numbers on maps (OQ-21).
+- **Why (methods/discussion):** the same DBN serves monitoring, nowcasting and forecasting; making every update a normal run keeps maps reproducible and comparable; conditional forecasts keep the forecast honest about what it cannot foresee.
+- **Open:** sparse hourly observations (OQ-38), facility calendars (OQ-39), external hazard sources, licences and conversion to disruption probabilities (OQ-40), evaluation of forecasts (OQ-41), retention of crisis-mode results, and the boundary with a future digital twin (ADR 0020).
+
+### §12 Time step of the DBN: two scales (OQ-33)
+- **Change:** specify two time scales with the **same network structure and different transition probabilities**: a **one-week step** for daily operations (horizon weeks to months; one month = 4 steps) and a **one-hour step** for crises (hours to a few days). A crisis starts from the current weekly estimate, and its results (facilities affected, accumulated need, recovery) return to the weekly model as observations.
+- **Why:** weekly counts are more stable, with fewer zeros, and match the service's weekly planning; the hourly model relies on expert estimates and the Paper 3 vulnerability relationship because crisis data are few. This replaces the earlier "hourly only" choice.
+- **Mention as future option:** a one-day step for daily operations (differences within the week).
+
 ### Future work to mention
 - Capacity-constrained allocation as a model of redistribution and resource mobilisation (N-2c); severity weighting by service (N-24a).
 
 ### Open items affecting Paper 4
-- DBN structure and time step (OQ-17, OQ-25), observed consequence (OQ-18), resilience estimation (OQ-19), resource mobilisation (OQ-20), privacy of tickets (OQ-21).
+- DBN structure (OQ-17; the time step is decided in OQ-33), reference period (OQ-25), observed consequence (OQ-18), resilience estimation (OQ-19), resource mobilisation (OQ-20), privacy of tickets (OQ-21), neighbour dependence in the DBN (OQ-35), forecasting items OQ-38 to OQ-41.
