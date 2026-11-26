@@ -103,6 +103,8 @@ plugins:
             Compare: Σύγκριση
             Admin: Διαχείριση
             Data packages and updates: Πακέτα δεδομένων και ενημερώσεις
+            Working with the hub: Συνεργασία με την κεντρική εγκατάσταση
+            Hub: Κεντρική εγκατάσταση
             Roles: Ρόλοι
             FAQ: Συχνές ερωτήσεις
             Greek–English glossary: Γλωσσάριο ελληνικών–αγγλικών (στα αγγλικά)
@@ -150,6 +152,8 @@ nav:
       - Compare: user-guide/compare.md
       - Admin: user-guide/admin.md
       - Data packages and updates: user-guide/data-updates.md
+      - Working with the hub: user-guide/hub-updates.md
+      - Hub: user-guide/hub.md
       - Roles: user-guide/roles.md
       - FAQ: user-guide/faq.md
       - Greek–English glossary: i18n/glossary.md
@@ -158,6 +162,7 @@ nav:
       - uat/README.md
       - "UAT 00: bootstrap": uat/00-bootstrap.md
       - "UAT 01: platform": uat/01-platform.md
+      - "UAT 02: hub onboarding": uat/02-hub-onboarding.md
   - Method:
       - Domain model: specs/00-domain-model.md
       - Specifications index: specs/README.md
@@ -168,11 +173,17 @@ nav:
           - data-processing/README.md
           - DP-001 synthetic demo dataset: data-processing/DP-001-synthetic-demo-dataset.md
           - DP-002 synthetic demo packages: data-processing/DP-002-synthetic-demo-packages.md
+          - DP-003 hub base step: data-processing/DP-003-hub-base-step.md
+          - DP-004 facility imports: data-processing/DP-004-facility-imports.md
+          - DP-005 synthetic hub sources: data-processing/DP-005-synthetic-hub-sources.md
+          - DP-006 hub package assembly: data-processing/DP-006-hub-package-assembly.md
+          - Facility import: data-processing/facility-import.md
       - Data sources: data-sources.md
   - Architecture:
       - Overview: architecture.md
       - Components: architecture/components.md
       - Lifecycles and data model: architecture/lifecycles.md
+      - Hub onboarding: architecture/hub.md
       - Dependencies: architecture/dependencies.md
   - Decisions: adr/README.md
   - Contributing:

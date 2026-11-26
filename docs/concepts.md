@@ -17,6 +17,8 @@ population by social group, the facilities and the services they offer, and the 
 
 - It is **built and published by the hub** (the team that prepares data for all
   municipalities), from official and open sources, with a processing note for every step.
+  What you send to the hub and how an update arrives: [Working with the
+  hub](user-guide/hub-updates.md); the hub's own screens: [Hub](user-guide/hub.md).
 - It is **imported only by an administrator** of your installation (**Admin** → **Data
   packages**). Analysts and viewers never upload data.
 - It is **versioned**: every import creates a new **data version** (for example 1.0.0, then
@@ -81,4 +83,4 @@ When an administrator imports a new data version, or makes an earlier one active
 | **Viewer** | See shared scenarios and their runs: results, map, table, exports. Cannot create, edit or run scenarios; to see results of a scenario that was never run, ask an analyst to run it. |
 | **Analyst** | Everything a viewer can, plus create, edit, run, duplicate and share their own scenarios, and run the baseline. |
 | **Administrator** | Everything an analyst can, on every scenario (including other users' private ones), plus manage users, import data packages and choose the active data version. |
-| **Hub** (outside your installation) | Builds and publishes data packages; receives corrections to the data. |
+| **Hub** (outside your installation) | Onboards municipalities, curates their facilities, builds and publishes data packages; receives corrections to the data ([Hub](user-guide/hub.md)). |

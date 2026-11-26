@@ -42,5 +42,7 @@ flowchart LR
 | [Compare](compare.md) | compare a run with the baseline or another data version | everyone |
 | [Admin](admin.md) | users, data packages, results storage | administrators |
 | [Data packages and updates](data-updates.md) | what happens when new data arrives | everyone |
+| [Working with the hub](hub-updates.md) | what you send to the hub, what you receive, how an update arrives | everyone |
+| [Hub](hub.md) | the hub's screens: sources, onboarding, facilities, coverage, packages | hub team |
 | [Roles](roles.md) | who can do what | everyone |
 | [FAQ](faq.md) | seed, reused runs, edge effect, diagnostic model | everyone |

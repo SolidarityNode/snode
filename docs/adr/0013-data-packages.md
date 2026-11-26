@@ -105,6 +105,45 @@ The temporary `demo` schema is dropped by migration 0003.
 **Why:** opens in QGIS, keeps the projected CRS properly declared, simple to check by hand,
 needs no new library to read or write.
 
+## Decisions of the hub onboarding PR (v0.2)
+
+**Accepted for v0.2, to be revisited** (the hub, ADR 0012; processing notes DP-003 to DP-006):
+
+- **Schema 2.1**, written by the hub: schema 2.0 plus optional manifest keys. `coverage` holds
+  every layer of the hub's coverage matrix (`boundaries`, `spatial_units`, `population`,
+  `network`, `facilities`, `transit`, `susceptibility`; the five of 2.0 stay required),
+  `coverage_layers` lists them, `provenance` lists the processing records behind the version
+  (kind, date, `DP-NNN`, inputs with versions and SHA-256), `provenance_until_record` marks
+  where the next version's changes start, and `buffer` gains `distance_m`. Installations read
+  any 2.x, so 2.1 packages import with the existing import and preview unchanged. Facility
+  tables may carry extra columns (`external_id`, `address`, `operating_hours`, public contact).
+- **Stable ids**: official codes of the registered sources (`municipality_code`, `unit_code`,
+  `node_code`, `edge_code`); hub-assigned `HU-…`/`HE-…` (found again by the SHA-256 of the
+  source geometry) for units and edges without code; facilities `HF-000001`… from a sequence
+  that never goes back. A feature present from an earlier onboarding is reused, never
+  duplicated.
+- **Buffer**: default `whole_neighbouring_municipalities` (as the demo packages), configurable
+  per hub (`SOLIDARITYNODE_HUB_BUFFER_RULE`) and per study area; alternative `distance`
+  (`SOLIDARITYNODE_HUB_BUFFER_DISTANCE_M`). **OQ-28 stays open**: these are placeholders.
+- **Content of a version**: core and buffer features valid at the publish date **plus every
+  feature of the previous version** (with its `valid_to`), so a version never drops a feature
+  and the import never refuses it.
+- **Versioning**: `1.0.0` first; **minor** when the changes add, close or update features or
+  change coverage; **patch** when every change comes from changesets marked as corrections;
+  **major** only for a schema change of the format. Changelog: the earlier entries plus one
+  generated entry (feature ids added, changed, closed; coverage changes; summaries of the
+  processing records), with an optional line written by the publisher; in English (it is
+  package data).
+- **Propagation**: a study area is listed as *update available* when its next package would
+  differ from its last one (per-feature fingerprint of geometry, metadata and properties, plus
+  coverage). Publishing is always a deliberate action.
+- **Immutability**: a published package row cannot be changed or deleted (database trigger);
+  its directory and `.zip` stay in the hub storage. Every package is read back with the
+  installation's validator before it is published.
+- **Distribution**: download from the hub (screen or `make hub-export-package`) and manual
+  import (`make import-package`, Admin screen). Signing is still needed before any automatic
+  download (see Consequences).
+
 ## Consequences
 
 - Every version is stored in full: fine for a municipality, revisit for large study areas.
@@ -118,9 +157,10 @@ needs no new library to read or write.
 
 - **How real data corrections reach the hub.** Analysts never upload data: hypothetical changes
   are scenarios (`docs/concepts.md`), and real corrections or new facilities go to the hub and
-  arrive in the next package version. How an analyst or a municipality submits such a
-  correction (form, file, ticket, with which evidence and quality level) is part of the hub
-  onboarding work (ADR 0012, 0014), not decided here.
+  arrive in the next package version. In v0.2 the hub imports the files a municipality sends
+  (template and validation of DP-004); every changeset records a `source` that can later say
+  "submitted by municipality X". The submission flow itself (form, upload from an
+  installation, evidence) is a separate issue (ADR 0014).
 - **Choice of spatial unit for large municipalities.** For a municipality such as Athens, the
   7 municipal communities are too coarse to show differences in access within it. Which
   spatial unit to use (census tracts, building blocks, a grid) is a method choice for the

@@ -92,3 +92,10 @@ the run metadata). RQ, Dramatiq or Celery remain options if a broker becomes acc
 `JobRunner` interface keeps the change local to `jobs/` and the worker. The **hub-onboarding
 PR** (ADR 0012, 0014) is likely to hit triggers 3 and 4 (scheduled package builds and calls to
 external sources), so revisit this ADR there.
+
+**Revisited in the hub onboarding PR (v0.2): kept.** The hub adds two job kinds,
+`hub_onboard_base` and `hub_publish`, with progress and cooperative cancellation; each runs in
+one transaction, so a cancel or failure stores nothing. None of the triggers was hit: packages
+are published by a person (no scheduling), sources are uploaded (no calls to external
+services), and on the synthetic data both jobs take seconds. Revisit when national sources
+make a base step exceed 10 minutes, or when scheduled builds or downloads are added.

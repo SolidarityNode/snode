@@ -45,9 +45,25 @@ with the setting `DEPLOYMENT_MODE=municipality | hub` (default `municipality`).
 
 **Why:** the simplest option that keeps both roles in one image and leaves the hub open.
 
+### Hub (v0.2, accepted for v0.2, to be revisited)
+
+- The hub runs as **its own compose project** with its own database and volumes (`make hub-up`,
+  `make uat-hub`): the role lock forbids sharing a database with an installation. Hub tables
+  are created by migration 0011 only when the stored role is `hub`; `openapi-hub.json` describes
+  the hub API (`openapi.json` stays the municipal installation's).
+- Raw sources, uploaded facility files and published packages live in the `hub` volume
+  (`SOLIDARITYNODE_HUB_STORAGE_DIR`). Geoprocessing uses PostGIS in the hub database; QGIS is
+  not a runtime dependency.
+- **Roles in the hub** reuse ADR 0015's: `viewer` reads everything; `analyst` uploads facility
+  files and proposes manual edits (pending changesets); `admin` registers sources, runs the base
+  step, changes onboarding status, approves or rejects changesets, creates study areas and
+  publishes packages, and manages users. A dedicated "hub operator" role was not needed.
+- The UI shows hub screens (and a "hub" badge) when `/config` says `hub`; the footer of both
+  roles links to the user guide of the running version (`SOLIDARITYNODE_DOCS_BASE_URL`).
+
 ## Consequences
 
-- UI sections will be enabled per role when hub features exist.
+- UI sections are enabled per role (hub screens since v0.2).
 - Pulling packages from the hub, upward flow (ADR 0014) and multi-tenancy are not implemented.
 - **Commitment for any future connection (not implemented now).** Every connection between an
   installation and the hub is **initiated by the installation** (outbound only): it pulls
