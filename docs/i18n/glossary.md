@@ -111,10 +111,10 @@ Terms of the Greek pages of the documentation site (`docs/**/*.el.md`) that are 
 | user guide | οδηγός χρήσης | proposed | Greek docs navigation |
 | concepts | βασικές έννοιες | proposed | Greek docs navigation |
 | roadmap | πορεία ανάπτυξης | proposed | Greek docs navigation |
-| development version (dev) of the documentation | έκδοση ανάπτυξης (dev) | proposed | version banners of the documentation site |
-| latest release / latest version | τελευταία έκδοση | proposed | version banners of the documentation site |
-| older release | παλαιότερη έκδοση | proposed | version banners of the documentation site |
-| released (platform) | που έχει κυκλοφορήσει | proposed | version banners of the documentation site |
+| development version (dev) of the documentation | έκδοση ανάπτυξης (dev) | decided | version banners of the documentation site |
+| latest release / latest version | τελευταία έκδοση | decided | version banners of the documentation site |
+| older release | παλαιότερη έκδοση | decided | version banners of the documentation site |
+| released (platform) | που έχει κυκλοφορήσει | decided | version banners of the documentation site |
 | platform foundation (v0.1) | θεμέλια της πλατφόρμας (not βάση, which is the baseline) | decided | Greek docs (home, roadmap) |
 | milestone / GitHub issue | ορόσημο / θέμα (issue) | proposed | Greek docs (roadmap, FAQ) |
 | user acceptance testing (UAT) | δοκιμές αποδοχής (UAT) | proposed | Greek docs navigation, home |

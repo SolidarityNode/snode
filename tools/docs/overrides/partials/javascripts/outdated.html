@@ -1,6 +1,18 @@
 {#-
-  Override of Material's partial (9.8.2), which calls new URL("{{ base_url }}") without a base:
-  base_url is relative in this site, so the original throws "Invalid URL" and the banner of an
-  older version could flash late. Same logic, resolved against the page address.
+  OVERRIDE OF A MATERIAL FILE: recheck on every Material upgrade (ADR 0018).
+
+  Copied from: Material for MkDocs 9.8.2, templates/partials/javascripts/outdated.html
+  (the theme version locked in tools/docs/uv.lock).
+
+  Bug it fixes: the original calls new URL("{{ base_url }}") without a base. In this site
+  base_url is relative (for example "../.."), so the script throws "Invalid URL" on every page
+  and the outdated-version banner of an older release could appear late. The only change is the
+  second argument, location.href, which resolves the relative base against the page address;
+  the storage key is then the same absolute URL that Material's bundle uses.
+
+  Must be rechecked on every Material upgrade, and when Material is replaced (end of life
+  2027-05-05, ADR 0018): compare with the new upstream partial; delete this file if upstream
+  is fixed (an override shadows any upstream change); port the fix if the successor has the
+  same bug. Tested by the version-banner check in docs/releasing.md, "Version banners".
 -#}
 <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("{{ base_url }}",location.href),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
