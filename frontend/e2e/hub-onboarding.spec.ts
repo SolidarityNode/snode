@@ -97,12 +97,14 @@ test("onboard, import facilities, publish, and import the package in a municipal
   await expect(page.getByTestId("job-status")).toHaveText("succeeded", { timeout: 90_000 });
   await page.reload();
   await expect(page.getByTestId("onboarding-status")).toContainText("base data ready");
-  await expect(page.getByTestId("base-report")).toContainText("population of M-A: 4180");
+  await expect(page.getByTestId("base-report")).toContainText("Population of M-A: 4180");
 
   // Facilities: upload the file with personal-data columns; they are dropped and reported.
   await page.getByRole("link", { name: "Facilities of this municipality" }).click();
   await page.getByLabel("Source of the data").fill("Synthetic municipal register");
-  await page.getByLabel("File").setInputFiles(join(DEMO, "imports", "facilities-M-A-personal.csv"));
+  await page
+    .getByLabel("File", { exact: true })
+    .setInputFiles(join(DEMO, "imports", "facilities-M-A-personal.csv"));
   await page.getByRole("button", { name: "Check the file" }).click();
   const report = page.getByTestId("validation-report");
   await expect(report).toContainText(

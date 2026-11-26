@@ -104,10 +104,10 @@ needed) "Onboarding status: **base data ready** · 0 open and 0 closed facilitie
 **10.** Look at **Validation report of the base step**. ☐
 
 *Expected:* "Record 1: succeeded (DP-003, …)", "M-A: 42 feature(s) added, 0 changed, 0
-closed", **no errors or warnings**, and six lines under **Information**: population of M-A:
-4180, of M-B: 765, of M-C: 500 (all groups summed); "2 edge(s) with an end outside the area were
-left out"; "10 spatial unit(s) were linked to the network node nearest to a point inside them
-(DP-003)"; "the network of the area has 1 connected part(s)". **Inputs** lists the six sources
+closed.", **no errors or warnings**, and six lines under **Information (6)**: "Population of
+M-A: 4180 (all groups summed)", the same for M-B (765) and M-C (500); "2 edge(s) with an end
+outside the area were left out."; "10 spatial unit(s) were linked to the network node nearest to
+a point inside them (DP-003)"; "The network of the area has 1 connected part(s)". **Inputs** lists the six sources
 with versions and SHA-256.
 
 **11.** Look at **Status history**. ☐
@@ -216,7 +216,7 @@ curl -s -b /tmp/sn-hub -X POST -H 'Content-Type: application/json' -d '{}' http:
 **24.** **Onboarding** → **Start onboarding of M-B**, follow it until **succeeded**. ☐
 
 *Expected:* M-B "base data ready"; its report says "M-B: 8 feature(s) added, 0 changed, 0
-closed" (municipality D, its two units and nodes and three edges: A's and B's features already
+closed." (municipality D, its two units and nodes and three edges: A's and B's features already
 existed and were reused). **Study areas and packages**: study-area-a is still "up to date"
 (nothing of A's package changed).
 
