@@ -16,7 +16,7 @@
     "typecheck": "tsc -b --noEmit",
     "lint": "eslint . && prettier --check .",
     "fmt": "prettier --write . && eslint --fix .",
-    "gen:api": "openapi-typescript ../docs/schemas/openapi.json -o src/api/schema.d.ts && prettier --write src/api/schema.d.ts",
+    "gen:api": "openapi-typescript ../docs/schemas/openapi.json -o src/api/schema.d.ts && openapi-typescript ../docs/schemas/openapi-hub.json -o src/api/hub-schema.d.ts && prettier --write src/api/schema.d.ts src/api/hub-schema.d.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {

@@ -34,7 +34,7 @@ export class ApiError extends Error {
 }
 
 /** Absolute form of `API_BASE` (openapi-fetch builds `Request` objects, which need one). */
-const BASE_URL = new URL(API_BASE, globalThis.location.origin).toString().replace(/\/$/, "");
+export const BASE_URL = new URL(API_BASE, globalThis.location.origin).toString().replace(/\/$/, "");
 
 export const api = createClient<paths>({
   baseUrl: BASE_URL,

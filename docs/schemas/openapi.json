@@ -28,6 +28,11 @@
             "title": "Diagnostic Label",
             "type": "string"
           },
+          "docs_url": {
+            "description": "User guide matching the running version (SOLIDARITYNODE_DOCS_BASE_URL + major.minor, or dev in development)",
+            "title": "Docs Url",
+            "type": "string"
+          },
           "git_commit": {
             "title": "Git Commit",
             "type": "string"
@@ -43,7 +48,8 @@
           "app_env",
           "version",
           "git_commit",
-          "diagnostic_label"
+          "diagnostic_label",
+          "docs_url"
         ],
         "title": "AppConfigOut",
         "type": "object"
@@ -477,6 +483,92 @@
         "title": "DataVersionRef",
         "type": "object"
       },
+      "DownloadIn": {
+        "description": "The package version to download.",
+        "properties": {
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "title": "DownloadIn",
+        "type": "object"
+      },
+      "DownloadOut": {
+        "description": "A package download requested from the hub.",
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "requested_at": {
+            "format": "date-time",
+            "title": "Requested At",
+            "type": "string"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By"
+          },
+          "staging_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Staging Id"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "done",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "status",
+          "staging_id",
+          "error",
+          "requested_at",
+          "requested_by"
+        ],
+        "title": "DownloadOut",
+        "type": "object"
+      },
       "EdgeChangeIn": {
         "additionalProperties": false,
         "description": "Change the travel time or speed of one edge for one mode (Paper 1 \u00a713, \u00a715.7).\n\nA placeholder: checked and recorded, not applied yet. The value must stay strictly\npositive (a relative change above -100 %); a road is closed with ``closed_edges``.",
@@ -602,6 +694,152 @@
           "status"
         ],
         "title": "Health",
+        "type": "object"
+      },
+      "HubLinkOut": {
+        "description": "The connection to the hub as recorded by the last sync (never the token).",
+        "properties": {
+          "active_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Version"
+          },
+          "configured": {
+            "title": "Configured",
+            "type": "boolean"
+          },
+          "downloads": {
+            "items": {
+              "$ref": "#/components/schemas/DownloadOut"
+            },
+            "title": "Downloads",
+            "type": "array"
+          },
+          "hub_url": {
+            "title": "Hub Url",
+            "type": "string"
+          },
+          "installation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Installation Id"
+          },
+          "installation_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Installation Name"
+          },
+          "last_contact_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Contact At"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          },
+          "last_sync_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sync At"
+          },
+          "new_versions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "New Versions",
+            "type": "array"
+          },
+          "packages": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Packages",
+            "type": "array"
+          },
+          "study_area_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Study Area Id"
+          },
+          "sync_enabled": {
+            "title": "Sync Enabled",
+            "type": "boolean"
+          },
+          "sync_seconds": {
+            "title": "Sync Seconds",
+            "type": "number"
+          },
+          "token_present": {
+            "title": "Token Present",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "configured",
+          "hub_url",
+          "token_present",
+          "sync_enabled",
+          "sync_seconds",
+          "installation_id",
+          "installation_name",
+          "study_area_id",
+          "last_sync_at",
+          "last_contact_at",
+          "last_error",
+          "packages",
+          "active_version",
+          "new_versions",
+          "downloads"
+        ],
+        "title": "HubLinkOut",
         "type": "object"
       },
       "ImportIn": {
@@ -1198,6 +1436,30 @@
           "warnings"
         ],
         "title": "PreviewOut",
+        "type": "object"
+      },
+      "PseudonymOut": {
+        "description": "Which user a pseudonymous id stands for (administrators only).",
+        "properties": {
+          "pseudonym": {
+            "title": "Pseudonym",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pseudonym",
+          "username",
+          "role"
+        ],
+        "title": "PseudonymOut",
         "type": "object"
       },
       "ResultRow": {
@@ -2229,6 +2491,24 @@
         "title": "ScenarioVersionOut",
         "type": "object"
       },
+      "SendIn": {
+        "description": "Sending a draft; a complete list repeats the number of closures.",
+        "properties": {
+          "confirm_close": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirm Close"
+          }
+        },
+        "title": "SendIn",
+        "type": "object"
+      },
       "ServiceCapacityIn": {
         "additionalProperties": false,
         "description": "Capacity inputs of a new facility for one service.",
@@ -2281,6 +2561,64 @@
           "service_id"
         ],
         "title": "ServiceCapacityIn",
+        "type": "object"
+      },
+      "ServiceInputs": {
+        "description": "Capacity inputs of one service.",
+        "properties": {
+          "places": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Places"
+          },
+          "service_id": {
+            "title": "Service Id",
+            "type": "string"
+          },
+          "staff": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Staff"
+          },
+          "throughput": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Throughput"
+          },
+          "throughput_unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Throughput Unit"
+          }
+        },
+        "required": [
+          "service_id"
+        ],
+        "title": "ServiceInputs",
         "type": "object"
       },
       "ServiceOut": {
@@ -2394,6 +2732,629 @@
           "free_bytes"
         ],
         "title": "StorageOut",
+        "type": "object"
+      },
+      "SubmissionEditIn": {
+        "description": "The edit form: add, change or close one facility of the active data.",
+        "properties": {
+          "close": {
+            "default": false,
+            "title": "Close",
+            "type": "boolean"
+          },
+          "comment": {
+            "default": "",
+            "title": "Comment",
+            "type": "string"
+          },
+          "facility_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Facility Id"
+          },
+          "municipality_id": {
+            "title": "Municipality Id",
+            "type": "string"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceInputs"
+            },
+            "title": "Services",
+            "type": "array"
+          },
+          "values": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Values",
+            "type": "object"
+          }
+        },
+        "required": [
+          "municipality_id"
+        ],
+        "title": "SubmissionEditIn",
+        "type": "object"
+      },
+      "SubmissionEventOut": {
+        "description": "A status transition: from, to, who (a local user or the hub) and when.",
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "by_hub": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "By Hub"
+          },
+          "by_user": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "By User"
+          },
+          "from_status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "draft",
+                  "sent",
+                  "received",
+                  "rejected_by_validation",
+                  "pending_review",
+                  "approved",
+                  "rejected",
+                  "published",
+                  "imported",
+                  "withdrawn"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Status"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "to_status": {
+            "enum": [
+              "draft",
+              "sent",
+              "received",
+              "rejected_by_validation",
+              "pending_review",
+              "approved",
+              "rejected",
+              "published",
+              "imported",
+              "withdrawn"
+            ],
+            "title": "To Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from_status",
+          "to_status",
+          "by_user",
+          "by_hub",
+          "at",
+          "note"
+        ],
+        "title": "SubmissionEventOut",
+        "type": "object"
+      },
+      "SubmissionOut": {
+        "description": "A submission with its local validation report, changeset preview and history.",
+        "properties": {
+          "attempts": {
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "base_package_version": {
+            "title": "Base Package Version",
+            "type": "string"
+          },
+          "comment": {
+            "title": "Comment",
+            "type": "string"
+          },
+          "complete_list": {
+            "title": "Complete List",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By Name"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionEventOut"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "hub_changeset_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hub Changeset Id"
+          },
+          "hub_comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hub Comment"
+          },
+          "hub_conflicts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Hub Conflicts",
+            "type": "array"
+          },
+          "hub_decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hub Decided At"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "imported_in": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imported In"
+          },
+          "is_correction": {
+            "title": "Is Correction",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "kind": {
+            "enum": [
+              "import",
+              "manual"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          },
+          "municipality_id": {
+            "title": "Municipality Id",
+            "type": "string"
+          },
+          "next_attempt_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Attempt At"
+          },
+          "offline": {
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "published_in": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published In"
+          },
+          "report": {
+            "additionalProperties": true,
+            "title": "Report",
+            "type": "object"
+          },
+          "sent_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sent At"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "sent",
+              "received",
+              "rejected_by_validation",
+              "pending_review",
+              "approved",
+              "rejected",
+              "published",
+              "imported",
+              "withdrawn"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "submitted_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Pseudonymous id sent to the hub",
+            "title": "Submitted By"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "withdraw_requested": {
+            "title": "Withdraw Requested",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "municipality_id",
+          "kind",
+          "status",
+          "file_name",
+          "comment",
+          "complete_list",
+          "created_at",
+          "sent_at",
+          "offline",
+          "last_error",
+          "next_attempt_at",
+          "hub_comment",
+          "published_in",
+          "imported_in",
+          "withdraw_requested",
+          "summary",
+          "errors",
+          "created_by_name",
+          "base_package_version",
+          "is_correction",
+          "report",
+          "items",
+          "attempts",
+          "hub_changeset_id",
+          "hub_decided_at",
+          "hub_conflicts",
+          "submitted_by",
+          "events"
+        ],
+        "title": "SubmissionOut",
+        "type": "object"
+      },
+      "SubmissionSummaryOut": {
+        "description": "A submission in the list.",
+        "properties": {
+          "comment": {
+            "title": "Comment",
+            "type": "string"
+          },
+          "complete_list": {
+            "title": "Complete List",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By Name"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "hub_comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hub Comment"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "imported_in": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imported In"
+          },
+          "kind": {
+            "enum": [
+              "import",
+              "manual"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          },
+          "municipality_id": {
+            "title": "Municipality Id",
+            "type": "string"
+          },
+          "next_attempt_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Attempt At"
+          },
+          "offline": {
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "published_in": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published In"
+          },
+          "sent_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sent At"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "sent",
+              "received",
+              "rejected_by_validation",
+              "pending_review",
+              "approved",
+              "rejected",
+              "published",
+              "imported",
+              "withdrawn"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "withdraw_requested": {
+            "title": "Withdraw Requested",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "municipality_id",
+          "kind",
+          "status",
+          "file_name",
+          "comment",
+          "complete_list",
+          "created_at",
+          "sent_at",
+          "offline",
+          "last_error",
+          "next_attempt_at",
+          "hub_comment",
+          "published_in",
+          "imported_in",
+          "withdraw_requested",
+          "summary",
+          "errors",
+          "created_by_name"
+        ],
+        "title": "SubmissionSummaryOut",
         "type": "object"
       },
       "UserIn": {
@@ -2737,7 +3698,7 @@
     },
     "/config": {
       "get": {
-        "description": "Public configuration: deployment mode, basemap and build identity.",
+        "description": "Public configuration: deployment mode, basemap, build identity and user-guide address.",
         "operationId": "app_config_config_get",
         "responses": {
           "200": {
@@ -3038,6 +3999,184 @@
         "summary": "Ready",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/hub-link": {
+      "get": {
+        "description": "The hub connection and new package versions (administrators; never the token).",
+        "operationId": "hub_link_hub_link_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HubLinkOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Hub Link",
+        "tags": [
+          "submissions"
+        ]
+      }
+    },
+    "/hub-link/downloads": {
+      "post": {
+        "description": "Download a new package version from the hub (a job; then preview and confirm).",
+        "operationId": "download_hub_link_downloads_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download",
+        "tags": [
+          "submissions"
+        ]
+      }
+    },
+    "/hub-link/downloads/{download_id}": {
+      "get": {
+        "description": "Status of a download.",
+        "operationId": "download_status_hub_link_downloads__download_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "download_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Download Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Status",
+        "tags": [
+          "submissions"
+        ]
+      }
+    },
+    "/hub-link/downloads/{download_id}/preview": {
+      "get": {
+        "description": "Preview of a downloaded package (then confirm with the existing import).",
+        "operationId": "download_preview_hub_link_downloads__download_id__preview_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "download_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Download Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreviewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Preview",
+        "tags": [
+          "submissions"
+        ]
+      }
+    },
+    "/hub-link/pseudonyms": {
+      "get": {
+        "description": "Which user each pseudonymous id sent to the hub stands for (administrators only).",
+        "operationId": "pseudonyms_hub_link_pseudonyms_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PseudonymOut"
+                  },
+                  "title": "Response Pseudonyms Hub Link Pseudonyms Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Pseudonyms",
+        "tags": [
+          "submissions"
         ]
       }
     },
@@ -4180,6 +5319,377 @@
         "summary": "Storage",
         "tags": [
           "data"
+        ]
+      }
+    },
+    "/submissions": {
+      "get": {
+        "description": "Every submission of this installation, newest first.",
+        "operationId": "list_submissions_submissions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SubmissionSummaryOut"
+                  },
+                  "title": "Response List Submissions Submissions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Submissions",
+        "tags": [
+          "submissions"
+        ]
+      }
+    },
+    "/submissions/edits": {
+      "post": {
+        "description": "Propose a change to one facility of the active data with the form (a draft).",
+        "operationId": "edit_submissions_edits_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionEditIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Edit",
+        "tags": [
+          "submissions"
+        ]
+      }
+    },
+    "/submissions/sync": {
+      "post": {
+        "description": "Queue a sync with the hub now (the worker does it; nothing is called from here).",
+        "operationId": "check_now_submissions_sync_post",
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "title": "Response Check Now Submissions Sync Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Check Now",
+        "tags": [
+          "submissions"
+        ]
+      }
+    },
+    "/submissions/upload": {
+      "post": {
+        "description": "Check a template file **locally** and keep it as a draft (nothing is sent yet).",
+        "operationId": "upload_submissions_upload_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "municipality",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "title": "Municipality",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "file_name",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "title": "File Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comment",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Comment",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "complete_list",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Complete List",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_correction",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Is Correction",
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload",
+        "tags": [
+          "submissions"
+        ]
+      }
+    },
+    "/submissions/{submission_id}": {
+      "get": {
+        "description": "One submission: local validation report, changeset preview, status history.",
+        "operationId": "get_submission_submissions__submission_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "submission_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Submission Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Submission",
+        "tags": [
+          "submissions"
+        ]
+      }
+    },
+    "/submissions/{submission_id}/export": {
+      "get": {
+        "description": "Download the offline submission file (for installations without a network path).",
+        "operationId": "export_submissions__submission_id__export_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "submission_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Submission Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/zip": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export",
+        "tags": [
+          "submissions"
+        ]
+      }
+    },
+    "/submissions/{submission_id}/send": {
+      "post": {
+        "description": "Send a draft to the hub (queued for the worker).",
+        "operationId": "send_submissions__submission_id__send_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "submission_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Submission Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Send",
+        "tags": [
+          "submissions"
+        ]
+      }
+    },
+    "/submissions/{submission_id}/withdraw": {
+      "post": {
+        "description": "Withdraw a submission (its submitter or an administrator), before the hub reviews it.",
+        "operationId": "withdraw_submissions__submission_id__withdraw_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "submission_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Submission Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Withdraw",
+        "tags": [
+          "submissions"
         ]
       }
     },

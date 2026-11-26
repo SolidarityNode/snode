@@ -1,0 +1,3 @@
+facility_id,external_id,name,municipality,x,y,lon,lat,address,facility_type,service_id,places,staff,throughput,throughput_unit,operating_hours,status,quality,public_phone,public_email,source,notes
+,REG-F4,Community centre 4 (fictional),M-B,136500.0,3881000.0,,,,community_centre,S-HC,15,3,130,hour,Mon-Fri 08:00-16:00,open,verified_by_municipality,2100000000,info@example.org,Synthetic municipal register (fictional),
+,REG-F4,Community centre 4 (fictional),M-B,136500.0,3881000.0,,,,community_centre,S-SD,6,1,60,appointment,Mon-Fri 08:00-16:00,open,verified_by_municipality,2100000000,info@example.org,Synthetic municipal register (fictional),

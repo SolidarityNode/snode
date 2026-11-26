@@ -24,6 +24,8 @@
 | charset-normalizer | 3.5.3 | MIT | dev only: docs tooling |
 | click | 8.5.1 | BSD-3-Clause | backend; dev only: docs tooling |
 | colorama | 0.4.6 | BSD-3-Clause | dev only: docs tooling |
+| defusedxml | 0.7.1 | PSF-2.0 | backend |
+| et-xmlfile | 2.0.0 | MIT | backend |
 | fastapi | 0.165.0 | MIT | backend |
 | ghp-import | 2.1.0 | Apache-2.0 | dev only: docs tooling |
 | h11 | 0.16.0 | MIT | backend |
@@ -48,6 +50,7 @@
 | mypy-extensions | 1.2.0 | MIT | dev only: backend, core |
 | networkx | 3.7 | BSD-3-Clause | backend, core |
 | numpy | 2.5.5 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | backend, core |
+| openpyxl | 3.1.5 | MIT | backend |
 | opentelemetry-api | 1.45.2 | Apache-2.0 | backend |
 | packaging | 26.4 | Apache-2.0 OR BSD-2-Clause | backend, core; dev only: docs tooling |
 | paginate | 0.5.7 | MIT | dev only: docs tooling |
@@ -76,6 +79,7 @@
 | sqlalchemy | 2.1.9 | MIT | backend |
 | starlette | 1.10.0 | BSD-3-Clause | backend |
 | types-networkx | 3.6.1.20261122 | Apache-2.0 | dev only: core |
+| types-openpyxl | 3.1.5.20261122 | Apache-2.0 | dev only: backend |
 | typing-extensions | 4.16.0 | PSF-2.0 | backend; dev only: core |
 | typing-inspection | 0.4.5 | MIT | backend |
 | tzdata | 2026.6 | Apache-2.0 | backend, core; dev only: docs tooling |

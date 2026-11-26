@@ -40,6 +40,21 @@ const FREE_TEXT = new Set([
   "username",
   "roles",
   "role",
+  // hub texts (ADR 0012): names, lists, CRSs, values and file columns may contain spaces or colons
+  "allowed",
+  "columns",
+  "column",
+  "layers",
+  "groups",
+  "name",
+  "source",
+  "source_crs",
+  "crs",
+  "value",
+  "kinds",
+  "other",
+  "external_id",
+  "label",
 ]);
 
 /** Compile `catalogue` into regular expressions, the most specific (most literal text) first. */

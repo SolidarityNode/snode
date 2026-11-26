@@ -28,6 +28,7 @@ REPO = BACKEND.parent
 PACKAGES = REPO / "data" / "synthetic" / "packages"
 DEFAULT_SERVER = "postgresql+psycopg://solidaritynode:change-me@127.0.0.1:5432/solidaritynode"
 TABLES = (
+    "hub_downloads, submission_events, submissions, user_pseudonyms, "
     "run_tables, run_results, runs, jobs, scenario_versions, scenarios, data_warnings, "
     "data_coverage, data_records, data_features, data_versions, sessions, users, login_throttle"
 )

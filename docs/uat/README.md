@@ -86,6 +86,8 @@ Then follow the PR's "How to test (UAT)" steps. Checklists so far:
 - [`00-bootstrap.md`](00-bootstrap.md): the skeleton (partly superseded).
 - [`01-platform.md`](01-platform.md): the platform mechanics (data packages, scenarios, runs,
   results, comparison, users).
+- [`02-hub-onboarding.md`](02-hub-onboarding.md): the hub (sources, onboarding, facility imports,
+  coverage, publishing, propagation) and importing its packages; start with `make uat-hub`.
 
 ## 3. Looking inside the database
 

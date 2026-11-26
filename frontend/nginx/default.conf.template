@@ -19,6 +19,12 @@ server {
         set $backend_upstream ${BACKEND_UPSTREAM};
         rewrite ^/api/(.*)$ /$1 break;
         proxy_pass $backend_upstream;
+        # Uploads (data packages, hub raw sources) are streamed to the backend, which applies its
+        # own limits; without this nginx refuses bodies over 1 MB with 413 before the API sees
+        # them. NGINX_CLIENT_MAX_BODY_SIZE (default 4096m) sets the outer limit.
+        client_max_body_size ${NGINX_CLIENT_MAX_BODY_SIZE};
+        proxy_request_buffering off;
+        proxy_read_timeout 600s;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
         # The browser's address, for sign-in throttling per client address (ADR 0015). nginx is

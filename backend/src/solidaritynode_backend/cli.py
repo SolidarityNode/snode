@@ -10,6 +10,15 @@
     python -m solidaritynode_backend.cli export-schemas DIR          # JSON Schema and OpenAPI
     python -m solidaritynode_backend.cli check-config                # list every settings problem
     python -m solidaritynode_backend.cli clear-login-locks [--all | --username NAME]
+
+Hub only (``DEPLOYMENT_MODE=hub``)::
+
+    python -m solidaritynode_backend.cli hub-register-source PATH|- --file-name F --name N \
+        --layer-type T --version V --licence L --attribution A --processing-note DP-NNN
+    python -m solidaritynode_backend.cli hub-register-demo DIR      # every file of sources.json
+    python -m solidaritynode_backend.cli hub-onboard MUNICIPALITY [--wait]
+    python -m solidaritynode_backend.cli hub-publish STUDY_AREA [--wait]
+    python -m solidaritynode_backend.cli hub-export-package STUDY_AREA VERSION OUT|-
 """
 
 from __future__ import annotations
@@ -21,6 +30,7 @@ import os
 import sys
 import tempfile
 import time
+import uuid
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -105,6 +115,10 @@ def _import(settings: Settings, source: Path, yes: bool, preview_only: bool) -> 
                 print("Aborted; nothing imported.")
                 return 1
         outcome = import_package(db, settings, content, None)
+        if settings.deployment_mode == "municipality":
+            from solidaritynode_backend.services.submissions import mark_imported
+
+            mark_imported(db)
         db.commit()
     print(f"Imported as data version {outcome.data_version_id} (now active).")
     print(f"Baseline run queued: {outcome.baseline_run_id}")
@@ -222,16 +236,22 @@ def wait_runs(settings: Settings, timeout: float) -> int:
 
 
 def export_schemas(directory: Path) -> int:
-    """Write ``scenario.schema.json``, ``openapi.json`` and ``messages.json`` to ``directory``."""
+    """Write the scenario schema, both OpenAPI schemas and ``messages.json`` to ``directory``.
+
+    ``openapi.json`` describes the municipal installation and ``openapi-hub.json`` the hub
+    (ADR 0012: each role mounts only its own routes).
+    """
     from solidaritynode_backend.main import create_app
     from solidaritynode_backend.schemas.scenario import export_json_schema
 
     directory.mkdir(parents=True, exist_ok=True)
     export_json_schema(directory / "scenario.schema.json")
-    openapi = create_app().openapi()
-    (directory / "openapi.json").write_text(json.dumps(openapi, indent=2, sort_keys=True) + "\n")
+    base = get_settings()
+    for mode, name in (("municipality", "openapi.json"), ("hub", "openapi-hub.json")):
+        app = create_app(base.model_copy(update={"deployment_mode": mode}))
+        (directory / name).write_text(json.dumps(app.openapi(), indent=2, sort_keys=True) + "\n")
     (directory / "messages.json").write_text(messages_json())
-    print(f"wrote {directory}/scenario.schema.json, openapi.json and messages.json")
+    print(f"wrote {directory}/scenario.schema.json, openapi.json, openapi-hub.json, messages.json")
     return 0
 
 
@@ -287,6 +307,138 @@ def clear_login_locks(settings: Settings, username: str | None) -> int:
     return 0
 
 
+def _hub_only(settings: Settings) -> bool:
+    if settings.deployment_mode != "hub":
+        print("error: this command needs DEPLOYMENT_MODE=hub", file=sys.stderr)
+        return False
+    return True
+
+
+def hub_register_source(settings: Settings, args: argparse.Namespace) -> int:
+    """Register one raw source (a file, or ``-`` for stdin) without processing it."""
+    from solidaritynode_backend.services.hub.common import HubError
+    from solidaritynode_backend.services.hub.sources import SourceMeta, register_source
+
+    meta = SourceMeta(
+        args.name,
+        args.layer_type,
+        args.coverage,
+        args.version,
+        args.licence,
+        args.attribution,
+        args.processing_note,
+        args.quality,
+        args.synthetic,
+    )
+    with _session(settings) as db:
+        try:
+            if args.path == "-":
+                row, created = register_source(
+                    db, settings, sys.stdin.buffer, args.file_name, meta, None
+                )
+            else:
+                with Path(args.path).open("rb") as handle:
+                    row, created = register_source(
+                        db, settings, handle, args.file_name or Path(args.path).name, meta, None
+                    )
+        except HubError as exc:
+            print(f"hub-register-source: {exc}", file=sys.stderr)
+            return 1
+        db.commit()
+    state = "registered" if created else "already registered (same content): nothing changed"
+    print(f"Source {row['id']} {row['name']} {row['version']} ({row['layer_type']}) {state}.")
+    print(f"  SHA-256 {row['sha256']}, {row['bytes']} bytes. Nothing was processed.")
+    return 0
+
+
+def hub_register_demo(settings: Settings, directory: Path) -> int:
+    """Register every source listed in ``<directory>/sources.json`` (demo setup)."""
+    from solidaritynode_backend.services.hub.sources import register_from_metadata
+
+    with _session(settings) as db:
+        results = register_from_metadata(db, settings, directory, None)
+        db.commit()
+    for row, created in results:
+        state = "registered" if created else "already registered"
+        print(f"  {row['layer_type']:<14} {row['name']} {row['version']}: {state}")
+    return 0
+
+
+def _wait_job(settings: Settings, job_id: str, timeout: float) -> int:
+    deadline = time.monotonic() + timeout
+    with _session(settings) as db:
+        while True:
+            job = db.get(Job, uuid.UUID(job_id))
+            assert job is not None
+            db.refresh(job)
+            if job.status in ("succeeded", "failed", "cancelled"):
+                print(f"Job {job_id}: {job.status}{': ' + job.error if job.error else ''}")
+                return 0 if job.status == "succeeded" else 1
+            if time.monotonic() > deadline:
+                print(f"Job {job_id} still {job.status}; is the worker running?", file=sys.stderr)
+                return 1
+            db.rollback()
+            time.sleep(1)
+
+
+def hub_onboard(settings: Settings, municipality: str, wait: bool) -> int:
+    """Queue the base step of a municipality (optionally wait for it)."""
+    from solidaritynode_backend.jobs import PostgresJobRunner
+    from solidaritynode_backend.services.hub.base import start_base
+    from solidaritynode_backend.services.hub.common import HubError
+
+    with _session(settings) as db:
+        try:
+            record_id, job_id = start_base(db, settings, PostgresJobRunner(db), municipality, None)
+        except HubError as exc:
+            print(f"hub-onboard: {exc}", file=sys.stderr)
+            return 1
+        db.commit()
+    print(f"Base step of {municipality} queued: record {record_id}, job {job_id}.")
+    return _wait_job(settings, job_id, 300) if wait else 0
+
+
+def hub_publish(settings: Settings, study_area: str, wait: bool) -> int:
+    """Queue the next package version of a study area (optionally wait for it)."""
+    from solidaritynode_backend.jobs import PostgresJobRunner
+    from solidaritynode_backend.services.hub.common import HubError
+    from solidaritynode_backend.services.hub.publish import start_publish
+
+    with _session(settings) as db:
+        try:
+            started = start_publish(db, settings, PostgresJobRunner(db), study_area, "", None)
+        except HubError as exc:
+            print(f"hub-publish: {exc}", file=sys.stderr)
+            return 1
+        db.commit()
+    print(f"Publishing {study_area} {started['version']}: job {started['job_id']}.")
+    return _wait_job(settings, started["job_id"], 300) if wait else 0
+
+
+def hub_export_package(settings: Settings, study_area: str, version: str, out: str) -> int:
+    """Write a published package archive to ``out`` (a directory, a file, or ``-``: stdout)."""
+    from solidaritynode_backend.services.hub.common import HubError
+    from solidaritynode_backend.services.hub.publish import package_archive
+
+    with _session(settings) as db:
+        try:
+            path = package_archive(db, settings, study_area, version)
+        except HubError as exc:
+            print(f"hub-export-package: {exc}", file=sys.stderr)
+            return 1
+    data = path.read_bytes()
+    if out == "-":
+        sys.stdout.buffer.write(data)
+        sys.stdout.buffer.flush()
+        return 0
+    target = Path(out)
+    if target.is_dir():
+        target = target / path.name
+    target.write_bytes(data)
+    print(f"wrote {target} ({len(data)} bytes)")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Command-line entry point."""
     parser = argparse.ArgumentParser(prog="solidaritynode_backend.cli")
@@ -314,6 +466,30 @@ def main(argv: Sequence[str] | None = None) -> int:
     which = clear.add_mutually_exclusive_group(required=True)
     which.add_argument("--all", action="store_true", help="every username and address")
     which.add_argument("--username", help="only this username")
+    reg = sub.add_parser("hub-register-source", help="hub: register a raw source file")
+    reg.add_argument("path", help="file, or - for stdin")
+    reg.add_argument("--file-name", default="")
+    reg.add_argument("--name", required=True)
+    reg.add_argument("--layer-type", required=True)
+    reg.add_argument("--version", required=True)
+    reg.add_argument("--licence", required=True)
+    reg.add_argument("--attribution", required=True)
+    reg.add_argument("--processing-note", required=True, help="DP-NNN")
+    reg.add_argument("--coverage", default="national")
+    reg.add_argument("--quality", default="open_data")
+    reg.add_argument("--synthetic", action="store_true")
+    demo = sub.add_parser("hub-register-demo", help="hub: register the sources of sources.json")
+    demo.add_argument("directory", type=Path)
+    onb = sub.add_parser("hub-onboard", help="hub: queue the base step of a municipality")
+    onb.add_argument("municipality")
+    onb.add_argument("--wait", action="store_true")
+    pub = sub.add_parser("hub-publish", help="hub: queue the next package of a study area")
+    pub.add_argument("study_area")
+    pub.add_argument("--wait", action="store_true")
+    exp_pkg = sub.add_parser("hub-export-package", help="hub: write a published package archive")
+    exp_pkg.add_argument("study_area")
+    exp_pkg.add_argument("version")
+    exp_pkg.add_argument("out", help="directory, file, or - for stdout")
     args = parser.parse_args(argv)
     if args.command == "check-config":
         return check_config()
@@ -338,6 +514,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         return wait_runs(settings, args.timeout)
     if args.command == "clear-login-locks":
         return clear_login_locks(settings, args.username)
+    if args.command.startswith("hub-") and not _hub_only(settings):
+        return 2
+    if args.command == "hub-register-source":
+        if args.path == "-" and not args.file_name:
+            print("hub-register-source: --file-name is required with -", file=sys.stderr)
+            return 2
+        return hub_register_source(settings, args)
+    if args.command == "hub-register-demo":
+        return hub_register_demo(settings, args.directory)
+    if args.command == "hub-onboard":
+        return hub_onboard(settings, args.municipality, args.wait)
+    if args.command == "hub-publish":
+        return hub_publish(settings, args.study_area, args.wait)
+    if args.command == "hub-export-package":
+        return hub_export_package(settings, args.study_area, args.version, args.out)
     return export_schemas(args.directory)
 
 

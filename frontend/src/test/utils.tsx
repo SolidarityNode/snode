@@ -55,6 +55,7 @@ export const SESSION: Session = {
     version: "0.0.1",
     git_commit: "abc",
     diagnostic_label: "Diagnostic model: not a research result",
+    docs_url: "https://solidaritynode.github.io/snode/dev/",
   },
   user: { id: 1, username: "analyst", role: "analyst", active: true },
   activeDataVersion: null,

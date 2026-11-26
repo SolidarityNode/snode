@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import sqlite3
 import struct
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -28,9 +28,12 @@ __all__ = [
     "APPLICATION_ID",
     "GeoPackageError",
     "Layer",
+    "LayerInfo",
     "Srs",
     "blob_from_wkb",
     "encode_geometry",
+    "iter_layer",
+    "layer_info",
     "read_geopackage",
     "write_geopackage",
 ]
@@ -338,6 +341,145 @@ def _value(declared: str, value: object, where: str) -> str | int | float | bool
             raise GeoPackageError(f"{where}: {kind} column holds {type(value).__name__} {value!r}")
         return int(value) if kind not in ("REAL", "DOUBLE", "FLOAT") else float(value)
     return str(value)
+
+
+@dataclass(frozen=True, slots=True)
+class LayerInfo:
+    """Metadata of a feature table, read without reading its rows.
+
+    Attributes:
+        name: Table name.
+        geometry_type: Declared geometry type.
+        srs: CRS of the geometry column.
+        columns: Attribute columns as ``(name, declared type)``, without ``fid`` and ``geom``.
+        rows: Number of rows.
+    """
+
+    name: str
+    geometry_type: str
+    srs: Srs
+    columns: tuple[tuple[str, str], ...]
+    rows: int
+
+
+def _open_checked(path: Path) -> sqlite3.Connection:
+    try:
+        db = sqlite3.connect(f"file:{path}?mode=ro&immutable=1", uri=True)
+    except sqlite3.Error as exc:  # pragma: no cover - sqlite opens lazily
+        raise GeoPackageError(f"cannot open GeoPackage: {exc}") from None
+    db.execute("PRAGMA trusted_schema = OFF")
+    try:
+        app_id = db.execute("PRAGMA application_id").fetchone()[0]
+    except sqlite3.DatabaseError:
+        db.close()
+        raise GeoPackageError("the file is not an SQLite database (GeoPackage)") from None
+    if app_id != APPLICATION_ID:
+        db.close()
+        raise GeoPackageError("the file is an SQLite database but not a GeoPackage")
+    return db
+
+
+def layer_info(path: Path) -> dict[str, LayerInfo]:
+    """Return the feature tables of a GeoPackage with columns and row counts (no rows read).
+
+    Used to validate large raw sources at registration without loading them.
+
+    Raises:
+        GeoPackageError: If the file is not a GeoPackage or its metadata tables are missing.
+    """
+    db = _open_checked(path)
+    try:
+        try:
+            srs = {
+                r[1]: Srs(r[0], r[1], r[2], r[3], r[4])
+                for r in db.execute(
+                    "SELECT srs_name, srs_id, organization, organization_coordsys_id, definition "
+                    "FROM gpkg_spatial_ref_sys"
+                )
+            }
+            contents = db.execute(
+                "SELECT c.table_name, g.column_name, g.geometry_type_name, g.srs_id "
+                "FROM gpkg_contents c JOIN gpkg_geometry_columns g ON g.table_name = c.table_name "
+                "WHERE c.data_type = 'features' ORDER BY c.table_name"
+            ).fetchall()
+        except sqlite3.DatabaseError as exc:
+            raise GeoPackageError(f"missing GeoPackage metadata tables: {exc}") from None
+        out: dict[str, LayerInfo] = {}
+        for table, geom_col, geom_type, srs_id in contents:
+            if srs_id not in srs:
+                raise GeoPackageError(f"{table}: SRS {srs_id} is not declared")
+            info = db.execute(f"PRAGMA table_info('{table}')").fetchall()
+            columns = tuple((c[1], str(c[2])) for c in info if c[1] not in ("fid", geom_col))
+            count = db.execute(f'SELECT count(*) FROM "{table}"').fetchone()[0]
+            out[str(table)] = LayerInfo(
+                str(table), str(geom_type).upper(), srs[srs_id], columns, int(count)
+            )
+        return out
+    finally:
+        db.close()
+
+
+def _blob_envelope(blob: bytes) -> tuple[float, float, float, float] | None:
+    """Return ``(min_x, max_x, min_y, max_y)`` of a GeoPackage blob, from its header or point."""
+    if len(blob) < 8:
+        return None
+    flags = blob[3]
+    kind = (flags >> 1) & 0b111
+    little = flags & 1
+    if kind in (1, 2, 3, 4):
+        min_x, max_x, min_y, max_y = struct.unpack("<dddd" if little else ">dddd", blob[8:40])
+        return (min_x, max_x, min_y, max_y)
+    wkb = blob[8:]
+    if len(wkb) >= 21:
+        order = "<" if wkb[0] == 1 else ">"
+        if struct.unpack(f"{order}I", wkb[1:5])[0] == 1:
+            x, y = struct.unpack(f"{order}dd", wkb[5:21])
+            return (x, x, y, y)
+    return None
+
+
+def iter_layer(
+    path: Path,
+    table: str,
+    bbox: tuple[float, float, float, float] | None = None,
+) -> Iterator[tuple[dict[str, Any], bytes | None]]:
+    """Yield ``(attributes, wkb)`` of a feature table row by row (streaming).
+
+    Args:
+        path: GeoPackage file.
+        table: Feature table name (see :func:`layer_info`).
+        bbox: Optional ``(min_x, min_y, max_x, max_y)`` in the layer CRS: rows whose envelope
+            does not intersect it are skipped before decoding. Rows without an envelope (no
+            header envelope and not a point) are always yielded.
+
+    Raises:
+        GeoPackageError: On an unknown table or an invalid geometry.
+    """
+    info = layer_info(path)
+    if table not in info:
+        raise GeoPackageError(f"table {table} not found")
+    columns = info[table].columns
+    db = _open_checked(path)
+    try:
+        names = ", ".join(f'"{c}"' for c, _ in columns)
+        query = f'SELECT geom{", " if names else ""}{names} FROM "{table}" ORDER BY fid'
+        for n, record in enumerate(db.execute(query), start=1):
+            blob = record[0]
+            if blob is not None and bbox is not None:
+                env = _blob_envelope(bytes(blob))
+                if env is not None and (
+                    env[1] < bbox[0] or env[0] > bbox[2] or env[3] < bbox[1] or env[2] > bbox[3]
+                ):
+                    continue
+            where = f"{table} row {n}"
+            wkb = None if blob is None else _blob_to_wkb(bytes(blob), where)
+            attrs = {
+                col: _value(declared, value, f"{where} {col}")
+                for (col, declared), value in zip(columns, record[1:], strict=True)
+            }
+            yield attrs, wkb
+    finally:
+        db.close()
 
 
 def read_geopackage(path: Path) -> dict[str, Layer]:

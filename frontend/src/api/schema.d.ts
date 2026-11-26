@@ -80,7 +80,7 @@ export interface paths {
     };
     /**
      * App Config
-     * @description Public configuration: deployment mode, basemap and build identity.
+     * @description Public configuration: deployment mode, basemap, build identity and user-guide address.
      */
     get: operations["app_config_config_get"];
     put?: never;
@@ -754,6 +754,11 @@ export interface components {
       deployment_mode: "municipality" | "hub";
       /** Diagnostic Label */
       diagnostic_label: string;
+      /**
+       * Docs Url
+       * @description User guide matching the running version (SOLIDARITYNODE_DOCS_BASE_URL + major.minor, or dev in development)
+       */
+      docs_url: string;
       /** Git Commit */
       git_commit: string;
       /** Version */

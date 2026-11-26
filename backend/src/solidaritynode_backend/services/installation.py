@@ -28,10 +28,27 @@ __all__ = [
     "stored_role",
 ]
 
-MUNICIPALITY_ONLY_TABLES: tuple[str, ...] = ()
-"""Tables that exist only in municipal installations (tickets will be added here, ADR 0010)."""
-HUB_ONLY_TABLES: tuple[str, ...] = ()
-"""Tables that exist only in the hub (onboarding will be added here)."""
+MUNICIPALITY_ONLY_TABLES: tuple[str, ...] = (
+    "submissions",
+    "submission_events",
+    "user_pseudonyms",
+    "hub_link",
+    "hub_downloads",
+)
+"""Tables that exist only in municipal installations (migration 0012; tickets later, ADR 0010)."""
+HUB_ONLY_TABLES: tuple[str, ...] = (
+    "hub_sources",
+    "hub_features",
+    "hub_onboarding",
+    "hub_onboarding_events",
+    "hub_processing_records",
+    "hub_changesets",
+    "hub_changeset_items",
+    "hub_study_areas",
+    "hub_packages",
+    "hub_installations",
+)
+"""Tables that exist only in the hub (migrations 0011, 0012)."""
 
 
 class RoleMismatchError(RuntimeError):

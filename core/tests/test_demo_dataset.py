@@ -39,10 +39,13 @@ def test_manifest_checksums_match_files() -> None:
     assert manifest["synthetic"] is True
     assert manifest["processing_notes"] == ["DP-001"]
     listed = {f["path"] for f in manifest["files"]}
+    # hub/ is a separate dataset (synthetic hub sources, DP-005) with its own metadata.
     on_disk = {
         p.relative_to(demo.DEMO_DIR).as_posix()
         for p in demo.DEMO_DIR.rglob("*")
-        if p.is_file() and p.name not in {"manifest.json", "README.md"}
+        if p.is_file()
+        and p.name not in {"manifest.json", "README.md"}
+        and p.relative_to(demo.DEMO_DIR).parts[0] != "hub"
     }
     assert listed == on_disk
     for entry in manifest["files"]:

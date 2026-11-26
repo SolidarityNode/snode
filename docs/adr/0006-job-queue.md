@@ -92,3 +92,19 @@ the run metadata). RQ, Dramatiq or Celery remain options if a broker becomes acc
 `JobRunner` interface keeps the change local to `jobs/` and the worker. The **hub-onboarding
 PR** (ADR 0012, 0014) is likely to hit triggers 3 and 4 (scheduled package builds and calls to
 external sources), so revisit this ADR there.
+
+**Revisited in the hub onboarding PR (v0.2): kept.** The hub adds two job kinds,
+`hub_onboard_base` and `hub_publish`, with progress and cooperative cancellation; each runs in
+one transaction, so a cancel or failure stores nothing. None of the triggers was hit: packages
+are published by a person (no scheduling), sources are uploaded (no calls to external
+services), and on the synthetic data both jobs take seconds. Revisit when national sources
+make a base step exceed 10 minutes, or when scheduled builds or downloads are added.
+
+**Municipal submissions (v0.2, ADR 0014 Part A): triggers 3 and 4 hit, queue kept.** A municipal
+installation syncs with the hub on a schedule and retries unreachable calls. Instead of a
+general scheduler, the worker has a **small periodic tick**: every
+`SOLIDARITYNODE_HUB_SYNC_SECONDS` (default 300) it enqueues one `hub_sync` job unless one is
+queued or running; at most one sync runs at a time (also guarded by an advisory lock), with the
+usual heartbeat; backoff and idempotent resend live in the job. The **Paper 4 scheduled runs**
+(OQ-31: daily and crisis updates) will reopen the scheduler question; procrastinate (MIT) stays
+the first candidate. No general scheduler now.

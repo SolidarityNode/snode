@@ -1,6 +1,6 @@
 # Architecture
 
-> Status: platform 0.1.0, platform mechanics (no scientific method yet: the only model is the diagnostic model `diagnostic-v0`). It will grow with each module. The science is specified in [`docs/specs/`](specs/README.md); decisions are recorded in [`docs/adr/`](adr/README.md).
+> Status: platform 0.1.0 plus hub onboarding (v0.2, [Hub onboarding](architecture/hub.md)); platform mechanics (no scientific method yet: the only model is the diagnostic model `diagnostic-v0`). It will grow with each module. The science is specified in [`docs/specs/`](specs/README.md); decisions are recorded in [`docs/adr/`](adr/README.md).
 
 ## 1. Overview and trust boundaries
 
@@ -18,7 +18,7 @@ flowchart LR
         RES[("results volume<br/>Parquet samples,<br/>package uploads")]
         CORE["core library<br/>(imported in-process)"]
     end
-    subgraph HUB["Hub (future, v0.2; ADR 0012)"]
+    subgraph HUB["Hub (separate installation, DEPLOYMENT_MODE=hub; ADR 0012)"]
         PKG[("data packages<br/>versioned, checksummed")]
     end
 
@@ -53,7 +53,7 @@ flowchart LR
 | `db` | `compose.yaml` | PostgreSQL/PostGIS. | [components](architecture/components.md#db) |
 | results storage | `results` volume | Per-sample results in Parquet, package uploads. | [components](architecture/components.md#results-storage) |
 | data packages | `data/synthetic/packages/` | Versioned input data. | [components](architecture/components.md#data-packages) |
-| hub | (future) | Onboarding and package publication. | [components](architecture/components.md#hub-future) |
+| hub | `backend/` with `DEPLOYMENT_MODE=hub` | Raw sources, onboarding, facility imports, coverage, package publication. | [hub onboarding](architecture/hub.md) |
 
 Lifecycles (runs, data updates, statuses), the data model and the scenario application order are in [Lifecycles and data model](architecture/lifecycles.md); third-party dependencies in [Dependencies](architecture/dependencies.md).
 
@@ -164,7 +164,7 @@ Model runs never execute inside a request handler. The run lifecycle (sequence d
 
 ## 7. Deployment and data packages
 
-Spec 00 §3 describes one codebase running in two roles. v0.1 implements the municipal installation (`DEPLOYMENT_MODE=municipality`) with manual package import; hub onboarding comes next (ADR 0012). ADRs 0012, 0013 and 0015–0017 are accepted for v0.1; ADR 0014 (upward flow) stays open and nothing is sent upwards.
+Spec 00 §3 describes one codebase running in two roles. v0.1 implements the municipal installation (`DEPLOYMENT_MODE=municipality`) with manual package import; v0.2 adds the hub (`DEPLOYMENT_MODE=hub`: sources, onboarding, facility imports, coverage, publishing; [Hub onboarding](architecture/hub.md), ADR 0012, 0013). ADRs 0012, 0013 and 0015–0017 are accepted for v0.1; ADR 0014 (upward flow) stays open and nothing is sent upwards.
 
 ```mermaid
 flowchart LR

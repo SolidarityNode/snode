@@ -100,6 +100,22 @@ concept's term the same everywhere; do not translate one concept two ways.
 | hub onboarding | ένταξη (δήμου) στην κεντρική εγκατάσταση | proposed | Greek docs (home, roadmap) |
 | municipal installation | εγκατάσταση δήμου («η εγκατάσταση του δήμου σας»; never bare «εγκατάσταση» where it could mean the hub) | decided | Greek docs |
 | rollback (make an earlier data version active again) | επαναφορά | proposed | Greek docs (Admin, roadmap) |
+| study area | περιοχή μελέτης | in use | Study area page, hub study areas |
+| raw source (hub) | πρωτογενής πηγή | proposed | hub Sources screen |
+| onboarding of municipalities (hub screen) | ένταξη δήμων | proposed | hub navigation and Onboarding screen |
+| base step (of onboarding) | βασικό βήμα | proposed | hub municipality screen |
+| onboarding status: not started / base data ready / facilities in progress / in review / published | δεν έχει ξεκινήσει / βασικά δεδομένα έτοιμα / δομές σε εξέλιξη / σε έλεγχο / δημοσιευμένο | proposed | hub screens |
+| coverage matrix | πίνακας κάλυψης | proposed | hub Coverage screen |
+| processing record | εγγραφή επεξεργασίας | proposed | hub municipality screen |
+| checksum | άθροισμα ελέγχου | proposed | hub Sources and municipality screens |
+| import template | πρότυπο εισαγωγής | proposed | hub Facilities screen, XLSX instructions |
+| validation report | αναφορά ελέγχου | proposed | hub facility import |
+| changeset | σύνολο αλλαγών | proposed | hub facility import and history |
+| approve / reject | έγκριση / απόρριψη | proposed | hub changesets |
+| core municipality | κεντρικός δήμος | proposed | hub study areas |
+| publish (a package) | δημοσίευση | proposed | hub study areas |
+| update available | διαθέσιμη ενημέρωση | proposed | hub propagation list |
+| susceptibility indicators (layer) | δείκτες κοινωνικής ευπάθειας | proposed | hub coverage matrix |
 
 ## Documentation
 

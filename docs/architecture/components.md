@@ -121,10 +121,12 @@ The module map and what each module will compute: [domain model §6](../specs/00
 
 **Related.** ADR [0013](../adr/0013-data-packages.md); OQ-28 (buffer); [Data packages and updates](../user-guide/data-updates.md).
 
-## Hub (future)
+## Hub
 
-**Responsibility.** Keeps national raw sources, onboards municipalities step by step (clip with buffer, clean, check, `DP-NNN` notes), keeps a coverage matrix per municipality and publishes data packages. When a municipality is onboarded or corrected, it publishes new packages for every study area whose buffer includes it. Optionally receives aggregated, anonymised indicators from municipalities (ADR 0014, open).
+**Responsibility.** Keeps national raw sources, onboards municipalities step by step (clip with buffer, stable ids, checks, `DP-NNN` processing records), imports and curates facilities through changesets, keeps a coverage matrix per municipality and layer, and publishes data packages per study area; lists the study areas whose package is out of date when a neighbour is onboarded or corrected. Optionally receives aggregated, anonymised indicators from municipalities later (ADR 0014, open).
 
-**State in 0.1.0.** `DEPLOYMENT_MODE=hub` exists and mounts only placeholder hub routes (`routers/hub.py`); onboarding is the next step on the [roadmap](../roadmap.md) (milestone [v0.2 Hub onboarding](https://github.com/SolidarityNode/snode/milestone/2)).
+**State in v0.2.** Implemented with `DEPLOYMENT_MODE=hub`: `routers/hub.py`, `services/hub/`, migration 0011 (hub-only tables), worker jobs `hub_onboard_base` and `hub_publish`, hub screens in the frontend. Details and diagrams: [Hub onboarding](hub.md); user guide: [Hub](../user-guide/hub.md).
 
-**Related.** ADR [0009](../adr/0009-geospatial-data-sources.md), [0012](../adr/0012-deployment-model.md), [0013](../adr/0013-data-packages.md), [0014](../adr/0014-upward-data-flow.md); Spec 00 §3 (Onboarding, Deployment).
+**Tests.** `backend/tests/hub/` (onboarding, facilities, publishing, API and permissions); `frontend/src/pages/hub/HubPages.test.tsx`; `frontend/e2e/hub-onboarding.spec.ts`; [UAT 02](../uat/02-hub-onboarding.md).
+
+**Related.** ADR [0009](../adr/0009-geospatial-data-sources.md), [0012](../adr/0012-deployment-model.md), [0013](../adr/0013-data-packages.md), [0014](../adr/0014-upward-data-flow.md); Spec 00 §3 (Onboarding, Deployment); DP-003 to DP-006.

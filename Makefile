@@ -41,7 +41,8 @@ BACKEND_URL := http://127.0.0.1:$(BACKEND_HOST_PORT)
         fmt stop up down logs ps wait db-shell seed reset uat images licenses labels clean distclean \
         test-db test-e2e e2e-setup import-package activate-version create-admin schemas \
         clear-login-locks version version-sync docs docs-setup docs-build docs-generate docs-check docs-stamp docs-links \
-        deps-report deps-report-check
+        deps-report deps-report-check hub-up hub-down hub-seed hub-register-source hub-export-package \
+        uat-hub
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -126,9 +127,10 @@ test-backend:
 test-frontend:
 	cd frontend && $(PNPM) run test
 
-# The end-to-end test runs in its own throw-away stack (compose project $(E2E_PROJECT), its own
-# volumes and ports), so it always starts from demo package 1.0.0 and never touches your local
-# data; the stack is removed afterwards. Playwright runs in its official image (browsers and
+# The end-to-end test runs in its own throw-away stacks (compose projects $(E2E_PROJECT), a
+# municipal installation seeded with demo package 1.0.0, and $(E2E_HUB_PROJECT), a hub with the
+# synthetic national sources registered; their own volumes and ports), so it never touches your
+# local data; both stacks are removed afterwards. Playwright runs in its official image (browsers and
 # system libraries included) on the host network. E2E_LOCAL=1 uses a host browser instead
 # (`make e2e-setup` once).
 PLAYWRIGHT_IMAGE ?= mcr.microsoft.com/playwright:v1.65.1-noble
@@ -138,26 +140,41 @@ E2E_BACKEND_PORT ?= 18000
 E2E_DB_PORT ?= 15432
 E2E_COMPOSE := $(COMPOSE) -p $(E2E_PROJECT)
 E2E_URL := http://127.0.0.1:$(E2E_FRONTEND_PORT)
+E2E_HUB_PROJECT ?= solidaritynode-e2e-hub
+E2E_HUB_FRONTEND_PORT ?= 18180
+E2E_HUB_BACKEND_PORT ?= 18100
+E2E_HUB_DB_PORT ?= 15433
+E2E_HUB_COMPOSE := $(COMPOSE) -p $(E2E_HUB_PROJECT)
+E2E_HUB_URL := http://127.0.0.1:$(E2E_HUB_FRONTEND_PORT)
+E2E_HUB_ENV := DEPLOYMENT_MODE=hub FRONTEND_HOST_PORT=$(E2E_HUB_FRONTEND_PORT) \
+  BACKEND_HOST_PORT=$(E2E_HUB_BACKEND_PORT) DB_HOST_PORT=$(E2E_HUB_DB_PORT)
 
 e2e-setup: ## Install the Playwright browser on the host (only for E2E_LOCAL=1)
 	cd frontend && $(PNPM) exec playwright install chromium
 
-test-e2e: check-engine ## End-to-end test (Playwright) in a separate throw-away stack
+test-e2e: check-engine ## End-to-end tests (Playwright) in throw-away stacks (municipality and hub)
 	$(E2E_COMPOSE) down --volumes >/dev/null 2>&1 || true
+	$(E2E_HUB_ENV) $(E2E_HUB_COMPOSE) down --volumes >/dev/null 2>&1 || true
 	@status=0; \
 	$(MAKE) --no-print-directory up wait seed COMPOSE="$(E2E_COMPOSE)" \
 	  FRONTEND_HOST_PORT=$(E2E_FRONTEND_PORT) BACKEND_HOST_PORT=$(E2E_BACKEND_PORT) \
 	  DB_HOST_PORT=$(E2E_DB_PORT) || status=$$?; \
 	if [ $$status -eq 0 ]; then \
+	  $(MAKE) --no-print-directory up wait hub-seed COMPOSE="$(E2E_HUB_COMPOSE)" $(E2E_HUB_ENV) || status=$$?; \
+	fi; \
+	if [ $$status -eq 0 ]; then \
 	  if [ "$(E2E_LOCAL)" = "1" ]; then \
-	    (cd frontend && E2E_BASE_URL=$(E2E_URL) $(PNPM) run test:e2e) || status=$$?; \
+	    (cd frontend && E2E_BASE_URL=$(E2E_URL) E2E_HUB_URL=$(E2E_HUB_URL) $(PNPM) run test:e2e) || status=$$?; \
 	  else \
-	    $(CONTAINER_ENGINE) run --rm --network host -v "$(CURDIR)/frontend:/work:Z" -w /work \
-	      -e E2E_BASE_URL=$(E2E_URL) $(PLAYWRIGHT_IMAGE) npx playwright test || status=$$?; \
+	    $(CONTAINER_ENGINE) run --rm --network host -v "$(CURDIR)/frontend:/work:Z" \
+	      -v "$(CURDIR)/data/synthetic/demo/hub:/hub-demo:ro,Z" -w /work \
+	      -e E2E_BASE_URL=$(E2E_URL) -e E2E_HUB_URL=$(E2E_HUB_URL) -e E2E_HUB_DEMO=/hub-demo \
+	      $(PLAYWRIGHT_IMAGE) npx playwright test || status=$$?; \
 	  fi; \
 	fi; \
 	FRONTEND_HOST_PORT=$(E2E_FRONTEND_PORT) BACKEND_HOST_PORT=$(E2E_BACKEND_PORT) DB_HOST_PORT=$(E2E_DB_PORT) \
 	  $(E2E_COMPOSE) down --volumes >/dev/null 2>&1 || true; \
+	$(E2E_HUB_ENV) $(E2E_HUB_COMPOSE) down --volumes >/dev/null 2>&1 || true; \
 	exit $$status
 
 # --- Formatting ----------------------------------------------------------------------------
@@ -271,6 +288,78 @@ uat: ## Fresh state for manual testing: reset, up, then print the URLs to open
 	@echo "  demo-admin   / demo-admin-pass    (admin: users and data packages)"
 	@echo "  demo-analyst / demo-analyst-pass  (analyst: scenarios and runs)"
 	@echo "Checklist: docs/uat/01-platform.md. Database: make db-shell. Logs: make logs."
+
+# --- Hub (DEPLOYMENT_MODE=hub; ADR 0012) ----------------------------------------------------
+# A hub runs as its own compose project with its own database and volumes (one database serves
+# one role), next to a municipal installation started with `make up`.
+HUB_PROJECT ?= solidaritynode-hub
+HUB_FRONTEND_PORT ?= 8180
+HUB_BACKEND_PORT ?= 8100
+HUB_DB_PORT ?= 5433
+HUB_COMPOSE := $(COMPOSE) -p $(HUB_PROJECT)
+HUB_ENV := DEPLOYMENT_MODE=hub FRONTEND_HOST_PORT=$(HUB_FRONTEND_PORT) \
+  BACKEND_HOST_PORT=$(HUB_BACKEND_PORT) DB_HOST_PORT=$(HUB_DB_PORT)
+HUB_CLI := $(HUB_ENV) $(HUB_COMPOSE) exec -T backend python -m solidaritynode_backend.cli
+# The empty municipal installation of the hub UAT (packages from the hub are imported into it).
+UAT_MUNI_PROJECT ?= solidaritynode-uat-municipality
+UAT_MUNI_FRONTEND_PORT ?= 8280
+UAT_MUNI_BACKEND_PORT ?= 8200
+UAT_MUNI_DB_PORT ?= 5434
+UAT_MUNI_COMPOSE := $(COMPOSE) -p $(UAT_MUNI_PROJECT)
+UAT_MUNI_ENV := DEPLOYMENT_MODE=municipality FRONTEND_HOST_PORT=$(UAT_MUNI_FRONTEND_PORT) \
+  BACKEND_HOST_PORT=$(UAT_MUNI_BACKEND_PORT) DB_HOST_PORT=$(UAT_MUNI_DB_PORT)
+
+hub-up: check-engine ## Start a hub (own compose project; frontend :8180, API :8100 by default)
+	$(MAKE) --no-print-directory up wait COMPOSE="$(HUB_COMPOSE)" $(HUB_ENV)
+
+hub-down: ## Stop the hub (keeps its volumes)
+	$(HUB_ENV) $(HUB_COMPOSE) down
+
+hub-seed: ## Register the synthetic hub sources (and demo users in development) in a hub stack
+	$(COMPOSE) exec -T backend python -m solidaritynode_backend.cli hub-register-demo /app/data/synthetic/demo/hub/sources
+	@if [ "$(APP_ENV)" = "development" ]; then \
+	  $(COMPOSE) exec -T backend python -m solidaritynode_backend.cli seed-demo-users; fi
+
+hub-register-source: check-engine ## Hub: register a raw source (FILE= NAME= LAYER= SOURCE_VERSION= LICENCE= ATTRIBUTION= NOTE=DP-NNN [COVERAGE= QUALITY=])
+	@[ -n "$(FILE)" ] && [ -n "$(NAME)" ] && [ -n "$(LAYER)" ] && [ -n "$(SOURCE_VERSION)" ] && \
+	  [ -n "$(LICENCE)" ] && [ -n "$(ATTRIBUTION)" ] && [ -n "$(NOTE)" ] || { \
+	  echo "make hub-register-source: FILE, NAME, LAYER, SOURCE_VERSION, LICENCE, ATTRIBUTION and NOTE are required" >&2; exit 1; }
+	@[ -f "$(FILE)" ] || { echo "make hub-register-source: $(FILE) not found" >&2; exit 1; }
+	cat "$(FILE)" | $(HUB_CLI) hub-register-source - --file-name "$(notdir $(FILE))" \
+	  --name "$(NAME)" --layer-type "$(LAYER)" --version "$(SOURCE_VERSION)" --licence "$(LICENCE)" \
+	  --attribution "$(ATTRIBUTION)" --processing-note "$(NOTE)" \
+	  --coverage "$(or $(COVERAGE),national)" --quality "$(or $(QUALITY),open_data)"
+
+hub-export-package: check-engine ## Hub: write a published package archive (STUDY_AREA= VERSION= [OUT=dir])
+	@[ -n "$(STUDY_AREA)" ] && [ -n "$(VERSION)" ] || { echo "Usage: make hub-export-package STUDY_AREA=<id> VERSION=<x.y.z> [OUT=dir]" >&2; exit 1; }
+	@out="$(or $(OUT),.)"; mkdir -p "$$out"; target="$$out/$(STUDY_AREA)-$(VERSION).zip"; \
+	if $(HUB_CLI) hub-export-package "$(STUDY_AREA)" "$(VERSION)" - > "$$target"; then \
+	  echo "wrote $$target (import it with: make import-package PKG=$$target)"; \
+	else echo "make hub-export-package: failed; $$target is incomplete" >&2; exit 1; fi
+
+uat-hub: check-engine ## Hub UAT: fresh hub (:8180) with demo sources and an empty municipal installation (:8280); development only
+	@[ "$(APP_ENV)" = "development" ] || { echo "make uat-hub: development only (APP_ENV=$(APP_ENV))" >&2; exit 1; }
+	@if [ "$(FORCE)" != "1" ]; then \
+	  echo "This DELETES the volumes of the hub UAT ($(HUB_PROJECT)) and of its municipal installation ($(UAT_MUNI_PROJECT))."; \
+	  echo "Your own stack (make up) is not touched."; \
+	  read -r -p "Type 'yes' to continue: " answer || answer=""; \
+	  [ "$$answer" = "yes" ] || { echo "Aborted."; exit 1; }; \
+	fi
+	$(HUB_ENV) $(HUB_COMPOSE) down --volumes
+	$(UAT_MUNI_ENV) $(UAT_MUNI_COMPOSE) down --volumes
+	$(MAKE) --no-print-directory up wait hub-seed COMPOSE="$(HUB_COMPOSE)" $(HUB_ENV)
+	$(MAKE) --no-print-directory up wait COMPOSE="$(UAT_MUNI_COMPOSE)" $(UAT_MUNI_ENV)
+	$(UAT_MUNI_ENV) $(UAT_MUNI_COMPOSE) exec -T backend python -m solidaritynode_backend.cli seed-demo-users
+	@echo ""
+	@echo "Hub UAT ready (build $(GIT_COMMIT)). Six synthetic national sources are registered; nothing is onboarded."
+	@echo "Open:"
+	@echo "  Hub:                     http://127.0.0.1:$(HUB_FRONTEND_PORT)"
+	@echo "  Municipal installation:  http://127.0.0.1:$(UAT_MUNI_FRONTEND_PORT)  (empty: no data package yet)"
+	@echo "Demo accounts on both (development only):"
+	@echo "  demo-admin   / demo-admin-pass    (admin)"
+	@echo "  demo-analyst / demo-analyst-pass  (analyst)"
+	@echo "Demo facility files: data/synthetic/demo/hub/imports/"
+	@echo "Checklist: docs/uat/02-hub-onboarding.md. Stop: make hub-down."
 
 images: ## Build the container images with $(CONTAINER_ENGINE)
 	$(CONTAINER_ENGINE) build -f backend/Containerfile -t localhost/solidaritynode-backend:dev .

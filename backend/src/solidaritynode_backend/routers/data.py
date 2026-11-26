@@ -44,6 +44,7 @@ from solidaritynode_backend.services.packages import (
     staged_path,
 )
 from solidaritynode_backend.services.study_area import is_open
+from solidaritynode_backend.services.submissions import mark_imported
 
 router = APIRouter(tags=["data"])
 
@@ -271,6 +272,7 @@ def confirm_import(body: ImportIn, admin: Admin, db: Db, settings: Config) -> Im
         with opened_package(path) as directory:
             content = read_package(directory)
         outcome = import_package(db, settings, content, admin.id)
+        mark_imported(db)  # submissions published in this version (ADR 0014 Part A)
     except PackageError as exc:
         db.rollback()
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None

@@ -12,4 +12,6 @@ frontend/dist
 data
 # The backend image carries the synthetic demo data packages (offered for import).
 !data/synthetic/packages
+# ... and the synthetic hub sources and facility files (DP-005), registered by make uat-hub.
+!data/synthetic/demo/hub
 docs

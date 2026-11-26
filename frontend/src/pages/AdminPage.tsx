@@ -12,11 +12,14 @@ type Role = Schemas["UserOut"]["role"];
 
 export function AdminPage() {
   const { t } = useT();
+  const { config } = useSession();
+  // The hub has no data versions or runs of its own: only its users are administered here.
+  const hub = config?.deployment_mode === "hub";
   return (
     <section aria-labelledby="admin-title">
       <h2 id="admin-title">{t("admin.title")}</h2>
-      <Packages />
-      <Storage />
+      {!hub && <Packages />}
+      {!hub && <Storage />}
       <Users />
     </section>
   );
