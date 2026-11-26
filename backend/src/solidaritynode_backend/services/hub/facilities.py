@@ -37,7 +37,7 @@ from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 from sqlalchemy import RowMapping, text
 from sqlalchemy.orm import Session
@@ -61,6 +61,9 @@ from solidaritynode_backend.services.hub.spreadsheet import Cell, csv_bytes, xls
 
 __all__ = [
     "TEMPLATE",
+    "DataVersionFeatureSource",
+    "FeatureSource",
+    "HubFeatureSource",
     "ImportRequest",
     "approve_changeset",
     "changeset_detail",
@@ -557,16 +560,282 @@ def _number(value: str, row: int, column: str, report: list[Check]) -> float | N
     return number
 
 
-def _services(settings: Settings, db: Session) -> dict[str, str]:
-    source = latest_sources(db).get("services")
-    if source is None:
-        raise HubError("hub.base.missing_sources", layers="services")
-    with source_path(settings, source).open(encoding="utf-8-sig", newline="") as handle:
+class FeatureSource(Protocol):
+    """Where the validator reads municipalities, units, nodes, services and facilities.
+
+    The same validation runs in both roles (ADR 0014 Part A, decision 23): the hub reads its
+    curated features (:class:`HubFeatureSource`), a municipal installation the features of its
+    active data version (:class:`DataVersionFeatureSource`). Only these reads differ.
+    """
+
+    srid: int
+
+    def check_base(self, municipality: str) -> None:
+        """Raise :class:`HubError` if facilities of ``municipality`` cannot be validated here."""
+        ...
+
+    def services(self) -> dict[str, str]:
+        """Return the service unit of every known service."""
+        ...
+
+    def in_municipality(self, municipality: str, x: float, y: float) -> bool:
+        """Return whether the point (in :attr:`srid`) lies in the municipality."""
+        ...
+
+    def unit_at(self, municipality: str, x: float, y: float) -> str | None:
+        """Return the open spatial unit of the municipality that covers the point."""
+        ...
+
+    def nearest_node(self, x: float, y: float) -> str | None:
+        """Return the nearest open network node."""
+        ...
+
+    def existing(self, municipality: str) -> dict[str, dict[str, Any]]:
+        """Return the facilities of the municipality (open and closed), comparable state."""
+        ...
+
+    def municipality_of(self, facility_id: str) -> str | None:
+        """Return the municipality of a facility anywhere in the source, or ``None``."""
+        ...
+
+
+_POINT = "ST_SetSRID(ST_MakePoint(:x, :y), :s)"
+
+
+class HubFeatureSource:
+    """The hub's curated features (``hub_features``) and its latest services source."""
+
+    def __init__(self, db: Session, settings: Settings | None) -> None:
+        """Read from ``db`` with the hub settings (``None``: only :meth:`existing` is used)."""
+        self.db = db
+        self.settings = settings
+        self.srid = settings.hub_srid if settings is not None else 0
+
+    def check_base(self, municipality: str) -> None:
+        """The municipality must have base data (its base step succeeded)."""
+        has_base = self.db.execute(
+            text(
+                "SELECT 1 FROM hub_features WHERE layer = 'municipalities' AND feature_id = :m "
+                "AND EXISTS (SELECT 1 FROM hub_onboarding WHERE municipality_id = :m "
+                "AND status <> 'not_started')"
+            ),
+            {"m": municipality},
+        ).first()
+        if not has_base:
+            raise HubError("hub.error.not_onboarded", municipality=municipality)
+
+    def services(self) -> dict[str, str]:
+        """Services of the latest registered services source."""
+        source = latest_sources(self.db).get("services")
+        if source is None or self.settings is None:
+            raise HubError("hub.base.missing_sources", layers="services")
+        with source_path(self.settings, source).open(encoding="utf-8-sig", newline="") as handle:
+            return {
+                r["service_id"].strip(): r["service_unit"].strip()
+                for r in csv.DictReader(handle)
+                if r.get("service_id")
+            }
+
+    def _params(self, municipality: str, x: float, y: float) -> dict[str, Any]:
+        return {"x": x, "y": y, "s": self.srid, "m": municipality}
+
+    def in_municipality(self, municipality: str, x: float, y: float) -> bool:
+        """Point in the curated boundary."""
+        return bool(
+            self.db.execute(
+                text(
+                    f"SELECT ST_Covers(geom, {_POINT}) FROM hub_features "
+                    "WHERE layer = 'municipalities' AND feature_id = :m"
+                ),
+                self._params(municipality, x, y),
+            ).scalar_one_or_none()
+        )
+
+    def unit_at(self, municipality: str, x: float, y: float) -> str | None:
+        """Open unit covering the point."""
+        found = self.db.execute(
+            text(
+                "SELECT feature_id FROM hub_features WHERE layer = 'spatial_units' "
+                f"AND municipality_id = :m AND valid_to IS NULL AND ST_Covers(geom, {_POINT}) "
+                "ORDER BY feature_id LIMIT 1"
+            ),
+            self._params(municipality, x, y),
+        ).scalar_one_or_none()
+        return None if found is None else str(found)
+
+    def nearest_node(self, x: float, y: float) -> str | None:
+        """Nearest open node."""
+        found = self.db.execute(
+            text(
+                "SELECT feature_id FROM hub_features WHERE layer = 'network_nodes' "
+                f"AND valid_to IS NULL ORDER BY geom <-> {_POINT} LIMIT 1"
+            ),
+            self._params("", x, y),
+        ).scalar_one_or_none()
+        return None if found is None else str(found)
+
+    def existing(self, municipality: str) -> dict[str, dict[str, Any]]:
+        """Curated facilities of the municipality."""
+        out = {}
+        for fid, props, quality, valid_to, x, y in self.db.execute(
+            text(
+                "SELECT feature_id, properties, quality, valid_to, ST_X(geom), ST_Y(geom) "
+                "FROM hub_features WHERE layer = 'facilities' AND municipality_id = :m"
+            ),
+            {"m": municipality},
+        ):
+            out[str(fid)] = {
+                **props,
+                "quality": quality,
+                "valid_to": valid_to.isoformat() if valid_to else None,
+                "_xy": [round(float(x), 3), round(float(y), 3)],
+            }
+        return out
+
+    def municipality_of(self, facility_id: str) -> str | None:
+        """Municipality of any curated facility."""
+        found = self.db.execute(
+            text(
+                "SELECT municipality_id FROM hub_features "
+                "WHERE layer = 'facilities' AND feature_id = :f"
+            ),
+            {"f": facility_id},
+        ).scalar_one_or_none()
+        return None if found is None else str(found)
+
+
+# Package columns that are not part of a facility's comparable state.
+_PACKAGE_ONLY = ("municipality_id", "role", "processing_note", "valid_from", "_geometry_sha256")
+
+
+class DataVersionFeatureSource:
+    """The features of one imported data version of a municipal installation (ADR 0013).
+
+    Facilities are made comparable with the hub's state: ``status`` from ``valid_to`` when the
+    package has none, ``throughput_unit`` from the services table (packages carry no unit).
+    Only the **core** municipalities of the version's study area can be validated (ADR 0014
+    Part A, decision 25).
+    """
+
+    def __init__(self, db: Session, data_version_id: int) -> None:
+        """Read the data version ``data_version_id``."""
+        self.db = db
+        self.dv = data_version_id
+        row = db.execute(
+            text("SELECT srid, manifest, created FROM data_versions WHERE id = :d"),
+            {"d": data_version_id},
+        ).one()
+        self.srid = int(row.srid)
+        self.created = row.created
+        self.core = set(row.manifest.get("study_area", {}).get("core_municipalities", []))
+
+    def check_base(self, municipality: str) -> None:
+        """Only core municipalities of the installation's study area."""
+        if municipality not in self.core:
+            raise HubError("hub.submission.not_core", municipality=municipality)
+
+    def services(self) -> dict[str, str]:
+        """Services of the data version (``tables/services.csv``)."""
         return {
-            r["service_id"].strip(): r["service_unit"].strip()
-            for r in csv.DictReader(handle)
-            if r.get("service_id")
+            str(p["service_id"]): str(p["service_unit"])
+            for (p,) in self.db.execute(
+                text(
+                    "SELECT properties FROM data_records WHERE data_version_id = :d "
+                    "AND table_name = 'services'"
+                ),
+                {"d": self.dv},
+            )
         }
+
+    def _open(self, alias: str = "f") -> str:
+        return (
+            f"({alias}.properties->>'valid_to' IS NULL OR "
+            f"CAST({alias}.properties->>'valid_to' AS date) > :created)"
+        )
+
+    def _params(self, municipality: str, x: float, y: float) -> dict[str, Any]:
+        return {
+            "x": x,
+            "y": y,
+            "s": self.srid,
+            "m": municipality,
+            "d": self.dv,
+            "created": self.created,
+        }
+
+    def in_municipality(self, municipality: str, x: float, y: float) -> bool:
+        """Point in the package boundary."""
+        return bool(
+            self.db.execute(
+                text(
+                    f"SELECT ST_Covers(geom, {_POINT}) FROM data_features WHERE "
+                    "data_version_id = :d AND layer = 'municipalities' AND feature_id = :m"
+                ),
+                self._params(municipality, x, y),
+            ).scalar_one_or_none()
+        )
+
+    def unit_at(self, municipality: str, x: float, y: float) -> str | None:
+        """Open unit covering the point."""
+        found = self.db.execute(
+            text(
+                "SELECT feature_id FROM data_features f WHERE data_version_id = :d "
+                "AND layer = 'spatial_units' AND properties->>'municipality_id' = :m "
+                f"AND {self._open()} AND ST_Covers(geom, {_POINT}) ORDER BY feature_id LIMIT 1"
+            ),
+            self._params(municipality, x, y),
+        ).scalar_one_or_none()
+        return None if found is None else str(found)
+
+    def nearest_node(self, x: float, y: float) -> str | None:
+        """Nearest open node."""
+        found = self.db.execute(
+            text(
+                "SELECT feature_id FROM data_features f WHERE data_version_id = :d "
+                f"AND layer = 'network_nodes' AND {self._open()} "
+                f"ORDER BY geom <-> {_POINT} LIMIT 1"
+            ),
+            self._params("", x, y),
+        ).scalar_one_or_none()
+        return None if found is None else str(found)
+
+    def existing(self, municipality: str) -> dict[str, dict[str, Any]]:
+        """Facilities of the municipality in the package, as the hub would describe them."""
+        units = self.services()
+        out = {}
+        for fid, props, x, y in self.db.execute(
+            text(
+                "SELECT feature_id, properties, ST_X(geom), ST_Y(geom) FROM data_features "
+                "WHERE data_version_id = :d AND layer = 'facilities' "
+                "AND properties->>'municipality_id' = :m"
+            ),
+            {"d": self.dv, "m": municipality},
+        ):
+            state = {k: v for k, v in props.items() if k not in _PACKAGE_ONLY}
+            services = {}
+            for sid, inputs in (props.get("services") or {}).items():
+                services[sid] = {c: inputs.get(c) for c in NUMBERS}
+                services[sid]["throughput_unit"] = (
+                    units.get(sid) if inputs.get("throughput") is not None else None
+                )
+            state["services"] = services
+            state["status"] = props.get("status") or ("closed" if props.get("valid_to") else "open")
+            for key in (*DIFF_FIELDS, "valid_to"):
+                state.setdefault(key, None)
+            state["_xy"] = [round(float(x), 3), round(float(y), 3)]
+            out[str(fid)] = state
+        return out
+
+    def municipality_of(self, facility_id: str) -> str | None:
+        """Municipality of any facility of the data version."""
+        found = self.db.execute(
+            text(
+                "SELECT properties->>'municipality_id' FROM data_features "
+                "WHERE data_version_id = :d AND layer = 'facilities' AND feature_id = :f"
+            ),
+            {"d": self.dv, "f": facility_id},
+        ).scalar_one_or_none()
+        return None if found is None else str(found)
 
 
 def _group(rows: list[tuple[int, dict[str, str]]], report: list[Check]) -> list[_Facility]:
@@ -674,10 +943,12 @@ def _validate_rows(
             )
 
 
-def _coordinates(db: Session, settings: Settings, facility: _Facility, report: list[Check]) -> None:
+def _coordinates(
+    db: Session, source: FeatureSource, facility: _Facility, report: list[Check]
+) -> None:
     f = facility.fields
     first = facility.rows[0]
-    srid = int(f.get("_srid") or settings.hub_srid)
+    srid = int(f.get("_srid") or source.srid)
     if f.get("x") and f.get("y"):
         xs, ys = f["x"], f["y"]
     elif f.get("lon") and f.get("lat"):
@@ -695,26 +966,18 @@ def _coordinates(db: Session, settings: Settings, facility: _Facility, report: l
             "SELECT ST_X(p), ST_Y(p) FROM (SELECT ST_Transform(ST_SetSRID(ST_MakePoint(:x, :y), "
             ":s), :h) AS p) q"
         ),
-        {"x": float(xs), "y": float(ys), "s": srid, "h": settings.hub_srid},
+        {"x": float(xs), "y": float(ys), "s": srid, "h": source.srid},
     ).one()
     facility.xy = (float(x), float(y))
 
 
 def _locate(
-    db: Session, settings: Settings, facility: _Facility, municipality: str, report: list[Check]
+    source: FeatureSource, facility: _Facility, municipality: str, report: list[Check]
 ) -> None:
     if facility.xy is None:
         return
-    point = "ST_SetSRID(ST_MakePoint(:x, :y), :s)"
-    params = {"x": facility.xy[0], "y": facility.xy[1], "s": settings.hub_srid, "m": municipality}
-    inside = db.execute(
-        text(
-            f"SELECT ST_Covers(geom, {point}) FROM hub_features "
-            "WHERE layer = 'municipalities' AND feature_id = :m"
-        ),
-        params,
-    ).scalar_one_or_none()
-    if not inside:
+    x, y = facility.xy
+    if not source.in_municipality(municipality, x, y):
         report.append(
             check(
                 "hub.import.outside_municipality",
@@ -724,43 +987,17 @@ def _locate(
             )
         )
         return
-    facility.unit_id = db.execute(
-        text(
-            f"SELECT feature_id FROM hub_features WHERE layer = 'spatial_units' "
-            f"AND municipality_id = :m AND valid_to IS NULL AND ST_Covers(geom, {point}) "
-            "ORDER BY feature_id LIMIT 1"
-        ),
-        params,
-    ).scalar_one_or_none()
+    facility.unit_id = source.unit_at(municipality, x, y)
     if facility.unit_id is None:
         report.append(
             check("hub.import.no_unit", "error", row=facility.rows[0], municipality=municipality)
         )
-    facility.node_id = db.execute(
-        text(
-            f"SELECT feature_id FROM hub_features WHERE layer = 'network_nodes' "
-            f"AND valid_to IS NULL ORDER BY geom <-> {point} LIMIT 1"
-        ),
-        params,
-    ).scalar_one_or_none()
+    facility.node_id = source.nearest_node(x, y)
 
 
 def _existing(db: Session, municipality: str) -> dict[str, dict[str, Any]]:
-    out = {}
-    for fid, props, quality, valid_to, x, y in db.execute(
-        text(
-            "SELECT feature_id, properties, quality, valid_to, ST_X(geom), ST_Y(geom) "
-            "FROM hub_features WHERE layer = 'facilities' AND municipality_id = :m"
-        ),
-        {"m": municipality},
-    ):
-        out[str(fid)] = {
-            **props,
-            "quality": quality,
-            "valid_to": valid_to.isoformat() if valid_to else None,
-            "_xy": [round(float(x), 3), round(float(y), 3)],
-        }
-    return out
+    """Curated facilities of a hub municipality (used by approval's stale check)."""
+    return HubFeatureSource(db, None).existing(municipality)
 
 
 def _state(facility: _Facility, current: Mapping[str, Any] | None) -> dict[str, Any]:
@@ -836,13 +1073,13 @@ def _public(props: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _match_and_items(
-    db: Session,
+    source: FeatureSource,
     settings: Settings,
     facilities: list[_Facility],
     request: ImportRequest,
     report: list[Check],
 ) -> list[dict[str, Any]]:
-    existing = _existing(db, request.municipality_id)
+    existing = source.existing(request.municipality_id)
     by_external = {
         str(p["external_id"]): fid for fid, p in existing.items() if p.get("external_id")
     }
@@ -854,13 +1091,7 @@ def _match_and_items(
         if f.get("facility_id"):
             fid = f["facility_id"]
             if fid not in existing:
-                other = db.execute(
-                    text(
-                        "SELECT municipality_id FROM hub_features "
-                        "WHERE layer = 'facilities' AND feature_id = :f"
-                    ),
-                    {"f": fid},
-                ).scalar_one_or_none()
+                other = source.municipality_of(fid)
                 code = "hub.import.id_other_municipality" if other else "hub.import.unknown_id"
                 report.append(
                     check(code, "error", row=first, id=fid, municipality=request.municipality_id)
@@ -992,27 +1223,32 @@ def _duplicates(
 
 
 def build_changeset(
-    db: Session, settings: Settings, request: ImportRequest, parsed: Parsed
+    db: Session,
+    settings: Settings,
+    request: ImportRequest,
+    parsed: Parsed,
+    source: FeatureSource | None = None,
 ) -> tuple[list[dict[str, Any]], list[Check]]:
-    """Validate parsed rows and return the changeset items and the report (nothing written)."""
+    """Validate parsed rows and return the changeset items and the report (nothing written).
+
+    Args:
+        db: Session.
+        settings: Settings (duplicate distance).
+        request: The municipality and options of the import.
+        parsed: Rows of the file, personal-data columns already dropped.
+        source: Where features are read: the hub's curated features (default) or a municipal
+            installation's active data version (ADR 0014 Part A).
+    """
+    source = source or HubFeatureSource(db, settings)
     report: list[Check] = list(parsed.dropped)
-    has_base = db.execute(
-        text(
-            "SELECT 1 FROM hub_features WHERE layer = 'municipalities' AND feature_id = :m "
-            "AND EXISTS (SELECT 1 FROM hub_onboarding WHERE municipality_id = :m "
-            "AND status <> 'not_started')"
-        ),
-        {"m": request.municipality_id},
-    ).first()
-    if not has_base:
-        raise HubError("hub.error.not_onboarded", municipality=request.municipality_id)
-    services = _services(settings, db)
+    source.check_base(request.municipality_id)
+    services = source.services()
     _validate_rows(parsed.rows, services, request.municipality_id, report)
     facilities = _group(parsed.rows, report)
     for facility in facilities:
-        _coordinates(db, settings, facility, report)
-        _locate(db, settings, facility, request.municipality_id, report)
-    items = _match_and_items(db, settings, facilities, request, report)
+        _coordinates(db, source, facility, report)
+        _locate(source, facility, request.municipality_id, report)
+    items = _match_and_items(source, settings, facilities, request, report)
     return items, report
 
 

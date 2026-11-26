@@ -189,6 +189,11 @@ HUB_MESSAGES: Final[Mapping[str, str]] = MappingProxyType(
         "hub.publish.summary": "published {id} {version}",
         "hub.publish.status_note": "published in {id} {version}",
         "hub.publish.initial": "First version of study area {id}.",
+        # Submissions from municipal installations (ADR 0014 Part A)
+        "hub.submission.not_core": (
+            "municipality {municipality} is not a core municipality of this installation's "
+            "study area; only core municipalities can be corrected from here"
+        ),
     }
 )
 """Hub message templates by code (ADR 0012); part of :data:`BACKEND_MESSAGES`."""

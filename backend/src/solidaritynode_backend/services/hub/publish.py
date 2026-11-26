@@ -109,6 +109,8 @@ LAYER_COLUMNS: dict[str, tuple[tuple[str, str], ...]] = {
         ("public_phone", "TEXT"),
         ("public_email", "TEXT"),
         ("source", "TEXT"),
+        ("status", "TEXT"),
+        ("notes", "TEXT"),
     ),
     "network_nodes": (("node_id", "TEXT"), ("kind", "TEXT"), ("unit_id", "TEXT")),
     "network_edges": (
