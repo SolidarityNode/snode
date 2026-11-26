@@ -54,6 +54,12 @@ concept's term the same everywhere; do not translate one concept two ways.
 | service loss | απώλεια υπηρεσίας | proposed | Greek docs (home) |
 | recovery | ανάκαμψη | proposed | Greek docs (home, roadmap) |
 | risk | κίνδυνος | proposed | Greek docs (home) |
+| forecast / forecasting (Paper 4, OQ-31) | πρόγνωση | proposed | Greek docs (roadmap) |
+| nowcast (estimate of the present) | εκτίμηση του τώρα | proposed | Greek docs (roadmap) |
+| current picture | τρέχουσα εικόνα | proposed | open questions (OQ-31) |
+| risk map | χάρτης κινδύνου | proposed | Greek docs (roadmap) |
+| conditional forecast | πρόγνωση υπό όρους | proposed | Greek docs (roadmap) |
+| daily operations / crisis (forecast users) | καθημερινή λειτουργία / κρίση | proposed | open questions (OQ-31) |
 | service units / reference period | μονάδες υπηρεσίας / περίοδος αναφοράς | proposed | Greek docs (home) |
 | two-step floating catchment area (2SFCA) | μέθοδος κινητής περιοχής εξυπηρέτησης δύο βημάτων (2SFCA) | proposed | Greek docs (home) |
 | (Dynamic) Bayesian Network | (δυναμικό) μπεϋζιανό δίκτυο | proposed | Greek docs (home) |

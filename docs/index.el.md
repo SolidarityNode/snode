@@ -1,5 +1,5 @@
 ---
-translated_from_sha256: 878db5b41e46b9458ee052bcda96f06952049e22e0ab93d4abca7d9fb0bd6e73
+translated_from_sha256: 63e5ea1870369fe19a61afb006e712dad0e7b19e5b65cc85264972d4f947a2e6
 ---
 
 <div align="center" markdown>
@@ -171,7 +171,7 @@ flowchart LR
 Η μέθοδος έχει ακόμη ανοιχτά ζητήματα· ο κώδικας δεν τα λύνει ποτέ ([πώς αντιμετωπίζονται](../CONTRIBUTING.md#how-open-questions-are-handled), στα αγγλικά). Η τρέχουσα κατάσταση, από τον συγκεντρωτικό πίνακα του [`open-questions.md`](specs/open-questions.md) (στα αγγλικά):
 
 <!-- BEGIN GENERATED: oq-counts-el (scripts/docs_indexes.py) -->
-30 ζητήματα: **10 αποφασισμένα**, 2 εν μέρει αποφασισμένα, 1 προτεινόμενο, **17 ανοιχτά**.
+41 ζητήματα: **14 αποφασισμένα**, 2 εν μέρει αποφασισμένα, 1 προτεινόμενο, **24 ανοιχτά**.
 <!-- END GENERATED: oq-counts-el -->
 
 ## Υπόβαθρο { #background }

@@ -8,14 +8,14 @@ The specification is the **source of truth for the science** (AGENTS.md). If cod
 | File | Title | State |
 | --- | --- | --- |
 | [`00-domain-model.md`](00-domain-model.md) | Domain model (v0 draft) | DRAFT for human review |
-| [`open-questions.md`](open-questions.md) | Open questions | 30 questions: **10 decided**, 2 partly decided, 1 proposed, **17 open**. |
+| [`open-questions.md`](open-questions.md) | Open questions | 41 questions: **14 decided**, 2 partly decided, 1 proposed, **24 open**. |
 | [`paper-revisions.md`](paper-revisions.md) | Paper revision notes | living document |
 | [`source/README.md`](source/README.md) | Original paper texts | living document |
 <!-- END GENERATED: specs-index -->
 
 Open questions ([`open-questions.md`](open-questions.md), its summary table is the single source):
 <!-- BEGIN GENERATED: oq-counts (scripts/docs_indexes.py) -->
-30 questions: **10 decided**, 2 partly decided, 1 proposed, **17 open**.
+41 questions: **14 decided**, 2 partly decided, 1 proposed, **24 open**.
 <!-- END GENERATED: oq-counts -->
 
 Planned per-paper specs, not yet written: `01-accessibility-capacity.md` (Paper 1), `02-hidden-need.md` (Paper 2), `03-vulnerability.md` (Paper 3), `04-resilience.md` (Paper 4). Their work is tracked in the milestones [v0.3 Paper 1 Accessibility](https://github.com/SolidarityNode/snode/milestone/3) to [v0.6 Paper 4 Resilience](https://github.com/SolidarityNode/snode/milestone/6).
